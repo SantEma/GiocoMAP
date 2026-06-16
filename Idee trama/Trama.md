@@ -73,8 +73,14 @@ Nel bosco durante il tragitto il giocatore si imbatte in un **ladro** che gli ru
 >[!NOTE] Scelta stilistica
 > I pensieri interiori dei personaggi sono esposti tra parentesi blu, seguendo lo stile dell'avventura testuale tipica del gioco Phoenix Wrigth.
 
-[Enigma N3 da inserire per trovare un erba dalle sembianze mediche ma velenosa]
-	
+Nel bosco il protagonista potrà interagire con molti oggetti (come alberi, cartelli, piante, ecc...)
+Così attiverà il terzo enigma.
+Alla risoluzione del terzo enigma e all'ottenimento del tessuto, sussegue il seguente testo a schermo.
+
+*Nelle tasche di Fox trovi anche una chiave, sembra importante così' decidi di tenerla*.
+
+Risolte queste avversità il protagonista potrà uscire finalmente dal bosco arrivando a Karundis la periferia a valle situata poco lontana dal palazzo reale.
+
 [da finire]
 
 ### Finale
@@ -87,20 +93,18 @@ Il mercante si sposa con la principessa e prende il suo titolo da nobile
 - Palazzo reale
 - Stalla
 - Bosco Losco
-
+- Karundis
 ## Personaggi
 - Eryndor
 - Re di Shambala
 - Principessa Marien
-- Sir Jack
 - Costrutto magico David
 - Mr.Cooper il rancher
 - Contadino Green
-- Ned Fox il ladro
 - Pescivendolo
-
 ### Nemici
-
+- Ned Fox il ladro
+- Sir Jack
 ## Oggetti
 - **Chiave**: apre il portone del castello
 - **Spada Sincro**: la spada utilizzata per sconfiggere il cavaliere nel finale
@@ -111,6 +115,8 @@ Il mercante si sposa con la principessa e prende il suo titolo da nobile
 - **Strana Birra**: Automaticamente la birra renderà ubriaco il protagonista facendolo risvegliare come marito di Sir Jack e così si otterrà il finale segreto.
 - **Tessuto**: Da consegnare al Re.
 - **Carote e cena**: Oggetti per la quest della carrozza
+- **Fiori**: Per avvelenare Fox
+- **Chiave**: chiave dal dubbio utilizzo, servirà per aprire il castello
 ## Enigmi (e soluzioni)
 
 Ogni enigma da un oggetto che andrà nell'inventario e che servirà per poter risolvere altri tipi di enigmi sparsi nella trama, per esempio la chiave data da un enigma N servirà per aprire un portone dell'enigma N+X.
@@ -186,5 +192,56 @@ $$t + 1 = 60$$
 $$t = 60 - 1$$
 
 $$t = 59$$
+### Enigma N.3
+L'enigma N.3 si basa sulla ricerca di una **pianta velenosa**.
+Eryndor si addentra nella radura. Il giocatore se interagisce col cartello inizierà l'enigma.
+Gli altri oggetti importanti con cui l'utente può interagire nel bosco, facenti parte della quest, sono i **fiori colorati**.
 
+>[!NOTE] Esamina: Cartello degli Esploratori
+> *"La febbre dei boschi si cura solo con il fiore blu, il colore del cielo. Attenzione al fiore viola: il suo veleno addormenta all'istante anche un orso."*
+>
+> **Esamina il fiore Rosso**: "È un fiore Rosso. Emana un odore molto dolce."
+> 
+> **Esamina il fiore Blu**: "È un fiore Blu, lo stesso colore del cielo limpido."
+> 
+> **Esamina il fiore Viola**: "È un fiore Viola. Cresce tra le radici nodose di un albero."
 
+*(Eryndor torna da Fox con le piante nella borsa)*
+**Scegli quale erba consegnare a Fox:**
+- **[Opzione 1]:** Consegna l'Erba Rossa.
+- **[Opzione 2]:** Consegna l'Erba Blu.
+- **[Opzione 3]:** Consegna l'Erba Viola.
+
+#### ❌ (Se il giocatore sceglie l'Opzione 1 o l'Opzione 2)
+
+**Eryndor:** "Ecco, prendi questa. È la pianta che cercavi."
+
+**Fox:** "Ah, fammi vedere... Sì, sembra proprio lei! Grazie del disturbo, babbeo! Ora, come promesso... col cavolo che ti ridò il tessuto! Ciao!"
+
+**Eryndor:** (Un attimo! Se gli do la cura reale o un'erba qualunque, questo furfante si rimetterà in sesto o scapperà comunque con la mia stoffa... Mi sta palesemente truffando!)
+
+**Eryndor:** (Non posso rischiare. Devo dargli la pianta velenosa viola per addormentarlo, così potrò riprendermi il tessuto dalle sue tasche mentre è svenuto. Meglio fermarlo prima che scappi!)
+
+**Eryndor:** "Aspetta, Fox! Mi sono sbagliato, quella non è la pianta giusta. Guarda meglio nella mia borsa..."
+
+_(Il gioco reindirizza il giocatore al menu di scelta delle tre erbe)_
+
+#### (Se il giocatore sceglie l'Opzione 3 - SCELTA CORRETTA)
+
+**Eryndor:** "Ecco a te. Questa è la rarissima erba medica che cercavi."
+
+**Fox:** "Davvero? Ottimo! Dammela subito!"
+
+_(Fox beve avidamente l'estratto dell'erba viola)_
+
+**Fox:** "Ahah! Funziona, sento già gli effetti! E ora, come ti dicevo prima... il tessuto me lo tengo io, fesso! Non ti ridò un bel nient..."
+
+**Fox:** "Aspetta... perché... mi sento le palpebre... così pesanti...?"
+
+_(Fox barcolla e crolla a terra, addormentato profondamente)_
+
+**Eryndor:** (Perfetto. Il cartello degli esploratori aveva ragione: il fiore viola è un potente sonnifero, altro che medicina!)
+
+**Eryndor:** (Ora che sta dormendo come un sasso, posso riprendermi il tessuto della Principessa direttamente dalle sue tasche senza che possa muovere un dito. Giustizia è fatta!)
+
+_(Schermata di notifica: **Hai recuperato il Tessuto Reale!**)_
