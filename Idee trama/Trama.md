@@ -5,9 +5,12 @@
 Ci troviamo nel regno incantato di Shambhala. Sono Eryndor, un mercante di tessuti, alla ricerca di elevarmi dal mio status sociale basso per divenire nobile. Il re del regno ha inviato una lettera a tutti i mercanti alla corte per trovare il tessuto perfetto con cui fare il vestito da sposa della sua cara figlia, nonché principessa Marien del regno (il gioco si apre con la lettera). 
 
 >[!TODO] Implementazioni basiche 
->Il protagonista parla tramite Rejex o tramite grafica.
->Più velocemente si risolvono gli enigmi più punteggio ottieni
-
+>- Il protagonista parla tramite Rejex o tramite grafica e nella grafica il giocatore clicca sulle zone presenti nello sfondo per interagire (cliccare sul pescatore, su oggetti o frecce), il cursore diventa a forma di mano quando si trova un oggetto cliccabile
+>- Più velocemente si risolvono gli enigmi più punteggio ottieni
+>- Il personaggio si sposta tramite frecce direzionali presenti a schermo che lo portano a NORD, SUD, EST o OVEST per spostarsi tra le mappe
+>- I dialoghi del NPC sono tutti presenti su un file da estrapolare
+>- Non esiste una sconfitta il gioco non permette di perdere
+>- Sul DB si salva la partita e i punteggi
 ### Trama
 **6 enigmi** totali nel corso del videogioco di cui **2 al castello**.
 Eryndor si trova nella sua **bottega** in piazza centrale e il gioco sia apre proprio da qui.
