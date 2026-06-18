@@ -35,8 +35,7 @@
               "title": "Idee implementative"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -180,12 +179,12 @@
               "title": "Struttura di Trama"
             }
           }
-        ]
+        ],
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -198,11 +197,30 @@
       "bases:Crea nuova Base": false
     }
   },
-  "active": "2e02f77aa1970d35",
+  "active": "40224259ac4d50c2",
   "lastOpenFiles": [
-    "Trama.md",
+    "SpriteSheet/Personaggi/Fox.png",
+    "SpriteSheet/Personaggi/SirJack.png",
+    "SpriteSheet/Personaggi/Gemini_Generated_Image_k7k9m5k7k9m5k7k9.png",
+    "SpriteSheet/StrumentiGrafici/MappaShambhala.png",
+    "SpriteSheet/StrumentiGrafici/Ispirazione.txt",
+    "SpriteSheet/StrumentiGrafici/Nuovo Documento di testo.txt",
+    "SpriteSheet/Oggetti/Tessuto.png",
+    "SpriteSheet/Oggetti/Tessuto.png.opdownload",
+    "SpriteSheet/Oggetti/AmpollaOro.png",
+    "SpriteSheet/Oggetti/AmpollaOro.png.opdownload",
+    "SpriteSheet/Oggetti/Fish.png",
+    "SpriteSheet/Oggetti/Fish.png.opdownload",
+    "SpriteSheet/Oggetti/Carota.png",
+    "SpriteSheet/Oggetti/Carota.png.opdownload",
+    "SpriteSheet/Oggetti/Birra.jpg",
+    "SpriteSheet/Oggetti/Birra.jpg.opdownload",
+    "SpriteSheet/Oggetti/Spada.png",
+    "SpriteSheet/Oggetti/Screenshot 2026-06-18 174750.png",
+    "SpriteSheet/Oggetti/Chiave.PNG.opdownload",
+    "SpriteSheet/Oggetti",
+    "SpriteSheet/Nuova cartella",
     "Idee implementative.md",
-    "Nuova cartella",
-    "ImmaginiDiGioco"
+    "Trama.md"
   ]
 }
