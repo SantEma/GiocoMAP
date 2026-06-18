@@ -1,2 +1,2 @@
 # GiocoMAP
-Gioco creato da Emanuele Santoruvo e Andrea Milo per il corso Metodi Avanzati di Programmazione A.A. 2025/2026
+Gioco creato da Emanuele Santoruvo, Giulio Murgo e Andrea Milo per il corso Metodi Avanzati di Programmazione A.A. 2025/2026
