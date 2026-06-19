@@ -1,4 +1,4 @@
-# TITOLO DA SCEGLIERE DEL GIOCO
+# The Royal Silk Adventure
 ## Trama principale
 
 ### Introduzione
