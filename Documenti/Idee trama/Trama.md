@@ -50,7 +50,7 @@ Arrivato alla stalla incontra il titolare del ranch **Mr.Cooper**.
 *   **MrCooper**: *"Cosa posso fare per te giovanotto? Qui puoi trovare la mia scuderia, tutto ad ottimo prezzo, posso assicurartelo."*
 *   **Eryndor**: *"Da inserire frase pertinente alla scelta di **carrozza**"*
 *   **MrCooper**: *"Per lunghe distanze posso dartene una da 100 monete d'oro, altrimenti anche 80 d'argento vanno bene per brevi durate"*
-*   **Eryndor**: *"Inserire frase pertinente a **non avere soldi**"*
+*   **Eryndor**: *"Non ho soldi con me purtroppo**"
 *   **MrCooper**: *"Mmm... Capisco, se proprio desideri quella a brevi distanze te la potrei concedere, ma dovrai fare qualcosa per me."*
 *   **Eryndor sceglie se accettare S o N (se non accetta MrCooper ripeterà con frasi sempre più disperate e randomiche di accettare la proposta)**.
 *   **MrCooper**: *"Ottimo! Dovrai andare a prendere le carote dal contadino per darle alle mie puledre. Sai ormai ho una certa età."*
