@@ -45,6 +45,11 @@ Qui creo la GUI in NetBeans usando il designer visivo.
 * **`MainFrame` (JFrame):** La finestra principale.
 * *Stile Phoenix Wright:* Dividi la finestra in due. Un pannello superiore (es. `ImagePanel`) che mostra lo sfondo della location corrente (es. i cancelli del Castello) e forse lo sprite del PG presente. Un pannello inferiore (`DialogPanel`) contenente una `JTextArea` non modificabile per il testo e un pannello laterale con i pulsanti (`JButton`) per le azioni: "Esamina", "Parla", "Inventario", "Spostati".
 
+Layer per gli sprite e per gli oggetti cliccabili:
+- **L'uso del Layered Pane:** I contenitori di alto livello di Swing (come il `JFrame` che userai per la finestra principale) possiedono una gerarchia di pannelli che include il **Layered Pane**. Questo specifico pannello ha proprio il compito di "gestire la disposizione dei componenti" su più livelli (asse Z). Grazie al `LayeredPane` puoi impostare un'immagine di sfondo sul livello più basso, piazzare gli oggetti cliccabili su un livello intermedio e lo sprite del personaggio su un livello ancora superiore.
+- **Creare gli elementi cliccabili (Hotspots):** Come hai previsto nelle tue idee implementative, puoi posizionare delle componenti (ad esempio delle `JLabel` con le tue immagini PNG o anche aree trasparenti) sopra l'immagine di sfondo. A queste componenti puoi aggiungere un `MouseMotionListener` e un `MouseListener`. Quando le coordinate del mouse entrano in queste "aree sensibili" tra il background e il personaggio, puoi far cambiare l'icona del cursore (es. usando l'`HAND_CURSOR`) e intercettare il click effettivo del giocatore per fargli esaminare o raccogliere l'oggetto.
+- **Il Glass Pane:** Swing dispone inoltre di un **Glass Pane**, un livello trasparente che si posiziona sopra tutto il `Root Pane` (il contenitore base) e che può essere usato per intercettare gli eventi esterni, come i click del mouse, a livello globale.
+
 #### **📦 Package 3: Controller (L'intermediario)**
 
 * **`GameEngine`:** Inizializza la mappa e gestisce le interazioni. Quando l'utente preme il pulsante "Prendi Tessuto Reale", il Controller riceve l'input dalla *View*, chiama il metodo sul *Model* (es. `giocatore.aggiungi(tessuto)`), e poi dice alla *View* di aggiornare la casella di testo: *"Hai recuperato il Tessuto Reale!"*. (Facendo un esempio)
