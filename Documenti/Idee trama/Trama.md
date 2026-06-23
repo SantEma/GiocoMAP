@@ -5,7 +5,7 @@
 Ci troviamo nel regno incantato di Shambhala. Sono Eryndor, un mercante di tessuti, alla ricerca di elevarmi dal mio status sociale basso per divenire nobile. Il re del regno ha inviato una lettera a tutti i mercanti alla corte per trovare il tessuto perfetto con cui fare il vestito da sposa della sua cara figlia, nonché principessa Marien del regno (il gioco si apre con la lettera). 
 
 >[!TODO] Implementazioni basiche 
->- Il protagonista parla tramite Rejex o tramite grafica e nella grafica il giocatore clicca sulle zone presenti nello sfondo per interagire (cliccare sul pescatore, su oggetti o frecce), il cursore diventa a forma di mano quando si trova un oggetto cliccabile
+>- Il protagonista parla tramite Regex o tramite grafica e nella grafica il giocatore clicca sulle zone presenti nello sfondo per interagire (cliccare sul pescatore, su oggetti o frecce), il cursore diventa a forma di mano quando si trova un oggetto cliccabile
 >- Più velocemente si risolvono gli enigmi più punteggio ottieni
 >- Il personaggio si sposta tramite frecce direzionali presenti a schermo che lo portano a NORD, SUD, EST o OVEST per spostarsi tra le mappe
 >- I dialoghi del NPC sono tutti presenti su un file da estrapolare
@@ -348,9 +348,9 @@ Gli altri oggetti importanti con cui l'utente può interagire nel bosco, facenti
 
 *(Eryndor torna da Fox con le piante nella borsa)*
 **Scegli quale erba consegnare a Fox:**
-- **[Opzione 1]:** Consegna l'Erba Rossa.
-- **[Opzione 2]:** Consegna l'Erba Blu.
-- **[Opzione 3]:** Consegna l'Erba Viola.
+- **Opzione 1:** Consegna l'Erba Rossa.
+- **Opzione 2:** Consegna l'Erba Blu.
+- **Opzione 3:** Consegna l'Erba Viola.
 
 Se il giocatore sceglie l'Opzione 1 o l'Opzione 2
 *   **Eryndor:** *"Ecco, prendi questa. È la pianta che cercavi."*
@@ -361,7 +361,7 @@ Se il giocatore sceglie l'Opzione 1 o l'Opzione 2
 
 _(Il gioco reindirizza il giocatore al menu di scelta delle tre erbe)_
 
-**Se il giocatore sceglie l'Opzione 3 - SCELTA CORRETTA:**
+#### (Se il giocatore sceglie l'Opzione 3 - SCELTA CORRETTA)
 *   **Eryndor:** *"Ecco a te. Questa è la rarissima erba medica che cercavi."*
 *   **Fox:** *"Davvero? Ottimo! Dammela subito!"*
 
