@@ -40,5 +40,12 @@
       "Le mie galline mi fanno impazzire e non posso allontanarmi! Ho solo bisogno di questo piccolo favore al porto!",
       "Non posso darti le carote se non mi aiuti a sfamarmi stasera. Ti scongiuro, vai dal pescivendolo per me!"
     ]
-  }
+  },
+    "Dialoghi_Generici_Idle": [
+        "Oggi c'è una strana calma nel regno... spero solo che non sia la quiete prima della tempesta!",
+        "Si sentono un sacco di voci bizzarre in giro ultimamente, ma preferisco non ficcare il naso negli affari altrui.",
+        "Se stai cercando un modo per svoltare la giornata, forse dovresti fare due passi e schiarirti le idee.",
+        "C'è sempre un gran movimento a Shambhala, ognuno insegue i propri sogni... o i propri guai!",
+        "Scusami viandante, ma al momento ho parecchi pensieri per la testa. Ci faremo una bella chiacchierata un'altra volta!"
+    ]
 }
