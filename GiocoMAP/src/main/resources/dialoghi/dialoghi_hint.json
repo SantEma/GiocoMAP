@@ -1,0 +1,44 @@
+{
+  "Aiuti_Enigmi": {
+    "Enigma_1_Porto": [
+      "Hai provato a seguire il suono della grande campana di bronzo? Si dice che guidi sempre i viandanti verso l'acqua.",
+      "Se cerchi risposte, forse dovresti controllare dove l'aria sa di sale e la strada diventa di assi di legno.",
+      "I giganti con le ali di tela? Sono sicuramente le navi mercantili attraccate ai pontili a Nord."
+    ],
+    "Enigma_2_Germi": [
+      "Se un germe si divide in due germi e due germi si dividono in quattro, significa che ogni minuto che passa il numero di germi raddoppia.",
+      "Se all'inizio c'è un solo germe, il vaso si riempirà in un'ora. Perciò, se parti con un germe, quanti germi avrai dopo un minuto? Leggi il problema con attenzione.",
+      "Fai un passo indietro e rifletti. Devi indicare quanto tempo impiegano due germi a riempire il vaso. Se un germe si suddivide in due in un minuto, quanto altro tempo occorrerà per riempire il vaso?"
+    ],
+    "Enigma_4_Orologio_Fucina": [
+      "Nel momento in cui inizi a contare, ovvero a mezzogiorno, le lancette sono già sovrapposte, per cui il passaggio di una lancetta sull'altra non avviene.",
+      "Pensaci bene: un passaggio ogni ora. Attenzione però, le lancette non passano l'una sull'altra allo scoccare di ogni ora, ma un po' dopo, ad esempio all'una e 5 o alle sei e 33."
+    ],
+    "Enigma_5_Vincolo": [
+      "Non pensare di dover presentare un pezzo tagliato su misura per ogni nuovo giorno. Ricorda che il Custode può darti il resto. Se il primo giorno gli cedi un frammento singolo, il secondo giorno potresti cedergliene un frammento doppio, riprendendoti indietro quello singolo!",
+      "Pensa alla matematica dei raddoppi. Se tu avessi a disposizione un frammento che vale 1, un frammento che vale 2 e un frammento che vale 4, potresti scambiarli per ottenere qualsiasi valore da 1 a 7."
+    ],
+    "Enigma_7_Mercanti_Collaborano": [
+      "Il primo manichino deve pesare più del tessuto del porto... il Velluto Cremisi è il più pesante in assoluto, non credi?",
+      "Ascoltate me! Se il Lino Candido deve per forza occupare una posizione dispari, ma dopo il tessuto del porto... potrebbe essere la terza?",
+      "Ricordate la seconda legge! Seta e Broccato sono legati da tre posizioni di scarto. Se la Seta fosse al due, il Broccato andrebbe al cinque per forza!"
+    ]
+  },
+  "Ricerca_Chiave_Castello": [
+    "Ho sentito che le guardie hanno perso una chiave molto importante mentre pattugliavano il Bosco Losco. Che sbadati!",
+    "Senza la chiave non passerai mai il cancello. I ladri che si nascondono nei boschi spesso prendono di mira le guardie reali per rubare i loro lasciapassare."
+  ],
+  "Loop_Rifiuti_Quest": {
+    "MrCooper": [
+      "Ti prego, giovanotto! Senza quelle carote le mie povere puledre patiranno la fame!",
+      "Dai, è solo una piccola commissione dal contadino! Ti farò un trattamento di favore, te lo prometto, ma aiutami!",
+      "Non puoi voltare le spalle a un vecchio disperato, vero? Ho davvero bisogno di quelle carote per la mia scuderia!",
+      "Senza il tuo aiuto non so come fare. Ti prego, accetta questo incarico!"
+    ],
+    "Contadino_Green": [
+      "Senza quella cena del porto, stasera patirò la fame... ti prego, ho davvero bisogno di te!",
+      "Le mie galline mi fanno impazzire e non posso allontanarmi! Ho solo bisogno di questo piccolo favore al porto!",
+      "Non posso darti le carote se non mi aiuti a sfamarmi stasera. Ti scongiuro, vai dal pescivendolo per me!"
+    ]
+  }
+}

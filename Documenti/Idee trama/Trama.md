@@ -1,3 +1,4 @@
+# The Royal Silk Adventure
 ## Trama principale
 
 ### Introduzione
@@ -27,7 +28,7 @@ Sono lieto di invitarvi al palazzo reale con lo scopo di rendere uno di voi il m
 
 ---
 #### Fase della città col porto
-Il protagonista non conosce la via per andare verso il castello ma si accorge che dietro la lettera è presente un **indovinello**.
+Il protagonista non conosce la via per andare verso il castello ma si accorge che dietro la lettera è presente un **indovinello**. Vedere enigma N.1
 
 Il protagonista arrivato al porto della città vedrà tante persone portuali, ma la sua attenzione si soffermerà su questa strana creatura. E' un costrutto ideato dal Re in persona che sta analizzando tutti gli arrivati per capire chi sono i mercanti che hanno risolto la prima prova.
 	
@@ -38,13 +39,18 @@ Il protagonista arrivato al porto della città vedrà tante persone portuali, ma
 >
 >Da implementare inoltre che se il giocatore non ha nell'inventario il tessuto il robot lo farà tornare indietro a prenderlo per proseguire nella storia.
 
-Da questo momento in poi il protagonista aprendo la mappa capirà ( e se non lo capirà lo diranno gli NPC) e la prossima tappa è il bosco. Per arrivare nel bosco gli serve una **carrozza**, quindi deve andare alla stalla. Se prova ad andare nel bosco senza un signore a cazzodicane lo rispedirà indietro.
+Da questo momento in poi il protagonista aprendo la mappa capirà ( e se non lo capirà lo diranno gli NPC) e la prossima tappa è il bosco. 
+>[!TODO] Mappa open
+>Per aprire la mappa il player potrà sempre vederla tranne nei dialoghi con *M*
+>
+
+Per arrivare nel bosco gli serve una **carrozza**, quindi deve andare alla stalla. Se prova ad andare nel bosco senza un signore random NPC basic lo rispedirà indietro.
 
 Arrivato alla stalla incontra il titolare del ranch **Mr.Cooper**.
 *   **MrCooper**: *"Cosa posso fare per te giovanotto? Qui puoi trovare la mia scuderia, tutto ad ottimo prezzo, posso assicurartelo."*
 *   **Eryndor**: *"Da inserire frase pertinente alla scelta di **carrozza**"*
 *   **MrCooper**: *"Per lunghe distanze posso dartene una da 100 monete d'oro, altrimenti anche 80 d'argento vanno bene per brevi durate"*
-*   **Eryndor**: *"Inserire frase pertinente a **non avere soldi**"*
+*   **Eryndor**: *"Non ho soldi con me purtroppo**"
 *   **MrCooper**: *"Mmm... Capisco, se proprio desideri quella a brevi distanze te la potrei concedere, ma dovrai fare qualcosa per me."*
 *   **Eryndor sceglie se accettare S o N (se non accetta MrCooper ripeterà con frasi sempre più disperate e randomiche di accettare la proposta)**.
 *   **MrCooper**: *"Ottimo! Dovrai andare a prendere le carote dal contadino per darle alle mie puledre. Sai ormai ho una certa età."*
@@ -224,18 +230,19 @@ Si avviano i titoli di coda stile Dungeon Quest.
 - Stalla
 - Bosco Losco
 - Karundis
+- Grotta della fucina
 - Cancello del castello
 - Sala della principessa
 - Cripta di Eripeta
 
 ## Personaggi
-- Eryndor
-- Re di Shambala
+- Eryndor - non grafico
+- Re di Shambala - non grafico
 - Principessa Marien
 - Costrutto magico David
 - Mr.Cooper il rancher
 - Contadino Green
-- Pescivendolo
+- Pescivendolo - non grafico
 - Saggio Clock
 
 ### Nemici
