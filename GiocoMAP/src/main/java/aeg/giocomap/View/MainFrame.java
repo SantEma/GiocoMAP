@@ -4,9 +4,6 @@
  */
 package aeg.giocomap.View;
 
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-
 /**
  *
  * @author Utente
@@ -20,6 +17,14 @@ public class MainFrame extends javax.swing.JFrame {
      */
     public MainFrame() {
         initComponents();
+        
+        java.net.URL iconURL = getClass().getResource("/sprites/Oggetti/Tessuto.png");
+        if(iconURL != null){
+            javax.swing.ImageIcon icona = new javax.swing.ImageIcon(iconURL);
+            this.setIconImage(icona.getImage());
+            System.out.println("DEBUG: Immagine caricata");
+        }
+        else System.out.println("DEBUG: Errore di caricamento foto");
     }
 
     /**
@@ -89,17 +94,6 @@ public class MainFrame extends javax.swing.JFrame {
         // Ricalibrare la finestra grafica
         this.revalidate();
         this.repaint();
-    }
-    
-    public void Icon(){
-        setSize(400,300);
-        
-        ImageIcon icona = new ImageIcon("src/main/resources/sprites/Oggetti/Tessuto.png");
-        setIconImage(icona.getImage());
-        
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setVisible(true);
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

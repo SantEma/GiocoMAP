@@ -19,15 +19,18 @@ public class GameEngine {
     private Game_base_model model;
     private MainFrame frame;
     private TitleScreen title_screen;
+    private MusicPlayer music_player;
     
     // Costruttore
     public GameEngine(Game_base_model model, MainFrame frame){
         // Salvo model e frame del main qui
         this.model = model;
         this.frame = frame;
+        this.music_player = new MusicPlayer();
         
         // Carico la schermata del titolo
         this.title_screen = new TitleScreen();
+        music_player.playMusic(0);
         TitleScreenImp();
         this.frame.mostraPannello(title_screen); //mostro lo schermo all'utente
     }
@@ -38,18 +41,21 @@ public class GameEngine {
         title_screen.addNPListener(e ->{
             // Lambda Expression
                 model.NewStart();
+                music_player.stopMusic(); // Cambiando scena stoppiamo la musica
                 avviaGioco(); // Passiamo alla view del gioco
         });
         
         // Carica partita viene cliccato
         title_screen.addCPListener(e ->{
             model.LoadGame();
+            music_player.stopMusic();
             avviaGioco();
         });
         
         // Record viene cliccato
         title_screen.addRecordListener(e ->{
             model.Record();
+            music_player.stopMusic();
             Statistiche();
         });
     }
