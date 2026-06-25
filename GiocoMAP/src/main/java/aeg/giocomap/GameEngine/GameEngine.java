@@ -35,25 +35,30 @@ public class GameEngine {
     // Metodo per aggangicare il listener ai bottoni
     private void TitleScreenImp(){
         // Nuova partita viene cliccato
-        title_screen.addNPListener(new ActionListener(){
-            @Override // Scrivo la mia versione dell'interfaccia Action Listener
-            public void actionPerformed(ActionEvent e){
+        title_screen.addNPListener(e ->{
+            // Lambda Expression
                 model.NewStart();
                 avviaGioco(); // Passiamo alla view del gioco
-            }
         });
         
         // Carica partita viene cliccato
-        title_screen.addCPListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                model.LoadGame();
-                avviaGioco();
-            }
+        title_screen.addCPListener(e ->{
+            model.LoadGame();
+            avviaGioco();
+        });
+        
+        // Record viene cliccato
+        title_screen.addRecordListener(e ->{
+            model.Record();
+            Statistiche();
         });
     }
     
     private void avviaGioco(){
         // BUBUBUBUBU
+    }
+    
+    private void Statistiche(){
+        // Da fare la lista con i record
     }
 }

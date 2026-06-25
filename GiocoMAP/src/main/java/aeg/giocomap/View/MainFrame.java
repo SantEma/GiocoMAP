@@ -4,6 +4,9 @@
  */
 package aeg.giocomap.View;
 
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+
 /**
  *
  * @author Utente
@@ -29,6 +32,9 @@ public class MainFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Adventure Game MAP");
+        setIconImage(getIconImage());
+        setIconImages(null);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -71,15 +77,29 @@ public class MainFrame extends javax.swing.JFrame {
     
     // Funzione per cambiare scenari
     public void mostraPannello(javax.swing.JPanel newPanel){
-        // Rimuovo la scena attuale
+        // Rimuovo gli elementi della scena attuale
         this.getContentPane().removeAll();
         
+        // Creo una nuova paginazione con nuove regole per la nuova scena 
+        this.getContentPane().setLayout(new java.awt.BorderLayout());
+        
         // Inserisco la nuova scena
-        this.getContentPane().add(newPanel);
+        this.getContentPane().add(newPanel, java.awt.BorderLayout.CENTER);
         
         // Ricalibrare la finestra grafica
         this.revalidate();
         this.repaint();
+    }
+    
+    public void Icon(){
+        setSize(400,300);
+        
+        ImageIcon icona = new ImageIcon("src/main/resources/sprites/Oggetti/Tessuto.png");
+        setIconImage(icona.getImage());
+        
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setVisible(true);
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

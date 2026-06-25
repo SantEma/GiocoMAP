@@ -44,7 +44,7 @@ public class Game_base_model {
             pstm.close();
         }
         catch (SQLException e){
-            e.getErrorCode();
+            System.out.println(e.getMessage());
         }
     }
     
@@ -69,7 +69,42 @@ public class Game_base_model {
             pstm.close();
         }
         catch (SQLException e){
-            e.getErrorCode();
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    // Metodo per vedere le statistiche
+    public void Record(){
+        try{
+            // Estrapoliamo i record dal giocatore più vecchio al più recente
+            String query = "SELECT id, punteggio FROM records ORDER BY id ASC";
+            PreparedStatement pstm = conn.prepareStatement(query);
+            ResultSet rs = pstm.executeQuery();
+            
+            // Leggo fino all'ultimo risultato
+            boolean record_flag = false;
+            
+            while(rs.next()){
+                record_flag = true;
+                
+                int numPartita = rs.getInt(1);
+                int score = rs.getInt(2);
+                
+                // Per ora li stampiamo in console, in futuro saranno salvarli in una Lista 
+                // per inviarli all'interfaccia grafica
+                System.out.println("TEST: Partita " + numPartita + " - Punteggio: " + score);
+            }
+            
+            if(!record_flag){
+                System.out.println("TEST: Nessun record presente ancora");
+            }
+            
+            // Dealloco le risorse
+            rs.close();
+            pstm.close();  
+        }
+        catch(SQLException e){
+            System.out.println(e.getMessage());
         }
     }
 }
