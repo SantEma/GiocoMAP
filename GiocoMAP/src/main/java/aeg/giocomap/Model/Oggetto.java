@@ -10,6 +10,6 @@ package aeg.giocomap.Model;
  */
 public abstract class Oggetto {
     /*
-    Da implementare
+    Da implementare ASAP
     */
 }
