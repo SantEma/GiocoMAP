@@ -24,4 +24,26 @@ public abstract class Oggetto {
     public String getNome(){
         return nome;
     }
+    
+    public class Spada extends Oggetto {
+    private int caricaSincro;
+    
+    public Spada(int id, String nome){
+        super(id, nome);
+        this.caricaSincro=0;
+    }
+    
+    // Metodo per ricaricare la spada dopo un enigma
+    public void ricarica(int percentuale) {
+        this.caricaSincro+=percentuale;
+        if (this.caricaSincro>100) {
+            this.caricaSincro=100;
+        }
+        System.out.println("La " + getNome() + "ha come carica attuale: " + this.caricaSincro + "%");
+    }
+
+    public int getCaricaSincro() {
+        return caricaSincro;
+    }
+}
 }
