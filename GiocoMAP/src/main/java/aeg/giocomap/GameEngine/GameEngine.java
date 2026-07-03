@@ -29,8 +29,7 @@ public class GameEngine {
     private boolean isMapOpen = false;
     private MappaPanel mappa_panel;
     private JPanel scenario_precedente;
-    private JPanel mockGamePanel; // variabile momentanea per i test
-    private boolean possiedeMappa = true;
+    private boolean possiedeMappa = false;
     
     // Costruttore
     public GameEngine(Game_base_model model, MainFrame frame){
@@ -76,7 +75,7 @@ public class GameEngine {
     }
     
     private void avviaGioco(){
-        // BUBUBUBUBU Creo scenario finto per TEST
+        /* BUBUBUBUBU Creo scenario finto per TEST
         mockGamePanel = new JPanel();
         mockGamePanel.setBackground(Color.DARK_GRAY);
         
@@ -84,6 +83,7 @@ public class GameEngine {
         scenario_precedente = mockGamePanel;
         frame.mostraPannello(mockGamePanel);
         scenario_precedente = mockGamePanel;
+        */
     }
     
     // Integrazione e possibili feedback dei dialoghi
