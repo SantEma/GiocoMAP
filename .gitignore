@@ -31,4 +31,4 @@ replay_pid*
 /GiocoMAP/target/
 
 # Cartella salvataggi
-GiocoMAP/saves/
+/GiocoMAP/saves/
