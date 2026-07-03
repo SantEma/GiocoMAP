@@ -28,6 +28,18 @@ public class Game_base_model {
         try{
             conn = DriverManager.getConnection("jdbc:h2:./saves/DB");
             System.out.println("TEST: Connessione al DB avvenuta");
+            
+            // Se le tabelle non esistono al primo avvio
+            String querySaves = "CREATE TABLE IF NOT EXISTS saves"
+                    + "(id INT PRIMARY KEY,stanza_attuale INT,enigma_attuale INT)";
+            PreparedStatement pstmSaves = conn.prepareStatement(querySaves);
+            pstmSaves.executeUpdate();
+            pstmSaves.close();
+            
+            String queryRecords = "CREATE TABLE IF NOT EXISTS records (id INT PRIMARY KEY AUTO_INCREMENT, punteggio INT)";
+            PreparedStatement pstmRecords = conn.prepareStatement(queryRecords);
+            pstmRecords.executeUpdate();
+            pstmRecords.close();         
         }
         catch (SQLException e){
             System.err.println("Errore di connessione al DB: "+e.getMessage());

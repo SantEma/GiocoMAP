@@ -4,11 +4,14 @@
  */
 package aeg.giocomap.GameEngine;
 
+import aeg.giocomap.View.MappaPanel;
 import aeg.giocomap.Model.Game_base_model;
 import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.View.TitleScreen;
-import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
+import javax.swing.*;
 
 /**
  *
@@ -21,12 +24,24 @@ public class GameEngine {
     private TitleScreen title_screen;
     private MusicPlayer music_player;
     
+    // Variabili Mappa
+    private boolean isDialogoActive = false;
+    private boolean isMapOpen = false;
+    private MappaPanel mappa_panel;
+    private JPanel scenario_precedente;
+    private JPanel mockGamePanel; // variabile momentanea per i test
+    private boolean possiedeMappa = true;
+    
     // Costruttore
     public GameEngine(Game_base_model model, MainFrame frame){
         // Salvo model e frame del main qui
         this.model = model;
         this.frame = frame;
         this.music_player = new MusicPlayer();
+        
+        // Inizializzare mappa
+        this.mappa_panel = new MappaPanel();
+        impostaKeyBindingMappa();
         
         // Carico la schermata del titolo
         this.title_screen = new TitleScreen();
@@ -61,10 +76,72 @@ public class GameEngine {
     }
     
     private void avviaGioco(){
-        // BUBUBUBUBU
+        // BUBUBUBUBU Creo scenario finto per TEST
+        mockGamePanel = new JPanel();
+        mockGamePanel.setBackground(Color.DARK_GRAY);
+        
+        // Aggancio il KeyBinding
+        scenario_precedente = mockGamePanel;
+        frame.mostraPannello(mockGamePanel);
+        scenario_precedente = mockGamePanel;
+    }
+    
+    // Integrazione e possibili feedback dei dialoghi
+    public void setDialogueActive(boolean active){
+        this.isDialogoActive = active;
+    }
+    
+    // David consegna la mappa POSSIBILE METODO
+    public void setPossiedeMappa(boolean possiede){
+        this.possiedeMappa = possiede;
+        if(possiede) System.out.println("DEBUG: Il giocatore ha ottenuto la mappa");
     }
     
     private void Statistiche(){
         // Da fare la lista con i record
+    }
+
+    private void impostaKeyBindingMappa() {
+        // Cambiamo il livello più alto datoc he sostituisce tutta la visualizzazione dello schermo momentaneamente
+        JRootPane rootPane = frame.getRootPane();
+        InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW); //Mantiene sempre il focus attivo sul possibile input da tastiera
+        ActionMap am = rootPane.getActionMap();
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0), "toggle_mappa"); // Quando legge M senza nessun CTRL associato lancia il toggle_mappa
+        
+        // Chiamo la funzione toggleMappa associandola al segnale arrivato precedentemente
+        am.put("toggle_mappa", new AbstractAction(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                toggleMappa();
+            }
+        });
+    }
+    
+    private void toggleMappa(){
+        if(!possiedeMappa){
+            System.out.println("DEBUG: Il giocatore non possiede ancora la Mappa");
+            return;
+        }
+        
+        if(isDialogoActive){
+            System.out.println("DEBUG: Testo in corso mappa non apribile");
+            return;
+        }
+        
+        if (!isMapOpen) {
+            if (frame.getContentPane().getComponentCount() > 0) {
+                scenario_precedente = (JPanel) frame.getContentPane().getComponent(0); //salvo lo scenario attuale in scenario precedente
+            }
+            frame.mostraPannello(mappa_panel);
+            isMapOpen = true;
+            System.out.println("DEBUG: Mappa Aperta");
+        } else {
+            if (scenario_precedente != null) {
+                frame.mostraPannello(scenario_precedente); //ricarico lo scenario che era prima in efidenza
+            }
+            isMapOpen = false; //chiudo la mappa
+            System.out.println("DEBUG: Mappa Chiusa");
+        }
+        
     }
 }
