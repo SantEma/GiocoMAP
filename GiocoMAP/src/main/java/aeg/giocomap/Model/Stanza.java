@@ -32,7 +32,7 @@ public abstract class Stanza {
             // Qui bisognerebbe far partire il dialogo unico, da vedere come deve essere strutturato
             setPrimaEntrata(false); 
         } else {
-            System.out.println("DEBUG: Sei tornato in " + nomeStanza + ".");
+            System.out.println("DEBUG: Tornato in " + nomeStanza + ".");
         }
     }
 
