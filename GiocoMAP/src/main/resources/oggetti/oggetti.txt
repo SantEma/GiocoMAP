@@ -1,0 +1,10 @@
+1;Tessuto;Il prezioso tessuto da consegnare al Re di Shambhala.
+2;Strana Birra;Una bevanda dal sapore pungente e dall'aspetto robotico.
+3;Carote;Carote fresche, perfette per le puledre di Mr.Cooper.
+4;Cena di Green;Un bel piatto di pesce preso al porto.
+5;Fiore Blu;Fiore dello stesso colore del cielo limpido. Cura la febbre dei boschi.
+6;Fiore Rosso;Un fiore che emana un odore molto dolce.
+7;Fiore Viola;Fiore che cresce tra le radici nodose. Il suo veleno addormenta all'istante.
+8;Chiave Fox;Una chiave rubata a Ned Fox. Sembra importante.
+9;Ampolla d'oro;Un'ampolla contenente il figlio di Eripeta tramutato in oro liquido.
+10;Spada Sincro;Una spada dall'elsa opaca e priva di filo. Reagisce al tuo battito.

@@ -6,10 +6,23 @@ package aeg.giocomap.Model;
 
 /**
  *
- * @author emanu
+ * @author emanuele
  */
-public abstract class Oggetto {
-    /*
-    Da implementare ASAP
-    */
+public class Oggetto {
+    int id;
+    String nomeOggetto;
+    
+    public Oggetto(int id, String nome){
+        this.id=id;
+        this.nomeOggetto=nome;
+    }
+
+    public int getIdOggetto(){
+        return id;
+    }
+    
+    public String getNomeOggetto(){
+        return nomeOggetto;
+    }
+    
 }

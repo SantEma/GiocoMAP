@@ -11,7 +11,7 @@ Abbiamo adattato la trama per poter coincidere con le richieste fatte dal profes
 Divideremo in tre categorie il codice:
 #### Package 1: Model (Il Back-end e la Logica)
 * **`Stanza` (Room):** Ha un nome, una descrizione, una lista di oggetti presenti e i collegamenti ad altre stanze.
-* **`Oggetto` (Item):** Interfaccia o classe astratta. Avrà nome, descrizione e uno score (punteggio).
+* **`Oggetto` (Item):** Interfaccia o classe astratta. Avrà nome, descrizione e uno score (punteggio, solo per la spada).
 * **`Personaggio` (NPC):** Gestisce l'albero dei dialoghi, richiamando opportunamente il suo dialogo prestabilito.
 * **`Giocatore`:** Contiene la posizione attuale (Stanza corrente) e l'`Inventario`.
 * **`Inventario` (Generics/Lambda):** Usiamo i Generics per la collezione di oggetti. Usa le **Lambda Expression e gli Stream**  per cercare un oggetto (es. `inventario.stream().filter(obj -> obj.getNome().equals("Chiave")).findFirst()`).
