@@ -28,6 +28,18 @@ public class Game_base_model {
         try{
             conn = DriverManager.getConnection("jdbc:h2:./saves/DB");
             System.out.println("TEST: Connessione al DB avvenuta");
+            
+            // Se le tabelle non esistono al primo avvio le si creano
+            String querySaves = "CREATE TABLE IF NOT EXISTS saves"
+                    + "(id INT PRIMARY KEY,stanza_attuale INT,enigma_attuale INT)";
+            try (PreparedStatement pstmSaves = conn.prepareStatement(querySaves)) {
+                pstmSaves.executeUpdate();
+            }
+            
+            String queryRecords = "CREATE TABLE IF NOT EXISTS records (id INT PRIMARY KEY AUTO_INCREMENT, punteggio INT)";
+            try (PreparedStatement pstmRecords = conn.prepareStatement(queryRecords)) {
+                pstmRecords.executeUpdate();
+            }         
         }
         catch (SQLException e){
             System.err.println("Errore di connessione al DB: "+e.getMessage());
@@ -36,25 +48,36 @@ public class Game_base_model {
     
     // Metodo se l'utente crea una nuova partita
     public void NewStart(){
+        String query = "DELETE FROM saves";
+        PreparedStatement pstm = null;
         try{
             // Eliminiamo il salvataggio presente
-            String query = "DELETE FROM saves";
-            PreparedStatement pstm = conn.prepareStatement(query);
+            pstm = conn.prepareStatement(query);
             pstm.executeUpdate();
-            pstm.close();
         }
         catch (SQLException e){
             System.out.println(e.getMessage());
+        }
+        finally{
+            if(pstm != null) // Controllo se è stato creato lo statement
+                try {
+                    pstm.close();
+            } 
+            catch (SQLException ex) {
+                System.err.println("Errore chiusura Statement: " + ex.getMessage());
+            }
         }
     }
     
     // Metodo se l'utente carica una partita
     public void LoadGame(){
+        String query = "SELECT stanza_attuale, enigma_attuale FROM saves WHERE id = 1";
+        PreparedStatement pstm = null;
+        ResultSet rs = null;
         try{
             // Andiamo ad estrapolare il salvataggio
-            String query = "SELECT stanza_attuale, enigma_attuale FROM saves WHERE id = 1";
-            PreparedStatement pstm = conn.prepareStatement(query);
-            ResultSet rs = pstm.executeQuery();
+            pstm = conn.prepareStatement(query);
+            rs = pstm.executeQuery();
             
             // Scorro i risultati dell'interrogazione
             if(rs.next()){
@@ -65,21 +88,38 @@ public class Game_base_model {
             else{ 
                 System.out.println("TEST: Nessun salvataggio trovato");
             }
-            rs.close();
-            pstm.close();
         }
         catch (SQLException e){
             System.out.println(e.getMessage());
+        }
+        finally{
+            try{
+                if(rs != null)
+                    rs.close();   
+            }
+            catch (SQLException ex){
+                System.err.println("Errore chiusura ResultSet: " + ex.getMessage());
+            }
+            
+            try {
+                if(pstm != null)
+                    pstm.close();
+            }
+            catch (SQLException ex) {
+                System.err.println("Errore chiusura Statement: " + ex.getMessage());
+            }
         }
     }
     
     // Metodo per vedere le statistiche
     public void Record(){
+        String query = "SELECT id, punteggio FROM records ORDER BY id ASC";
+        PreparedStatement pstm = null;
+        ResultSet rs = null;
         try{
             // Estrapoliamo i record dal giocatore più vecchio al più recente
-            String query = "SELECT id, punteggio FROM records ORDER BY id ASC";
-            PreparedStatement pstm = conn.prepareStatement(query);
-            ResultSet rs = pstm.executeQuery();
+            pstm = conn.prepareStatement(query);
+            rs = pstm.executeQuery();
             
             // Leggo fino all'ultimo risultato
             boolean record_flag = false;
@@ -97,14 +137,29 @@ public class Game_base_model {
             
             if(!record_flag){
                 System.out.println("TEST: Nessun record presente ancora");
-            }
-            
-            // Dealloco le risorse
-            rs.close();
-            pstm.close();  
+            } 
         }
         catch(SQLException e){
             System.out.println(e.getMessage());
+        }
+        
+        // Dealloco le risorse
+        finally{
+            try{
+                if(rs != null)
+                    rs.close(); 
+            }
+            catch (SQLException ex){
+                System.err.println("Errore chiusura ResultSet: " + ex.getMessage());
+            }
+            
+            try{
+                if(pstm != null)
+                    pstm.close();
+            }
+            catch (SQLException ex){
+                System.err.println("Errore chiusura Statement: " + ex.getMessage());
+            }
         }
     }
 }
