@@ -38,7 +38,7 @@ public abstract class Oggetto {
                 if (this.caricaSincro>99) {
                     this.caricaSincro=99;
                 }
-            System.out.println("La " + getNomeOggetto() + "ha come carica attuale: " + this.caricaSincro + "%");
+            System.out.println("La " + getNomeOggetto() + " ha come carica attuale: " + this.caricaSincro + "%");
         }
 
         public int getCaricaSincro() {
