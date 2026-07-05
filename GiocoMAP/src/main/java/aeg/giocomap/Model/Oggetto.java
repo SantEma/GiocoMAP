@@ -8,7 +8,7 @@ package aeg.giocomap.Model;
  *
  * @author emanuele
  */
-public abstract class Oggetto {
+public class Oggetto {
     int id;
     String nomeOggetto;
     
