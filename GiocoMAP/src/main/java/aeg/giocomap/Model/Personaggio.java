@@ -50,5 +50,26 @@ public class Personaggio {
     public void resetDialogo() {
         this.indiceDialogoAttuale=0;
     }
+
+/*
+    DA INSERIRE:
+    Giocatore deve essere ancora implementato, per questo ora il fantoccio è 
+    sottocommento per poter permettere al team di andare avanti
     
+    public class Fantoccio extends Personaggio {
+
+        public Fantoccio() {
+            super("System_Fantoccio_Invisibile"); 
+        }
+        
+        public void daiOggetto(Oggetto oggettoDaConsegnare, Giocatore giocatore) {
+            if (oggettoDaConsegnare != null && giocatore != null) {
+                giocatore.getInventario().aggiungi(oggettoDaConsegnare);
+            
+            System.out.println("DEBUG: Il fantoccio ha inserito silenziosamente l'oggetto [" 
+                    + oggettoDaConsegnare.getNomeOggetto() + "] nell'inventario.");
+        }
+        }
+    }
+*/
 }

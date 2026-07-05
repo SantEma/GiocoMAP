@@ -7,22 +7,15 @@ package aeg.giocomap.Model;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
-    ToDo: servirà veramente la lista di oggetti presenti in una stanza?
-    Ipotizzo di no, poichè abbiamo la possibilità di far dare tutto al fantoccio 
-    ma li tengo al momento nel codice come referenza futura
-*/
 public abstract class Stanza {
     
     private String nomeStanza;
     private String descrizioneStanza;
-    //private List<Oggetto> oggettiPresenti;
     private boolean primaEntrata; 
     
     public Stanza(String nome, String descrizione) {
         this.nomeStanza = nome;
         this.descrizioneStanza = descrizione;
-        //this.oggettiPresenti = new ArrayList<>();
         this.primaEntrata = true; 
     }
 
@@ -52,18 +45,5 @@ public abstract class Stanza {
         return descrizioneStanza;
     }
 
-    /*
-    public List<Oggetto> getOggettiPresenti() {
-        return oggettiPresenti;
-    }
-    
-    public void aggiungiOggettoNellaStanza(Oggetto o) {
-        this.oggettiPresenti.add(o);
-    }
-    
-    public void rimuoviOggettoDallaStanza(Oggetto o) {
-        this.oggettiPresenti.remove(o);
-    }
-    */
 }
 
