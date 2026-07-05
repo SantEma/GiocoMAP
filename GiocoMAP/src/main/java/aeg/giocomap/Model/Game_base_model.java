@@ -4,11 +4,15 @@
  */
 package aeg.giocomap.Model;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.*;
 
 /**
  *
@@ -16,6 +20,7 @@ import java.sql.SQLException;
  */
 public class Game_base_model {
     private Connection conn;
+    private Map<Integer, Oggetto> catalogoOggetti;
     
     // Costruttore che chiama la connessione al DB sin dall'inizio per poter caricare partita
     // o salvarla in seguito
@@ -162,4 +167,71 @@ public class Game_base_model {
             }
         }
     }
+    
+    public void caricaOggettiDaFile() {
+        catalogoOggetti=new HashMap<>();
+        
+        try {
+            BufferedReader reader=new BufferedReader(new InputStreamReader(
+                getClass().getResourceAsStream("/oggetti/oggetti.txt")
+            ));
+            
+            // Variabili temporanee 
+            String linea;
+            int currentId=-1;
+            String currentNome="";
+            String currentDesc="";
+            
+            while ((linea=reader.readLine())!=null) {
+                // Saltiamo le righe vuote
+                if(linea.trim().isEmpty()){ 
+                    continue;
+                } 
+               
+                String[] parti=linea.split(";");
+                
+                if (parti.length>=3) {
+                    if (currentId!=-1) {
+                        inserisciOggetto(currentId, currentNome, currentDesc);
+                    }
+                    
+                    currentId=Integer.parseInt(parti[0].trim());
+                    currentNome=parti[1].trim();
+                    currentDesc=parti[2].trim();
+                } else {
+                    if (currentId!=-1) {
+                        currentDesc+=" "+linea.trim();
+                    }
+                }
+            }
+            
+            if (currentId != -1) {
+                inserisciOggetto(currentId, currentNome, currentDesc);
+            }
+            
+            reader.close();
+            System.out.println("DEBUG: Catalogo oggetti caricato con successo (" + catalogoOggetti.size() + " oggetti).");
+            
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Errore durante il caricamento degli oggetti dal file: " + e.getMessage());
+        }
+    }
+    
+    private void inserisciOggetto(int id, String nome, String desc) {
+        Oggetto nuovoOggetto;
+        
+        // Se l'oggetto corrisponde alla Spada sincro, istanziamo la sua classe specifica
+        if (id == 10) {
+            nuovoOggetto = new Spada(id, nome); 
+        } else {
+            nuovoOggetto = new Oggetto(id, nome);
+        }
+        
+        catalogoOggetti.put(id, nuovoOggetto);
+    }
+
+    public Oggetto getOggettoDaCatalogo(int id) {
+        return catalogoOggetti.get(id);
+    }
 }
+
