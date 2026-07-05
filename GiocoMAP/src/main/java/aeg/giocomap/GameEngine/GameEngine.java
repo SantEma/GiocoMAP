@@ -8,9 +8,7 @@ import aeg.giocomap.View.MappaPanel;
 import aeg.giocomap.Model.Game_base_model;
 import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.View.TitleScreen;
-import java.awt.Color;
-import java.awt.event.KeyEvent;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
 import javax.swing.*;
 
 /**
@@ -19,15 +17,15 @@ import javax.swing.*;
  */
 public class GameEngine {
     //Sfrutto il controller per far dialogare la logica di base alla logica visiva
-    private Game_base_model model;
-    private MainFrame frame;
-    private TitleScreen title_screen;
-    private MusicPlayer music_player;
+    private final Game_base_model model;
+    private final MainFrame frame;
+    private final TitleScreen title_screen;
+    private final MusicPlayer music_player;
     
     // Variabili Mappa
     private boolean isDialogoActive = false;
     private boolean isMapOpen = false;
-    private MappaPanel mappa_panel;
+    private final MappaPanel mappa_panel;
     private JPanel scenario_precedente;
     private boolean possiedeMappa = false;
     
@@ -38,7 +36,7 @@ public class GameEngine {
         this.frame = frame;
         this.music_player = new MusicPlayer();
         
-        // Inizializzare mappa
+        // Inizializzare la mappa
         this.mappa_panel = new MappaPanel();
         impostaKeyBindingMappa();
         
@@ -86,29 +84,29 @@ public class GameEngine {
         */
     }
     
-    // Integrazione e possibili feedback dei dialoghi
+    // Integrazione dei dialoghi e verifica di quando essi sono attivi
     public void setDialogueActive(boolean active){
         this.isDialogoActive = active;
     }
     
-    // David consegna la mappa POSSIBILE METODO
+    // David consegna la mappa (POSSIBILE METODO)
     public void setPossiedeMappa(boolean possiede){
         this.possiedeMappa = possiede;
         if(possiede) System.out.println("DEBUG: Il giocatore ha ottenuto la mappa");
     }
     
     private void Statistiche(){
-        // Da fare la lista con i record
+        // Da fare la lista con i record (hall of fame)
     }
 
     private void impostaKeyBindingMappa() {
-        // Cambiamo il livello più alto datoc he sostituisce tutta la visualizzazione dello schermo momentaneamente
+        // Cambio il livello più alto, sostituendo tutta la visualizzazione dello schermo momentaneamente
         JRootPane rootPane = frame.getRootPane();
         InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW); //Mantiene sempre il focus attivo sul possibile input da tastiera
         ActionMap am = rootPane.getActionMap();
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0), "toggle_mappa"); // Quando legge M senza nessun CTRL associato lancia il toggle_mappa
         
-        // Chiamo la funzione toggleMappa associandola al segnale arrivato precedentemente
+        // Chiamo la funzione toggleMappa associandola al segnale arrivato precedentemente ("toggle_mappa")
         am.put("toggle_mappa", new AbstractAction(){
             @Override
             public void actionPerformed(ActionEvent e){
@@ -137,7 +135,7 @@ public class GameEngine {
             System.out.println("DEBUG: Mappa Aperta");
         } else {
             if (scenario_precedente != null) {
-                frame.mostraPannello(scenario_precedente); //ricarico lo scenario che era prima in efidenza
+                frame.mostraPannello(scenario_precedente); //ricarico lo scenario che era prima in evidenza
             }
             isMapOpen = false; //chiudo la mappa
             System.out.println("DEBUG: Mappa Chiusa");

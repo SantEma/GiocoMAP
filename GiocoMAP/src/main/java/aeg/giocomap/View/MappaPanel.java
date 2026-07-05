@@ -12,7 +12,7 @@ import java.io.IOException;
 
 /**
  *
- * @author Utente
+ * @author Andrea
  */
 public class MappaPanel extends JPanel {
     private BufferedImage immagineMappa;
@@ -29,12 +29,12 @@ public class MappaPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.BLACK);
         
-        // Istruzioni temporanee per far capire come usare la Mappa
+        // Istruzioni per far capire come usare la Mappa
         JLabel istruzioni = new JLabel("Premi M per aprire e chiudere la mappa",SwingConstants.CENTER);
         istruzioni.setFont(new Font("Arial",Font.BOLD,20));
         istruzioni.setForeground(Color.WHITE);
         
-        //Testo posizionato sopra l'immagine
+        //Testo posizionato sotto l'immagine
         istruzioni.setOpaque(true);
         istruzioni.setBackground(new Color(0,0,0,150));
         istruzioni.setBorder(BorderFactory.createEmptyBorder(10,0,10,0));
@@ -46,7 +46,7 @@ public class MappaPanel extends JPanel {
     protected void paintComponent(Graphics g){
         super.paintComponent(g);
         if(immagineMappa != null){
-            // 1. Prendo le dimensioni (finestra) e dell'immagine originale
+            // 1. Prendo le dimensioni (finestra) dell'immagine originale
             int panelW = getWidth();
             int panelH = getHeight();
             int imgW = immagineMappa.getWidth();
