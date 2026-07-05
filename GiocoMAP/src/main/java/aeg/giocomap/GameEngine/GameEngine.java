@@ -9,6 +9,9 @@ import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.View.TitleScreen;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import com.google.gson.JsonObject;
+import aeg.giocomap.Util.JsonLoader;
+import aeg.giocomap.View.GameScreen;
 
 /**
  *
@@ -44,12 +47,14 @@ public class GameEngine {
                 music_player.stopMusic(); // Cambiando scena stoppiamo la musica
                 avviaGioco(); // Passiamo alla view del gioco
         });
+
+        
         
         // Carica partita viene cliccato
         title_screen.addCPListener(e ->{
             model.LoadGame();
             music_player.stopMusic();
-            avviaGioco();
+            caricaGioco();
         });
         
         // Record viene cliccato
@@ -60,11 +65,28 @@ public class GameEngine {
         });
     }
     
+    private String leggiLetteraIniziale(){
+    JsonObject root = JsonLoader.caricaJson("/dialoghi/walloftext.json");
+    if(root == null) return "Errore nel caricamento.";
+    
+    JsonObject lettera = root.getAsJsonObject("Lettera");
+    return JsonLoader.estraiTesto(lettera, "lettera_iniziale");
+   
+   
+    
+    }
+ 
     private void avviaGioco(){
-        // BUBUBUBUBU
+    String testo = leggiLetteraIniziale();
+    GameScreen game_screen= new GameScreen(testo);
+    frame.mostraPannello(game_screen);
     }
     
     private void Statistiche(){
         // Da fare la lista con i record
+    }
+
+    private void caricaGioco(){
+        
     }
 }
