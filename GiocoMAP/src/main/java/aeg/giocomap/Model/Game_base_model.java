@@ -167,7 +167,7 @@ public class Game_base_model {
         }
     }
     
-    public void loadOggettiDaCatologo(){
+    private void loadOggettiDaCatologo(){
         catalogoOggetti = new HashMap<>();
         
         try{
