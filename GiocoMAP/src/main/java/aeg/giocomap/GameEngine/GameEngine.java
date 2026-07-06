@@ -21,12 +21,10 @@ public class GameEngine {
     private final Game_base_model model;
     private final MainFrame frame;
     private final TitleScreen title_screen;
+    private final SceneManager sceneManager;
     private final MusicPlayer music_player;
-
+    
     private boolean isDialogoActive = false;
-    private boolean isMapOpen = false;
-    private final MappaPanel mappa_panel;
-    private JPanel scenario_precedente;
     private boolean possiedeMappa = false;
 
     public GameEngine(Game_base_model model, MainFrame frame) {
@@ -40,14 +38,16 @@ public class GameEngine {
         });
         
         this.music_player = new MusicPlayer();
-
-        this.mappa_panel = new MappaPanel();
         impostaKeyBindingMappa();
-
-        this.title_screen = new TitleScreen();
         music_player.playMusic(MusicPlayer.TITLE_SCREEN_MUSIC);
+        
+        this.sceneManager = new SceneManager(frame);
+        this.title_screen = new TitleScreen();
+        sceneManager.registraScena("MENU_PRINCIPALE",title_screen);
+        sceneManager.registraScena("MAPPA", new MappaPanel());
+        
         TitleScreenImp();
-        this.frame.mostraPannello(title_screen);
+        sceneManager.mostraScena("MENU_PRINCIPALE");
     }
 
     private void TitleScreenImp() {
@@ -101,7 +101,8 @@ public class GameEngine {
     // ha premuto nuova partita → mostra sempre la lettera
     List<String> righe = leggiLetteraIniziale();
     GameScreen game_screen = new GameScreen(righe);
-    frame.mostraPannello(game_screen);
+    sceneManager.registraScena("LETTERA_INIZIALE",game_screen);
+    sceneManager.mostraScena("LETTERA_INIZIALE");
 }
 
     public void setDialogueActive(boolean active) {
@@ -141,21 +142,9 @@ public class GameEngine {
             System.out.println("DEBUG: Testo in corso mappa non apribile");
             return;
         }
-
-        if (!isMapOpen) {
-            if (frame.getContentPane().getComponentCount() > 0) {
-                scenario_precedente = (JPanel) frame.getContentPane().getComponent(0);
-            }
-            frame.mostraPannello(mappa_panel);
-            isMapOpen = true;
-            System.out.println("DEBUG: Mappa Aperta");
-        } else {
-            if (scenario_precedente != null) {
-                frame.mostraPannello(scenario_precedente);
-            }
-            isMapOpen = false;
-            System.out.println("DEBUG: Mappa Chiusa");
-        }
+        
+        if(!sceneManager.isMapOpen()) sceneManager.ApriMappa();
+        else sceneManager.ChiudiMappa();
     }
     
     // Chiudiamo in modo pulito il gioco
