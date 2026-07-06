@@ -9,20 +9,29 @@ package aeg.giocomap.Model;
  * @author emanuele
  */
 public class Oggetto {
-    int id;
+    int idOggetto;
     String nomeOggetto;
+    String descrizioneOggetto;
     
-    public Oggetto(int id, String nome){
-        this.id=id;
+    public Oggetto(int idOggetto, String nome, String descrizioneOggetto){
+        this.idOggetto=idOggetto;
         this.nomeOggetto=nome;
+        this.descrizioneOggetto=descrizioneOggetto;
     }
 
     public int getIdOggetto(){
-        return id;
+        return idOggetto;
     }
     
     public String getNomeOggetto(){
         return nomeOggetto;
     }
     
+    public String getDescrizioneOggetto(){
+        return descrizioneOggetto;
+    }
+    
+    public void reagisciRisoluzioneEnigma() {
+        System.out.println("DEBUG: Risoluzione completata, ma sta cosa non fa nulla...");
+    }
 }
