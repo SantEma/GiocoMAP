@@ -8,7 +8,6 @@ import aeg.giocomap.View.MappaPanel;
 import aeg.giocomap.Model.Game_base_model;
 import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.View.TitleScreen;
-<<<<<<< HEAD
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import com.google.gson.JsonObject;
@@ -16,10 +15,11 @@ import aeg.giocomap.Util.JsonLoader;
 import aeg.giocomap.View.GameScreen;
 import java.util.ArrayList;
 import java.util.List;
-=======
 import java.awt.event.*;
 import javax.swing.*;
->>>>>>> origin/main
+
+
+
 
 /**
  *
@@ -67,8 +67,7 @@ public class GameEngine {
                 avviaGioco(); // Passiamo alla view del gioco
         });
 
-        
-        
+         
         // Carica partita viene cliccato
         title_screen.addCPListener(e ->{
             model.LoadGame();
@@ -84,23 +83,16 @@ public class GameEngine {
         });
     }
     
-<<<<<<< HEAD
     // DOPO
     private List<String> leggiLetteraIniziale() {
-    JsonObject root = JsonLoader.caricaJson("/dialoghi/walloftext.json");
-    if (root == null) return new ArrayList<>();
-    JsonObject lettera = root.getAsJsonObject("Lettera");
-    return JsonLoader.estraiLista(lettera, "lettera_iniziale");
-}
+        JsonObject root = JsonLoader.caricaJson("/dialoghi/walloftext.json");
+        if (root == null) return new ArrayList<>();
+        JsonObject lettera = root.getAsJsonObject("Lettera");
+        return JsonLoader.estraiLista(lettera, "lettera_iniziale");
+    }
 
     private void avviaGioco() {
-    List<String> righe = leggiLetteraIniziale();
-    GameScreen game_screen = new GameScreen(righe);
-    frame.mostraPannello(game_screen);
-}
-=======
-    private void avviaGioco(){
-        /* BUBUBUBUBU Creo scenario finto per TEST
+        /*
         mockGamePanel = new JPanel();
         mockGamePanel.setBackground(Color.DARK_GRAY);
         
@@ -109,9 +101,13 @@ public class GameEngine {
         frame.mostraPannello(mockGamePanel);
         scenario_precedente = mockGamePanel;
         */
+        List<String> righe = leggiLetteraIniziale();
+        GameScreen game_screen = new GameScreen(righe);
+        frame.mostraPannello(game_screen);
     }
-    
-    // Integrazione dei dialoghi e verifica di quando essi sono attivi
+   
+  // Integrazione dei dialoghi e verifica di quando essi sono attivi
+
     public void setDialogueActive(boolean active){
         this.isDialogoActive = active;
     }
@@ -121,7 +117,6 @@ public class GameEngine {
         this.possiedeMappa = possiede;
         if(possiede) System.out.println("DEBUG: Il giocatore ha ottenuto la mappa");
     }
->>>>>>> origin/main
     
     private void Statistiche(){
         // Da fare la lista con i record (hall of fame)
