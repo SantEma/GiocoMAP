@@ -232,6 +232,5 @@ public class Game_base_model {
             catalogoOggetti.put(id, nuovoOggetto);
         }
     }
-
 }
 

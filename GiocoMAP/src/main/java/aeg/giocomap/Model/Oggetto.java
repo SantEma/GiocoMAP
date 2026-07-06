@@ -31,5 +31,7 @@ public class Oggetto {
         return descrizioneOggetto;
     }
     
-    
+    public void reagisciRisoluzioneEnigma() {
+        System.out.println("DEBUG: Risoluzione completata, ma sta cosa non fa nulla...");
+    }
 }
