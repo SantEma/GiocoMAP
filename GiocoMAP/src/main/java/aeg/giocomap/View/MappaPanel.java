@@ -5,6 +5,7 @@
 package aeg.giocomap.View;
 
 import javax.swing.*;
+import java.awt.event.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
@@ -14,8 +15,11 @@ import java.io.IOException;
  *
  * @author Andrea
  */
-public class MappaPanel extends JPanel {
+public final class MappaPanel extends JPanel {
     private BufferedImage immagineMappa;
+    private BufferedImage mappaPre; 
+    private int ultima_l=-1;
+    private int ultima_h=-1;
    
     public MappaPanel() {
         try{
@@ -40,33 +44,57 @@ public class MappaPanel extends JPanel {
         istruzioni.setBorder(BorderFactory.createEmptyBorder(10,0,10,0));
         
         add(istruzioni,BorderLayout.SOUTH);
+        
+        this.addComponentListener(new java.awt.event.ComponentAdapter() {
+           public void componenentResized(java.awt.event.ComponentEvent e){
+               rigeneraMappa();
+               repaint();
+           }
+        });
+    }
+    
+    public void rigeneraMappa(){
+        // Prendo le dimensioni (finestra) dell'immagine originale
+        int panelW = getWidth();
+        int panelH = getHeight();
+        int imgW = immagineMappa.getWidth();
+        int imgH = immagineMappa.getHeight();
+        
+        // Calcolo il fattore di scala per mantenere le proporzioni intatte
+        double scaleX = (double) panelW / imgW;
+        double scaleY = (double) panelH / imgH;
+        double scale = Math.min(scaleX, scaleY); // Prendo il fattore più piccolo per farla entrare tutta
+            
+        // Calcolo la grandezza finale scalata
+        int drawW = (int) (imgW * scale);
+        int drawH = (int) (imgH * scale);
+            
+        // Calcolo le coordinate X e Y per centrare l'immagine perfettamente
+        int x = (panelW - drawW) / 2;
+        int y = (panelH - drawH) / 2;
+        
+        // Disegno l'immagine con le nuove grandezze proporzionate e centrate
+        BufferedImage tela=new BufferedImage(panelW,panelH,BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = tela.createGraphics();
+        
+        g.drawImage(immagineMappa, x, y, drawW, drawH, this);
+        g.dispose(); // deallocare memoria
+        
+        // Tela salvata nella variabile globale
+        mappaPre = tela;
+        ultima_l = panelW;
+        ultima_h = panelH;
     }
     
     @Override
     protected void paintComponent(Graphics g){
         super.paintComponent(g);
         if(immagineMappa != null){
-            // 1. Prendo le dimensioni (finestra) dell'immagine originale
-            int panelW = getWidth();
-            int panelH = getHeight();
-            int imgW = immagineMappa.getWidth();
-            int imgH = immagineMappa.getHeight();
             
-            // 2. Calcolo il fattore di scala per mantenere le proporzioni intatte
-            double scaleX = (double) panelW / imgW;
-            double scaleY = (double) panelH / imgH;
-            double scale = Math.min(scaleX, scaleY); // Prendo il fattore più piccolo per farla entrare tutta
+            // Se la finestra è cambiata ricreo la mappa in sottofondo
+            if(getWidth() != ultima_l || getWidth() != ultima_h || mappaPre == null) rigeneraMappa();
             
-            // 3. Calcolo la grandezza finale scalata
-            int drawW = (int) (imgW * scale);
-            int drawH = (int) (imgH * scale);
-            
-            // 4. Calcolo le coordinate X e Y per centrare l'immagine perfettamente
-            int x = (panelW - drawW) / 2;
-            int y = (panelH - drawH) / 2;
-            
-            // 5. Disegno l'immagine con le nuove grandezze proporzionate e centrate
-            g.drawImage(immagineMappa, x, y, drawW, drawH, this);
+            if(mappaPre != null) g.drawImage(mappaPre, 0, 0, this);
         }
         else{
             g.setColor(Color.WHITE);

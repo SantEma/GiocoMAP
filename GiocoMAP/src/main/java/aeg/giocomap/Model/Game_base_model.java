@@ -72,6 +72,19 @@ public class Game_base_model {
         }
     }
     
+    // Chiudo la connessione ad h2 se aperta
+    public void chiudiConnessione(){
+        try{
+            if(conn != null && !conn.isClosed()){
+                conn.close();
+                System.out.println("DEBUG: DB chiuso");    
+            } 
+        }
+        catch (SQLException e){
+            System.out.println("DEBUG: Errore durante la chiusura del DB "+e.getMessage());
+        }
+    }
+    
     // Metodo se l'utente crea una nuova partita
     public void NewStart(){
         String query = "DELETE FROM saves";
@@ -97,26 +110,28 @@ public class Game_base_model {
     
     // Metodo se l'utente carica una partita
     public String[] LoadGame() {
-    try {
-        String query = "SELECT stanza_attuale, enigma_attuale FROM saves WHERE id = 1";
-        PreparedStatement pstm = conn.prepareStatement(query);
-        ResultSet rs = pstm.executeQuery();
+        try {
+            String query = "SELECT stanza_attuale, enigma_attuale FROM saves WHERE id = 1";
+            PreparedStatement pstm = conn.prepareStatement(query);
+            ResultSet rs = pstm.executeQuery();
 
-        if (rs.next()) {
-            String stanza = rs.getString("stanza_attuale");
-            String enigma = rs.getString("enigma_attuale");
+            if (rs.next()) {
+                String stanza = rs.getString("stanza_attuale");
+                String enigma = rs.getString("enigma_attuale");
+                rs.close();
+                pstm.close();
+                return new String[]{stanza, enigma};
+            }
+
             rs.close();
             pstm.close();
-            return new String[]{stanza, enigma};
+            return null;    // nessun salvataggio trovato
+
+        } 
+        catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return null;
         }
-
-        rs.close();
-        pstm.close();
-        return null;    // nessun salvataggio trovato
-
-    } catch (SQLException e) {
-        System.err.println(e.getMessage());
-        return null;
     }
     
     private void loadOggettiDaCatologo(){
@@ -163,7 +178,7 @@ public class Game_base_model {
                 reader.close();
                 System.out.println("DEBUG: Catalogo oggetti: "+ catalogoOggetti.size()+" presenti all'interno");
         }
-        catch(Exception e){
+        catch(IOException e){
             System.out.println("DEBUG: Errore imprevisto: " + e);
         }
     }
@@ -184,6 +199,5 @@ public class Game_base_model {
             catalogoOggetti.put(id, nuovoOggetto);
         }
     }
-}
 }
 

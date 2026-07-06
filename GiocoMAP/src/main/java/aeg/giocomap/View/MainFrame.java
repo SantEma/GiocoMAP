@@ -4,7 +4,7 @@
  */
 package aeg.giocomap.View;
 
-import java.awt.Cursor;
+import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 
 /**
@@ -20,7 +20,18 @@ public class MainFrame extends javax.swing.JFrame {
      */
     public MainFrame() {
         initComponents();
+        
+        // Impedire di rimpicciolire o modificare la grandezza della finestra
         setExtendedState(JFrame.MAXIMIZED_BOTH);
+        
+        java.awt.Dimension screensize = java.awt.Toolkit.getDefaultToolkit().getScreenSize(); // Adatto alle dimensioni max dello schermo
+        this.setMinimumSize(screensize);
+        
+        this.addWindowStateListener((java.awt.event.WindowEvent e) -> {
+            // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+            if (e.getNewState()==JFrame.NORMAL)
+                setExtendedState(JFrame.MAXIMIZED_BOTH);
+        });
         
         java.net.URL iconURL = getClass().getResource("/sprites/Oggetti/Tessuto.png");
         if(iconURL != null){

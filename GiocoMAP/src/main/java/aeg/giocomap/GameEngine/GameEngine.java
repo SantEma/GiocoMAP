@@ -32,13 +32,20 @@ public class GameEngine {
     public GameEngine(Game_base_model model, MainFrame frame) {
         this.model = model;
         this.frame = frame;
+        this.frame.addWindowListener(new java.awt.event.WindowAdapter(){
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e){
+                ExitGame();
+            }
+        });
+        
         this.music_player = new MusicPlayer();
 
         this.mappa_panel = new MappaPanel();
         impostaKeyBindingMappa();
 
         this.title_screen = new TitleScreen();
-        music_player.playMusic(0);
+        music_player.playMusic(MusicPlayer.TITLE_SCREEN_MUSIC);
         TitleScreenImp();
         this.frame.mostraPannello(title_screen);
     }
@@ -51,7 +58,6 @@ public class GameEngine {
         });
 
         title_screen.addCPListener(e -> {
-            music_player.stopMusic();
             avviaGioco(true);
         });
 
@@ -83,6 +89,8 @@ public class GameEngine {
             return;  // torna al titolo senza fare nulla
         }
         // partita trovata → carica
+        music_player.stopMusic();
+        
         String stanza = salvataggio[0];
         String enigma = salvataggio[1];
         System.out.println("Carico partita dalla stanza: " + stanza);
@@ -148,5 +156,12 @@ public class GameEngine {
             isMapOpen = false;
             System.out.println("DEBUG: Mappa Chiusa");
         }
+    }
+    
+    // Chiudiamo in modo pulito il gioco
+    public void ExitGame(){
+        System.out.println("WARNING: Stiamo uscendo dal gioco");
+        model.chiudiConnessione(); // chiudo il DB se è aperto
+        System.exit(0);
     }
 }

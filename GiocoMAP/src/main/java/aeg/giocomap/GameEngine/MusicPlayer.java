@@ -10,7 +10,7 @@ import java.io.IOException;
 
 /**
  *
- * @author Utente
+ * @author Andrea
  */
 public class MusicPlayer {
     /*È un oggetto della libreria javax.sound.sampled 
@@ -18,6 +18,9 @@ public class MusicPlayer {
     */
     private Clip clip;
     private final String[] tracceAudio;
+    
+    public static final int TITLE_SCREEN_MUSIC = 0;
+    public static final int END_TITLE_MUSIC = 1;
     
     // Costruttore con tutte le tracce audio
     public MusicPlayer(){
@@ -50,6 +53,5 @@ public class MusicPlayer {
             clip.stop();
             clip.close();
         }
-    }
-    
+    } 
 }
