@@ -11,7 +11,7 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.awt.Graphics;
-
+import aeg.giocomap.Util.CursorUtil;
 /**
  *
  * @author Andrea
@@ -60,6 +60,7 @@ public class TitleScreen extends JPanel {
         btn_nuova_partita.setFont(fontBottoni);
         btn_carica_partita.setFont(fontBottoni);
         btn_record.setFont(fontBottoni);
+        CursorUtil.setHandCursor(btn_nuova_partita, btn_carica_partita, btn_record);
         
         // allineamento
         btn_nuova_partita.setAlignmentX(Component.CENTER_ALIGNMENT);

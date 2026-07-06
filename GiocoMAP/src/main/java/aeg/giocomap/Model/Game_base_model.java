@@ -24,8 +24,30 @@ public class Game_base_model {
     // o salvarla in seguito
     public Game_base_model(){
         connettiDatabase();
+        inizializzaTabelle();
         loadOggettiDaCatologo();
     }
+    
+    private void inizializzaTabelle() {
+    try {
+        String saves = "CREATE TABLE IF NOT EXISTS saves (" +
+                       "id INT PRIMARY KEY," +
+                       "stanza_attuale VARCHAR(100)," +
+                       "enigma_attuale INT)";
+
+        String records = "CREATE TABLE IF NOT EXISTS records (" +
+                         "id INT AUTO_INCREMENT PRIMARY KEY," +
+                         "nome VARCHAR(50)," +
+                         "punteggio INT," +
+                         "data TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
+
+        conn.prepareStatement(saves).executeUpdate();
+        conn.prepareStatement(records).executeUpdate();
+        System.out.println("TEST: Tabelle inizializzate");
+    } catch (SQLException e) {
+        System.err.println("Errore creazione tabelle: " + e.getMessage());
+    }
+}
     
     // Funzione che connette al Database
     private void connettiDatabase(){
@@ -74,97 +96,27 @@ public class Game_base_model {
     }
     
     // Metodo se l'utente carica una partita
-    public void LoadGame(){
+    public String[] LoadGame() {
+    try {
         String query = "SELECT stanza_attuale, enigma_attuale FROM saves WHERE id = 1";
-        PreparedStatement pstm = null;
-        ResultSet rs = null;
-        try{
-            // Andiamo ad estrapolare il salvataggio
-            pstm = conn.prepareStatement(query);
-            rs = pstm.executeQuery();
-            
-            // Scorro i risultati dell'interrogazione
-            if(rs.next()){
-                String stanza = rs.getString(1); // stanza_attuale
-                int enigma = rs.getInt(2); //enigma_attuale
-            }
-            //Se non ci sono salvataggi rs restituisce false
-            else{ 
-                System.out.println("TEST: Nessun salvataggio trovato");
-            }
+        PreparedStatement pstm = conn.prepareStatement(query);
+        ResultSet rs = pstm.executeQuery();
+
+        if (rs.next()) {
+            String stanza = rs.getString("stanza_attuale");
+            String enigma = rs.getString("enigma_attuale");
+            rs.close();
+            pstm.close();
+            return new String[]{stanza, enigma};
         }
-        catch (SQLException e){
-            System.out.println(e.getMessage());
-        }
-        finally{
-            try{
-                if(rs != null)
-                    rs.close();   
-            }
-            catch (SQLException ex){
-                System.err.println("Errore chiusura ResultSet: " + ex.getMessage());
-            }
-            
-            try {
-                if(pstm != null)
-                    pstm.close();
-            }
-            catch (SQLException ex) {
-                System.err.println("Errore chiusura Statement: " + ex.getMessage());
-            }
-        }
-    }
-    
-    // Metodo per vedere le statistiche
-    public void Record(){
-        String query = "SELECT id, punteggio FROM records ORDER BY id ASC";
-        PreparedStatement pstm = null;
-        ResultSet rs = null;
-        try{
-            // Estrapoliamo i record dal giocatore più vecchio al più recente
-            pstm = conn.prepareStatement(query);
-            rs = pstm.executeQuery();
-            
-            // Leggo fino all'ultimo risultato
-            boolean record_flag = false;
-            
-            while(rs.next()){
-                record_flag = true;
-                
-                int numPartita = rs.getInt(1);
-                int score = rs.getInt(2);
-                
-                // Per ora li stampiamo in console, in futuro saranno salvarli in una Lista 
-                // per inviarli all'interfaccia grafica
-                System.out.println("TEST: Partita " + numPartita + " - Punteggio: " + score);
-            }
-            
-            if(!record_flag){
-                System.out.println("TEST: Nessun record presente ancora");
-            } 
-        }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-        
-        // Dealloco le risorse
-        finally{
-            try{
-                if(rs != null)
-                    rs.close(); 
-            }
-            catch (SQLException ex){
-                System.err.println("Errore chiusura ResultSet: " + ex.getMessage());
-            }
-            
-            try{
-                if(pstm != null)
-                    pstm.close();
-            }
-            catch (SQLException ex){
-                System.err.println("Errore chiusura Statement: " + ex.getMessage());
-            }
-        }
+
+        rs.close();
+        pstm.close();
+        return null;    // nessun salvataggio trovato
+
+    } catch (SQLException e) {
+        System.err.println(e.getMessage());
+        return null;
     }
     
     private void loadOggettiDaCatologo(){
@@ -232,5 +184,6 @@ public class Game_base_model {
             catalogoOggetti.put(id, nuovoOggetto);
         }
     }
+}
 }
 

@@ -4,6 +4,9 @@
  */
 package aeg.giocomap.View;
 
+import java.awt.Cursor;
+import javax.swing.JFrame;
+
 /**
  *
  * @author Utente
@@ -17,6 +20,7 @@ public class MainFrame extends javax.swing.JFrame {
      */
     public MainFrame() {
         initComponents();
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         
         java.net.URL iconURL = getClass().getResource("/sprites/Oggetti/Tessuto.png");
         if(iconURL != null){
