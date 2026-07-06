@@ -196,7 +196,7 @@ public class Game_base_model {
                 
                 if (parti.length==3){
                     try {
-                        // Rimuovo spazi bianchi
+                        // Rimuovo gli spazi bianchi tramite trim()
                         currentId = Integer.parseInt(parti[0].trim());
                         currentNome = parti[1].trim();
                         currentDesc = parti[2].trim();
