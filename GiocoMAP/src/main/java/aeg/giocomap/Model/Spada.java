@@ -10,8 +10,8 @@ package aeg.giocomap.Model;
  */
     public class Spada extends Oggetto {
         private int caricaSincro;
-            public Spada(int id, String nome){
-                super(id, nome);
+            public Spada(int idSpada, String nomeSpada, String descrizioneSpada){
+                super(idSpada, nomeSpada, descrizioneSpada);
                 this.caricaSincro=0;
             }
     

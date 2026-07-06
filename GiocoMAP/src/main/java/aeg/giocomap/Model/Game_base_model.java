@@ -4,9 +4,7 @@
  */
 package aeg.giocomap.Model;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -26,6 +24,7 @@ public class Game_base_model {
     // o salvarla in seguito
     public Game_base_model(){
         connettiDatabase();
+        loadOggettiDaCatologo();
     }
     
     // Funzione che connette al Database
@@ -168,70 +167,71 @@ public class Game_base_model {
         }
     }
     
-    public void caricaOggettiDaFile() {
-        catalogoOggetti=new HashMap<>();
+    public void loadOggettiDaCatologo(){
+        catalogoOggetti = new HashMap<>();
         
-        try {
-            BufferedReader reader=new BufferedReader(new InputStreamReader(
-                getClass().getResourceAsStream("/oggetti/oggetti.txt")
-            ));
+        try{
+            //Leggiamo il file
+            BufferedReader reader=new BufferedReader(new FileReader("src/main/resources/oggetti/oggetti.txt"));
             
-            // Variabili temporanee 
+            //Variabili temporanee che verranno man mano sovrascritte
             String linea;
             int currentId=-1;
             String currentNome="";
             String currentDesc="";
+            boolean isNuovoOggetto;
             
+            // Fin tanto che la linea letta da file non è nulla...
             while ((linea=reader.readLine())!=null) {
-                // Saltiamo le righe vuote
-                if(linea.trim().isEmpty()){ 
+                //... e fin tanto che non è vuota..
+                if (linea.trim().isEmpty()){
                     continue;
-                } 
-               
-                String[] parti=linea.split(";");
+                }
+                /* 
+                ... allora divido la linea in diverse parti dove trovo
+                il punto e virgola (deciso tra noi come separatore nel file)
+                e poi salvo tutto in 3 parti, in modo da istanziare
+                */
+                String[] parti=linea.split(";",3);
                 
-                if (parti.length>=3) {
-                    if (currentId!=-1) {
+                if (parti.length==3){
+                    try {
+                        // Rimuovo spazi bianchi
+                        currentId = Integer.parseInt(parti[0].trim());
+                        currentNome = parti[1].trim();
+                        currentDesc = parti[2].trim();
                         inserisciOggetto(currentId, currentNome, currentDesc);
+                    } catch (NumberFormatException e) {
+                        System.err.println("DEBUG: Impossibile convertire ID in numero sulla linea n."+linea);
                     }
-                    
-                    currentId=Integer.parseInt(parti[0].trim());
-                    currentNome=parti[1].trim();
-                    currentDesc=parti[2].trim();
                 } else {
-                    if (currentId!=-1) {
-                        currentDesc+=" "+linea.trim();
-                    }
+                    System.err.println("DEBUG: Formato della riga non valido, attese 3 parti:"+ linea);
                 }
             }
-            
-            if (currentId != -1) {
-                inserisciOggetto(currentId, currentNome, currentDesc);
-            }
-            
-            reader.close();
-            System.out.println("DEBUG: Catalogo oggetti caricato con successo (" + catalogoOggetti.size() + " oggetti).");
-            
-        } catch (IOException | NumberFormatException e) {
-            System.err.println("Errore durante il caricamento degli oggetti dal file: " + e.getMessage());
+                reader.close();
+                System.out.println("DEBUG: Catalogo oggetti: "+ catalogoOggetti.size()+" presenti all'interno");
+        }
+        catch(Exception e){
+            System.out.println("DEBUG: Errore imprevisto: " + e);
         }
     }
     
-    private void inserisciOggetto(int id, String nome, String desc) {
-        Oggetto nuovoOggetto;
-        
-        // Se l'oggetto corrisponde alla Spada sincro, istanziamo la sua classe specifica
-        if (id == 10) {
-            nuovoOggetto = new Spada(id, nome); 
-        } else {
-            nuovoOggetto = new Oggetto(id, nome);
-        }
-        
-        catalogoOggetti.put(id, nuovoOggetto);
-    }
-
-    public Oggetto getOggettoDaCatalogo(int id) {
+    public Oggetto getOggettoDaCatalogo(int id){
         return catalogoOggetti.get(id);
     }
+    
+    private void inserisciOggetto(int id, String nome, String descrizione){
+        Oggetto nuovoOggetto;
+        Spada nuovaSpada;
+        
+        if (id == 10) {
+            nuovaSpada = new Spada(id, nome, descrizione);
+            catalogoOggetti.put(id, nuovaSpada);
+        } else {
+            nuovoOggetto = new Oggetto(id, nome, descrizione);
+            catalogoOggetti.put(id, nuovoOggetto);
+        }
+    }
+
 }
 
