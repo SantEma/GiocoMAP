@@ -21,7 +21,7 @@ public class MainFrame extends javax.swing.JFrame {
     public MainFrame() {
         initComponents();
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setCursor(new Cursor(Cursor.HAND_CURSOR)); 
+        
         java.net.URL iconURL = getClass().getResource("/sprites/Oggetti/Tessuto.png");
         if(iconURL != null){
             javax.swing.ImageIcon icona = new javax.swing.ImageIcon(iconURL);

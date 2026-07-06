@@ -5,12 +5,18 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.util.List;
+/**
+ *
+ * @author murgo
+ */
 
 public class GameScreen extends JPanel {
 
     private BufferedImage sfondo;
 
-    public GameScreen(String testo) {
+    public GameScreen(List<String> righe) {
+    String testo = String.join("", righe);
         try {
             sfondo = ImageIO.read(getClass().getResourceAsStream(
                 "/sprites/StrumentiGrafici/LetteraIniziale.png"));
