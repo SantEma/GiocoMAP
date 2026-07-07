@@ -2,13 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package aeg.giocomap.Model;
-
+package aeg.giocomap.Model.Oggetti;
 /**
  *
  * @author emanuele
  */
-    public class Spada extends Oggetto {
+    public class Spada extends Oggetto implements GiveObject{
         private int caricaSincro;
         
         public Spada(int idSpada, String nomeSpada, String descrizioneSpada){
@@ -16,7 +15,7 @@ package aeg.giocomap.Model;
             this.caricaSincro=0;
         }
         
-        //Grazie all'override, il programma capisce 
+        //Grazie all'override, il programma capisce che è la spada
         @Override
         public void reagisciRisoluzioneEnigma() {
             this.ricaricaSpada(33);

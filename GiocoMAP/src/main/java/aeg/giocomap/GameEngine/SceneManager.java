@@ -22,6 +22,9 @@ public class SceneManager {
     private JPanel scenario_precedente;
     private boolean mapOpen = false;
     
+    // variabili inventario
+    private boolean inventarioOpen = false;
+    
     public SceneManager(MainFrame frame){
         this.frame = frame;
     }
@@ -63,5 +66,38 @@ public class SceneManager {
     
     public boolean isMapOpen(){
         return mapOpen;
+    }
+    
+    // Logiche dell'Inventario
+    public void ApriInventario(){
+        if(!inventarioOpen){
+            // Salvo la scena precedente di gioco
+            if(frame.getContentPane().getComponentCount()>0) 
+                scenario_precedente=(JPanel) frame.getContentPane().getComponent(0);
+            
+            // Recupero dalla cache l'inventario
+            JPanel invP = sceneCache.get("INVENTARIO");
+            
+            // Casting dell'oggetto prima di mostrarlo ed eliminazione dei duplicati
+            if(invP instanceof aeg.giocomap.View.InventarioPanel inventarioPanel)
+                inventarioPanel.aggiornaVista();
+           
+            // Apro la scena a schermo
+            mostraScena("INVENTARIO");
+            inventarioOpen = true;
+            System.out.println("DEBUG: Scena aperta - Inventario");
+        }
+    }
+    
+    public void ChiudiInventario(){
+        if(inventarioOpen && scenario_precedente!=null){
+            frame.mostraPannello(scenario_precedente);
+            inventarioOpen = false;
+            System.out.println("DEBUG: Chisura inventario");
+        }
+    }
+    
+    public boolean isOpenInventario(){
+        return inventarioOpen;
     }
 }

@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package aeg.giocomap.Model;
+package aeg.giocomap.Model.Oggetti;
 
 /**
  *
@@ -29,9 +29,5 @@ public class Oggetto {
     
     public String getDescrizioneOggetto(){
         return descrizioneOggetto;
-    }
-    
-    public void reagisciRisoluzioneEnigma() {
-        System.out.println("DEBUG: Risoluzione completata, ma sta cosa non fa nulla...");
     }
 }
