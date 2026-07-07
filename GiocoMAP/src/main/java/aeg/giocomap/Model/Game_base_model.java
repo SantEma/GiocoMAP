@@ -191,14 +191,17 @@ public class Game_base_model {
     
     private void inserisciOggetto(int id, String nome, String descrizione){
         Oggetto nuovoOggetto;
-        Spada nuovaSpada;
         
         switch(id){
             case 10:
-                nuovaSpada=new Spada(id, nome, descrizione);
+                nuovoOggetto=new Spada(id, nome, descrizione);
+                break;
             default:
                 nuovoOggetto=new Oggetto(id, nome, descrizione);
+                break;
         }
+        
+        catalogoOggetti.put(id, nuovoOggetto);
     }
 }
 
