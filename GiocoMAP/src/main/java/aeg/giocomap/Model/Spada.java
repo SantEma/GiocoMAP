@@ -8,7 +8,7 @@ package aeg.giocomap.Model;
  *
  * @author emanuele
  */
-    public class Spada extends Oggetto {
+    public class Spada extends Oggetto implements GiveObject{
         private int caricaSincro;
         
         public Spada(int idSpada, String nomeSpada, String descrizioneSpada){
