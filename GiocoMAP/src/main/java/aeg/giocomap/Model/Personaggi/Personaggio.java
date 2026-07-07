@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package aeg.giocomap.Model;
+package aeg.giocomap.Model.Personaggi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,20 +10,15 @@ import java.util.List;
 /**
  * @author emanuele
  */
-public class Personaggio {
+public class Personaggio extends Entity {
     
-    private String nomePersonaggio;
     private List<String> alberoDialoghi;
     private int indiceDialogoAttuale;
 
-    public Personaggio(String nomePersonaggio) {
-        this.nomePersonaggio=nomePersonaggio;
+    public Personaggio(String nomePersonaggio){
+        super(nomePersonaggio);
         this.alberoDialoghi=new ArrayList<>();
         this.indiceDialogoAttuale=0;
-    }
-
-    public String getNomePersonaggio() {
-        return nomePersonaggio;
     }
     
     public void setDialoghi(List<String> dialoghi) {
@@ -50,26 +45,4 @@ public class Personaggio {
     public void resetDialogo() {
         this.indiceDialogoAttuale=0;
     }
-
-/*
-    DA INSERIRE:
-    Giocatore deve essere ancora implementato, per questo ora il fantoccio è 
-    sottocommento per poter permettere al team di andare avanti
-    
-    public class Fantoccio extends Personaggio {
-
-        public Fantoccio() {
-            super("System_Fantoccio_Invisibile"); 
-        }
-        
-        public void daiOggetto(Oggetto oggettoDaConsegnare, Giocatore giocatore) {
-            if (oggettoDaConsegnare != null && giocatore != null) {
-                giocatore.getInventario().aggiungi(oggettoDaConsegnare);
-            
-            System.out.println("DEBUG: Il fantoccio ha inserito silenziosamente l'oggetto [" 
-                    + oggettoDaConsegnare.getNomeOggetto() + "] nell'inventario.");
-        }
-        }
-    }
-*/
 }

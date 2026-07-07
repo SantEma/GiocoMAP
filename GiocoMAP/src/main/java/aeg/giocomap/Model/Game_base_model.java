@@ -4,6 +4,8 @@
  */
 package aeg.giocomap.Model;
 
+import aeg.giocomap.Model.Oggetti.Spada;
+import aeg.giocomap.Model.Oggetti.Oggetto;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;

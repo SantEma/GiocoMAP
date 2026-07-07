@@ -12,7 +12,7 @@ import aeg.giocomap.View.GameScreen;
 
 import aeg.giocomap.Model.Game_base_model;
 import aeg.giocomap.Model.Inventario;
-import aeg.giocomap.Model.Oggetto;
+import aeg.giocomap.Model.Oggetti.Oggetto;
 import aeg.giocomap.Util.JsonLoader;
 
 import com.google.gson.JsonObject;

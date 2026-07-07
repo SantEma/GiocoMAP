@@ -5,8 +5,8 @@
 package aeg.giocomap.View;
 
 import aeg.giocomap.Model.Inventario;
-import aeg.giocomap.Model.Oggetto;
-import aeg.giocomap.Model.Spada;
+import aeg.giocomap.Model.Oggetti.Oggetto;
+import aeg.giocomap.Model.Oggetti.Spada;
 
 
 import java.awt.*;
