@@ -4,7 +4,7 @@
  */
 package aeg.giocomap.View;
 
-import aeg.giocomap.Model.Inventario;
+import aeg.giocomap.Model.Giocatore.Inventario;
 import aeg.giocomap.Model.Oggetti.Oggetto;
 import aeg.giocomap.Model.Oggetti.Spada;
 

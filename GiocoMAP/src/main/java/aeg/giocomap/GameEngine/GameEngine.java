@@ -10,8 +10,8 @@ import aeg.giocomap.View.TitleScreen;
 import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.View.GameScreen;
 
-import aeg.giocomap.Model.Game_base_model;
-import aeg.giocomap.Model.Inventario;
+import aeg.giocomap.Model.Storage.*;
+import aeg.giocomap.Model.Giocatore.Inventario;
 import aeg.giocomap.Model.Oggetti.Oggetto;
 import aeg.giocomap.Util.JsonLoader;
 
@@ -24,7 +24,8 @@ import javax.swing.*;
 
 public class GameEngine {
 
-    private final Game_base_model model;
+    private final ModelDB db;
+    private final ModelTXTOggetti txt;
     private final MainFrame frame;
     private final TitleScreen title_screen;
     private final SceneManager sceneManager;
@@ -35,8 +36,9 @@ public class GameEngine {
     private boolean possiedeMappa = false;
     private boolean possiedeInventario = false;
 
-    public GameEngine(Game_base_model model, MainFrame frame) {
-        this.model = model;
+    public GameEngine(MainFrame frame) {
+        this.db = new ModelDB();
+        this.txt = new ModelTXTOggetti();
         this.frame = frame;
         this.frame.addWindowListener(new java.awt.event.WindowAdapter(){
             @Override
@@ -57,7 +59,7 @@ public class GameEngine {
         
         this.inventario_p=new Inventario<>();
         //Eryndor ha già il tessuto con se da inizio gioco
-        Oggetto tessutoIniziale_temp = model.getOggettoDaCatalogo(1);
+        Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
         if(tessutoIniziale_temp!=null) this.inventario_p.aggiungiOggetto(tessutoIniziale_temp); //Inserisco nella lista degli oggetti il primo oggetto
         
         sceneManager.registraScena("INVENTARIO",new InventarioPanel(inventario_p));
@@ -69,7 +71,7 @@ public class GameEngine {
 
     private void TitleScreenImp() {
         title_screen.addNPListener(e -> {
-            model.NewStart();
+            db.NewStart();
             music_player.stopMusic();
             avviaGioco(false);
         });
@@ -92,7 +94,7 @@ public class GameEngine {
     }
 
     private void avviaGioco(boolean carica) {
-    String[] salvataggio = model.LoadGame();
+    String[] salvataggio = db.LoadGame();
 
     if (carica) {
         // ha premuto carica partita
@@ -230,7 +232,7 @@ public class GameEngine {
     // Chiudiamo in modo pulito il gioco
     public void ExitGame(){
         System.out.println("WARNING: Stiamo uscendo dal gioco");
-        model.chiudiConnessione(); // chiudo il DB se è aperto
+        db.chiudiConnessione(); // chiudo il DB se è aperto
         System.exit(0);
     }
 }

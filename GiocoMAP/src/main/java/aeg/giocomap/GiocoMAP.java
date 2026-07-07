@@ -4,10 +4,10 @@
 
 package aeg.giocomap;
 
-import aeg.giocomap.Model.Game_base_model;
 import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.GameEngine.GameEngine;
-import aeg.giocomap.Model.*;
+import aeg.giocomap.Model.Storage.*;
+
 
 /**
  *
@@ -16,14 +16,12 @@ import aeg.giocomap.Model.*;
 public class GiocoMAP {
     
     public static void main(String args[]){
-        // Game_base Model
-        Game_base_model model = new Game_base_model();
-        
+ 
         // View principale
         MainFrame frame = new MainFrame();
         
         // Controller che gestisce Model e View
-        GameEngine engine = new GameEngine(model, frame);
+        GameEngine engine = new GameEngine(frame);
         
         // Finestra
         frame.setVisible(true);
