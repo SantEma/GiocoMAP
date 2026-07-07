@@ -191,13 +191,13 @@ public class Game_base_model {
         Oggetto nuovoOggetto;
         Spada nuovaSpada;
         
-        if (id == 10) {
-            nuovaSpada = new Spada(id, nome, descrizione);
-            catalogoOggetti.put(id, nuovaSpada);
-        } else {
-            nuovoOggetto = new Oggetto(id, nome, descrizione);
-            catalogoOggetti.put(id, nuovoOggetto);
+        switch(id){
+            case 10:
+                nuovaSpada=new Spada(id, nome, descrizione);
+            default:
+                nuovoOggetto=new Oggetto(id, nome, descrizione);
         }
     }
 }
+
 
