@@ -5,11 +5,16 @@
 package aeg.giocomap.GameEngine;
 
 import aeg.giocomap.View.MappaPanel;
-import aeg.giocomap.Model.Game_base_model;
-import aeg.giocomap.View.MainFrame;
+import aeg.giocomap.View.InventarioPanel;
 import aeg.giocomap.View.TitleScreen;
-import aeg.giocomap.Util.JsonLoader;
+import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.View.GameScreen;
+
+import aeg.giocomap.Model.Game_base_model;
+import aeg.giocomap.Model.Inventario;
+import aeg.giocomap.Model.Oggetto;
+import aeg.giocomap.Util.JsonLoader;
+
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +28,7 @@ public class GameEngine {
     private final TitleScreen title_screen;
     private final SceneManager sceneManager;
     private final MusicPlayer music_player;
+    private Inventario<Oggetto> inventario_p;
     
     private boolean isDialogoActive = false;
     private boolean possiedeMappa = false;
@@ -38,13 +44,21 @@ public class GameEngine {
         });
         
         this.music_player = new MusicPlayer();
-        impostaKeyBindingMappa();
         music_player.playMusic(MusicPlayer.TITLE_SCREEN_MUSIC);
         
         this.sceneManager = new SceneManager(frame);
         this.title_screen = new TitleScreen();
         sceneManager.registraScena("MENU_PRINCIPALE",title_screen);
+        
         sceneManager.registraScena("MAPPA", new MappaPanel());
+        impostaKeyBindingMappa();
+        
+        //Eryndor ha già il tessuto con se da inizio gioco
+        Oggetto tessutoIniziale_temp = model.getOggettoDaCatalogo(1);
+        if(tessutoIniziale_temp!=null) this.inventario_p.aggiungiOggetto(tessutoIniziale_temp); //Inserisco nella lista degli oggetti il primo oggetto
+        
+        sceneManager.registraScena("INVENTARIO",new InventarioPanel(inventario_p));
+        impostaKeyBlindingInventario();
         
         TitleScreenImp();
         sceneManager.mostraScena("MENU_PRINCIPALE");
@@ -117,7 +131,8 @@ public class GameEngine {
     private void Statistiche() {
         // Da fare
     }
-
+    
+    // KeyBinding e Apertura/Chiusura del pannello
     private void impostaKeyBindingMappa() {
         JRootPane rootPane = frame.getRootPane();
         InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -143,9 +158,47 @@ public class GameEngine {
             return;
         }
         
+        // Verifico che lo scenario precedente non sia l'inventario se no non tornerò mai alla scena di gioco
+        if(sceneManager.isOpenInventario()){
+            sceneManager.ChiudiInventario();
+            System.out.println("TEST: Inventario chiuso brutalmente");
+        }
+        
         if(!sceneManager.isMapOpen()) sceneManager.ApriMappa();
         else sceneManager.ChiudiMappa();
     }
+
+    private void impostaKeyBlindingInventario() {
+        JRootPane rootPane = frame.getRootPane();
+        InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap am = rootPane.getActionMap();
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_I, 0), "toogle_inventario");
+        
+        // passa il segnale ricevuto inventario al posto di mappa
+        am.put("toogle_inventario", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                toggleInventario();
+            }
+        });
+    }
+    
+    // Come per mappa eseguo l'operazione dell'inventario
+    private void toggleInventario() {
+        if (isDialogoActive) {
+            System.out.println("DEBUG: Testo in corso, inventario non apribile");
+            return;
+        }
+
+        if (sceneManager.isMapOpen()) {
+            System.out.println("DEBUG: Chiusura forzata mappa per aprire l'inventario");
+            sceneManager.ChiudiMappa();
+        }
+
+        if (!sceneManager.isOpenInventario()) sceneManager.ApriInventario();
+        else sceneManager.ChiudiInventario();
+    }
+    
     
     // Chiudiamo in modo pulito il gioco
     public void ExitGame(){
