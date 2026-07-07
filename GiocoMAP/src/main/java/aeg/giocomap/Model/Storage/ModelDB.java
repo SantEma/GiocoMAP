@@ -8,6 +8,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
 /**
  *
  * @author emanuele
@@ -64,6 +66,61 @@ public class ModelDB {
         }
     }
     
+
+    public void salvaSeNecessario(String nome, int punteggio) {
+        try {
+            // controlla se esiste già quel nome con quel punteggio
+            String query = "SELECT id FROM records WHERE nome = ? AND punteggio = ?";
+            PreparedStatement pstm = conn.prepareStatement(query);
+            pstm.setString(1, nome);
+            pstm.setInt(2, punteggio);
+            ResultSet rs = pstm.executeQuery();
+
+            if (rs.next()) {
+                System.out.println("TEST: Record già esistente, non salvato");
+                rs.close();
+                pstm.close();
+                return;
+            }
+
+            rs.close();
+            pstm.close();
+
+            // non esiste → salva
+            String insert = "INSERT INTO records (nome, punteggio) VALUES (?, ?)";
+            PreparedStatement pstmInsert = conn.prepareStatement(insert);
+            pstmInsert.setString(1, nome);
+            pstmInsert.setInt(2, punteggio);
+            pstmInsert.executeUpdate();
+            pstmInsert.close();
+            System.out.println("TEST: Record salvato → " + nome + " " + punteggio);
+
+        } 
+        catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public List<String[]> getRecords() {
+        List<String[]> lista = new ArrayList<>();
+        try {
+            String query = "SELECT nome, punteggio FROM records ORDER BY punteggio DESC";
+            PreparedStatement pstm = conn.prepareStatement(query);
+            ResultSet rs = pstm.executeQuery();
+
+            while (rs.next()) {
+                lista.add(new String[]{
+                    rs.getString("nome"),
+                    String.valueOf(rs.getInt("punteggio"))
+                });
+            }
+            rs.close();
+            pstm.close();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return lista;
+    }
     // Chiudo la connessione ad h2 se aperta
     public void chiudiConnessione(){
         try{
@@ -76,7 +133,7 @@ public class ModelDB {
             System.out.println("DEBUG: Errore durante la chiusura del DB "+e.getMessage());
         }
     }
-    
+
     // Metodo se l'utente crea una nuova partita
     public void NewStart(){
         String query = "DELETE FROM saves";
