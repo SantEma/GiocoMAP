@@ -4,19 +4,18 @@
  */
 package aeg.giocomap.Model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public abstract class Stanza {
+public class Stanza {
     
     private String nomeStanza;
-    private String descrizioneStanza;
-    private boolean primaEntrata; 
+    private boolean primaEntrata; // Controllo sulla prima volta in una stanza, utile per i dialoghi
+    private Map<String, Stanza> uscite;
     
-    public Stanza(String nome, String descrizione) {
-        this.nomeStanza = nome;
-        this.descrizioneStanza = descrizione;
-        this.primaEntrata = true; 
+    public Stanza(String nome) {
+        this.nomeStanza=nome;
+        this.primaEntrata=true;
+        this.uscite = new HashMap<>();
     }
 
     public void entra() {
@@ -34,16 +33,19 @@ public abstract class Stanza {
     }
 
     public void setPrimaEntrata(boolean primaEntrata) {
-        this.primaEntrata = primaEntrata;
+        this.primaEntrata=primaEntrata;
     }
 
     public String getNome() {
         return nomeStanza;
     }
 
-    public String getDescrizione() {
-        return descrizioneStanza;
+    public void impostaUscita(String direzione, Stanza stanza) {
+        uscite.put(direzione.toUpperCase(),stanza);
     }
-
+    
+    public Stanza getStanzaAdiacente(String direzione) {
+        return uscite.get(direzione.toUpperCase());
+    }
 }
 

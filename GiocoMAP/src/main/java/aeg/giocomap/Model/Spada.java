@@ -16,7 +16,7 @@ package aeg.giocomap.Model;
             this.caricaSincro=0;
         }
         
-        //Grazie all'override, il programma capisce 
+        //Grazie all'override, il programma capisce che è la spada
         @Override
         public void reagisciRisoluzioneEnigma() {
             this.ricaricaSpada(33);
