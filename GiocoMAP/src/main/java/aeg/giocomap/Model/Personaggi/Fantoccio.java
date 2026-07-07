@@ -8,7 +8,7 @@ package aeg.giocomap.Model.Personaggi;
  *
  * @author emanuele
  */
-public class Fantoccio extends Personaggio{
+public class Fantoccio extends Entity{
 
     public Fantoccio() {
         super("System_Fantoccio_Invisibile");

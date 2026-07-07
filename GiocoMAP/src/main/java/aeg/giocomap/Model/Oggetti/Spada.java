@@ -3,9 +3,6 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package aeg.giocomap.Model.Oggetti;
-
-import aeg.giocomap.Model.Oggetti.Oggetto;
-
 /**
  *
  * @author emanuele

@@ -8,7 +8,7 @@ package aeg.giocomap.Model.Personaggi;
  *
  * @author emanuele
  */
-public abstract class Entity{
+public abstract class Entity {
     private String nome;
 
     public Entity(String nome){
