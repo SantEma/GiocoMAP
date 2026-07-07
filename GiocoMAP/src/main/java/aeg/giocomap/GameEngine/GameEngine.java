@@ -19,6 +19,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.*;
+import java.awt.*;
 import javax.swing.*;
 
 public class GameEngine {
@@ -32,6 +33,7 @@ public class GameEngine {
     
     private boolean isDialogoActive = false;
     private boolean possiedeMappa = false;
+    private boolean possiedeInventario = false;
 
     public GameEngine(Game_base_model model, MainFrame frame) {
         this.model = model;
@@ -53,6 +55,7 @@ public class GameEngine {
         sceneManager.registraScena("MAPPA", new MappaPanel());
         impostaKeyBindingMappa();
         
+        this.inventario_p=new Inventario<>();
         //Eryndor ha già il tessuto con se da inizio gioco
         Oggetto tessutoIniziale_temp = model.getOggettoDaCatalogo(1);
         if(tessutoIniziale_temp!=null) this.inventario_p.aggiungiOggetto(tessutoIniziale_temp); //Inserisco nella lista degli oggetti il primo oggetto
@@ -114,7 +117,26 @@ public class GameEngine {
 
     // ha premuto nuova partita → mostra sempre la lettera
     List<String> righe = leggiLetteraIniziale();
-    GameScreen game_screen = new GameScreen(righe);
+    
+    //Test per verificare la visiualizzazione dell'inventario
+    JPanel giocoTest = new JPanel(new BorderLayout());
+    giocoTest.setBackground(Color.BLACK);
+    JLabel testo_test=new JLabel("Premi I per aprire inventario TEST");
+    testo_test.setForeground(Color.red);
+    testo_test.setFont(new Font("Arial",Font.BOLD,24));
+    giocoTest.add(testo_test,BorderLayout.CENTER);
+    
+    // salvo la scena nel manager
+    sceneManager.registraScena("GIOCO_TEST", giocoTest);
+    
+    
+    // mostra lettera con click sul sigillo
+    GameScreen game_screen = new GameScreen(righe,()->{
+        System.out.println("DEBUG: Sigillo a schermo cliccato");
+        possiedeInventario=true;
+        sceneManager.mostraScena("GIOCO_TEST");
+    });
+    
     sceneManager.registraScena("LETTERA_INIZIALE",game_screen);
     sceneManager.mostraScena("LETTERA_INIZIALE");
 }
@@ -187,6 +209,11 @@ public class GameEngine {
     private void toggleInventario() {
         if (isDialogoActive) {
             System.out.println("DEBUG: Testo in corso, inventario non apribile");
+            return;
+        }
+        
+        if(!possiedeInventario){
+            System.out.println("DEBUG: Inventario non ancora disponibile");
             return;
         }
 

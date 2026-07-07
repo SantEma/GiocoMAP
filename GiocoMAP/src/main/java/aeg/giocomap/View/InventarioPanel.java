@@ -38,6 +38,8 @@ public class InventarioPanel extends JPanel {
         // La griglia sarà interna ad un contenitore a nord per poterla vederla lineare e non centrata
         JPanel contenitore = new JPanel(new BorderLayout());
         contenitore.setBackground(Color.DARK_GRAY);
+        ToolTipManager.sharedInstance().setInitialDelay(100); // il fumetto appare all'istante sopra senza aspettare
+        ToolTipManager.sharedInstance().setDismissDelay(2000);
         contenitore.add(gridPanel, BorderLayout.NORTH);
         
         // Con scroll possiamo scorrere la griglia tramite mouse
