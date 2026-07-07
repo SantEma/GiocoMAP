@@ -30,8 +30,4 @@ public class Oggetto {
     public String getDescrizioneOggetto(){
         return descrizioneOggetto;
     }
-    
-    public void reagisciRisoluzioneEnigma() {
-        System.out.println("DEBUG: Risoluzione completata, ma sta cosa non fa nulla...");
-    }
 }
