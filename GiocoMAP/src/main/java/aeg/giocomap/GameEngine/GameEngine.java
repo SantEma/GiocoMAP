@@ -25,6 +25,11 @@ import javax.swing.*;
 
 public class GameEngine {
 
+    // variabili per immagazzinare i dialoghi dei file JSON
+    private JsonObject dbWallOfText;
+    private JsonObject dbStoria;
+    private JsonObject dbHint;
+    
     private final ModelDB db;
     private final ModelTXTOggetti txt;
     private final MainFrame frame;
@@ -42,6 +47,10 @@ public class GameEngine {
     private int punteggioTotale = 0;
 
     public GameEngine(MainFrame frame) {
+        this.dbWallOfText = JsonLoader.caricaJson("/dialoghi/walloftext.json");
+        this.dbStoria = JsonLoader.caricaJson("/dialoghi/dialoghi_storia.json");
+        this.dbHint=JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
+                
         this.db = new ModelDB();
         this.txt = new ModelTXTOggetti();
         this.frame = frame;
