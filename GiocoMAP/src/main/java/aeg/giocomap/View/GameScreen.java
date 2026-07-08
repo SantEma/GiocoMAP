@@ -83,7 +83,6 @@ public class GameScreen extends JPanel {
        StringBuilder rigaCorrente = new StringBuilder();
 
        for (String parola : parole) {
-            // gestisci i \n espliciti
            if (parola.contains("\n")) {
                 String[] parti = parola.split("\n", -1);
                for (int i = 0; i < parti.length; i++) {
@@ -120,7 +119,7 @@ public class GameScreen extends JPanel {
             }
         }
 
-        // ultima riga
+        
         if (rigaCorrente.length() > 0 && currentY <= maxY) {
             g.drawString(rigaCorrente.toString(), x, currentY);
         }

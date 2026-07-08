@@ -88,7 +88,7 @@ public class GameEngine {
 
         title_screen.addRecordListener(e -> {
             music_player.stopMusic();
-            Statistiche(false); // Modificato per supportare il nuovo metodo del collega
+            Statistiche(false); 
         });
     }
 
@@ -135,21 +135,20 @@ public class GameEngine {
             System.out.println("DEBUG: Sigillo a schermo cliccato");
             possiedeInventario = true;
             
-            // Per testare i titoli di coda a fine gioco potrai chiamare Statistiche(true) al posto di questa scena
-            sceneManager.mostraScena("GIOCO_TEST");
+            
         });
         
         sceneManager.registraScena("LETTERA_INIZIALE", game_screen);
         sceneManager.mostraScena("LETTERA_INIZIALE");
     }
 
-    // --- METODI PUNTEGGIO DEL COLLEGA ---
+    // Calcola quando inizia l'enigma
     
     public void iniziaEnigma() {
         tempoInizioEnigma = System.currentTimeMillis();
         System.out.println("DEBUG: Enigma iniziato");
     }
-
+    //Calcola il tempo per risolvere l'enigma e in base al tempo assegna un punteggio
     public void risolviEnigma() {
         if (tempoInizioEnigma == 0) return;
         int punti = calcolaPunti(tempoInizioEnigma);
@@ -158,17 +157,25 @@ public class GameEngine {
         System.out.println("DEBUG: Enigma risolto → " + punti + " punti, totale: " + punteggioTotale);
     }
 
-    private int calcolaPunti(long inizioMs) {
+     private int calcolaPunti(long inizioMs) {
         int secondi = (int)((System.currentTimeMillis() - inizioMs) / 1000);
-        if (secondi <= 60)  return 1000;
-        if (secondi <= 90)  return 800;
-        if (secondi <= 120) return 600;
-        if (secondi <= 300) return 400;
-        return 200;
-    }
-    
-    // --- FINE METODI PUNTEGGIO ---
 
+        int fascia;
+        if (secondi <= 100)       fascia = 1;
+        else if (secondi <= 150)  fascia = 2;
+        else if (secondi <= 220) fascia = 3;
+        else if (secondi <= 380) fascia = 4;
+        else                     fascia = 5;
+
+        switch (fascia) {
+            case 1: return 1000;
+            case 2: return 700;
+            case 3: return 500;
+            case 4: return 300;
+            default: return 100;
+        }
+    }
+  
     public void setDialogueActive(boolean active) {
         this.isDialogoActive = active;
     }
@@ -178,7 +185,7 @@ public class GameEngine {
         if (possiede) System.out.println("DEBUG: Il giocatore ha ottenuto la mappa");
     }
 
-    // --- METODO STATISTICHE E FINE GIOCO DEL COLLEGA ADATTATO A SCENEMANAGER ---
+    //Chiede di inserire un nome per mostrare le statistiche nei titoli di coda
     private void Statistiche(boolean fineGioco) {
         String nome = "";
         int punteggio = 0;

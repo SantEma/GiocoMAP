@@ -30,7 +30,7 @@ public class CursorUtil {
      * Le zone sono definite in percentuale rispetto alle dimensioni del pannello,
      * quindi funzionano su qualsiasi schermo e si ridimensionano automaticamente.
      *
-     * Le percentuali si ricavano con il Metodo 2 - Debug a runtime:
+     * Le percentuali si ricavano con il Metodo Debug a runtime:
      * Aggiungere temporaneamente al pannello un MouseListener che stampa
      * le coordinate in percentuale di ogni click:
      *
