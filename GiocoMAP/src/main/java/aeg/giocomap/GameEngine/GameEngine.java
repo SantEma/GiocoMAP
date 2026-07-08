@@ -142,12 +142,25 @@ public class GameEngine {
         // Estraggo lettera dal DB
         List<String> lettera=JsonLoader.estraiLista(dbWallOfText.getAsJsonObject("Lettera"),"lettera_iniziale");
         
+        // Creiamo la schermata del menù
+        JPanel giocoTest = new JPanel(new BorderLayout());
+        giocoTest.setBackground(Color.BLACK);
+        JLabel testo_test = new JLabel("Premi I per aprire inventario TEST");
+        testo_test.setForeground(Color.RED);
+        testo_test.setFont(new Font("Arial", Font.BOLD, 24));
+        testo_test.setHorizontalAlignment(SwingConstants.CENTER);
+        giocoTest.add(testo_test, BorderLayout.CENTER);
+        sceneManager.registraScena("GIOCO_TEST", giocoTest);
+        
         // Avvio la possibilità di usare il bottone
         LetteraScreen schermata_lettera=new LetteraScreen(lettera,()->{
             System.out.println("TEST: Lettera finita, gioco START");
             
+            // Lettera finita alla prossima scena sblocca l'inventario
+            possiedeInventario=true;
             // Qui passo la variabile della piazza centrale sceneManager.mostraScena
             // e faccio vedere il retro della lettera con l'enigma sopra e inizia l'esplorazione
+            //sceneManager.mostraScena("GIOCO_TEST"); TEST MOMENTANEI ANDRANNO SOSTITUITI CON LE VERE SCENE
         });
         
         // Mostro scena

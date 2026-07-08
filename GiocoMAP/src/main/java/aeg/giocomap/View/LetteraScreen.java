@@ -23,7 +23,7 @@ public class LetteraScreen extends JPanel {
 
     public LetteraScreen(List<String> righe, Runnable azioneAvanti) {
         // Unisce tutte le righe del JSON aggiungendo un a capo tra un paragrafo e l'altro
-        this.testo = String.join("\n\n", righe);
+        this.testo = String.join("", righe);
 
         try {
             sfondo = ImageIO.read(getClass().getResourceAsStream("/sprites/StrumentiGrafici/LetteraIniziale.png"));
