@@ -31,15 +31,9 @@ public class Personaggio extends Entity {
         if (alberoDialoghi==null || alberoDialoghi.isEmpty() || indiceDialogoAttuale>=alberoDialoghi.size()) {
             return null; 
         }
-        
-        if (indiceDialogoAttuale<alberoDialoghi.size()-1) {
-            String battuta=alberoDialoghi.get(indiceDialogoAttuale);
-            indiceDialogoAttuale++;
-            return battuta;
-        }
-        
-        // Quando il dialogo è finito l'NPC ripete la sua ultima frase ciclicamente
-        return alberoDialoghi.get(alberoDialoghi.size()-1);
+        String battuta = alberoDialoghi.get(indiceDialogoAttuale);
+        indiceDialogoAttuale++;
+        return battuta;
     }
     
     // Utile se l'NPC deve cambiare argomento (da vedere se verrà utilizzato)
