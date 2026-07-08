@@ -8,11 +8,6 @@ package aeg.giocomap.GameEngine;
  *
  * @author murgo
  */
-/**
- * Thread concorrente che misura il tempo impiegato dal giocatore
- * per risolvere un enigma. Gira in background senza bloccare la UI.
- * onTick viene eseguito sul thread di Swing ogni secondo.
- */ 
 
 public class TimerEnigma implements Runnable {
 
@@ -26,7 +21,12 @@ public class TimerEnigma implements Runnable {
         this.attivo = false;
     }
     
-    //avvia il timer
+    //Metodo che restituisce i secondi trascorsi
+    public int getSecondi() { 
+        return secondi; 
+    }
+    
+    //Avvia il timer
     public void avvia() {
         attivo = true;
         secondi = 0;
@@ -34,14 +34,11 @@ public class TimerEnigma implements Runnable {
         System.out.println("DEBUG: Timer avviato");
     }
 
-    //ferma il timer
+    //Ferma il timer
     public void ferma() {
         attivo = false;
         System.out.println("DEBUG: Timer fermato a " + secondi + "s");
     }
-    
-    //metodo che restituisce i secondi trascorsi
-    public int getSecondi() { return secondi; }
 
     @Override
     public void run() {

@@ -13,24 +13,19 @@ import java.util.List;
 /**
  *
  * @author murgo
- */
-/**
- * Factory che costruisce tutti gli enigmi del gioco.
- * Carica testi e aiuti dai file JSON tramite JsonLoader.
- * I metodi sono statici e ricevono il reward da assegnare
- * al giocatore alla risoluzione dell'enigma.
+ * 
  */
 
-public class EnigmaFactory {
+public class IstanzaEnigma {
 
-    // metodo privato per caricare gli aiuti dal file dialoghi
+    // Metodo privato per caricare gli aiuti dal file dialoghi
     private static List<String> caricaAiuti(String enigmaId) {
         JsonObject root = JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
         if (root == null) return java.util.Collections.emptyList();
         return JsonLoader.estraiLista(root, enigmaId);
     }
 
-    // metodo privato per caricare il testo dal file walloftext
+    // Metodo privato per caricare il testo dal file walloftext
     private static String caricaTesto(String chiave) {
         JsonObject root = JsonLoader.caricaJson("/dialoghi/walloftext.json");
         if (root == null) return "";

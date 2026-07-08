@@ -10,12 +10,6 @@ import java.util.List;
  *
  * @author murgo
  */
-/**
- * Classe astratta che rappresenta un enigma del gioco.
- * Ogni enigma ha un testo, una lista di aiuti progressivi
- * e un oggetto reward sbloccato alla risoluzione.
- * La logica di verifica è delegata alle sottoclassi.
- */
 
 public abstract class Enigma {
 
@@ -35,9 +29,25 @@ public abstract class Enigma {
         this.indiceAiutoCorrente = 0;
     }
 
+        public String getId() { 
+        return id; 
+    }
+    
+    public String getTesto() {
+        return testo; 
+    }
+    
+    public boolean isRisolto() { 
+        return risolto; 
+    }
+    
+    public Oggetto getReward() { 
+        return reward; 
+    }
+    
     public abstract boolean verifica(String risposta);
 
-    // restituisce il prossimo aiuto disponibile
+    // Restituisce il prossimo aiuto disponibile
     public String prossimoAiuto() {
         if (aiuti == null || aiuti.isEmpty())
             return "Nessun aiuto disponibile.";
@@ -46,8 +56,5 @@ public abstract class Enigma {
         return aiuti.get(indiceAiutoCorrente++);
     }
 
-    public String getId() { return id; }
-    public String getTesto() { return testo; }
-    public boolean isRisolto() { return risolto; }
-    public Oggetto getReward() { return reward; }
+
 }

@@ -26,10 +26,10 @@ public class GameEngine {
     private final TitleScreen title_screen;
     private final SceneManager sceneManager;
     private final MusicPlayer music_player;
-    private Inventario<Oggetto> inventario_p;
+    private Inventario<Oggetto> inventario_p; //ToDo: appena si mergia, questo deve andare su Giocatore
     private boolean isDialogoActive = false;
     private boolean possiedeMappa = false;
-    private boolean possiedeInventario = false;
+    private boolean possiedeInventario = false; //ToDo: appena si mergia, questo deve andare su Giocatore
     private int punteggioTotale = 0;
     private TimerEnigma timerEnigma;
 
@@ -58,9 +58,10 @@ public class GameEngine {
 
         this.inventario_p = new Inventario<>();
         Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
-        if (tessutoIniziale_temp != null)
+        if (tessutoIniziale_temp != null){
             this.inventario_p.aggiungiOggetto(tessutoIniziale_temp);
-
+        }
+        
         sceneManager.registraScena("INVENTARIO", new InventarioPanel(inventario_p));
         impostaKeyBindingInventario();
 
@@ -98,12 +99,7 @@ public class GameEngine {
 
         if (carica) {
             if (salvataggio == null) {
-                JOptionPane.showMessageDialog(
-                    frame,
-                    "Nessuna partita salvata trovata!",
-                    "Attenzione",
-                    JOptionPane.WARNING_MESSAGE
-                );
+                JOptionPane.showMessageDialog(frame,"Nessuna partita salvata trovata!","Attenzione",JOptionPane.WARNING_MESSAGE);
                 return;
             }
             music_player.stopMusic();
@@ -133,16 +129,16 @@ public class GameEngine {
     }
 
     
-    // chiamato quando il giocatore vede un enigma
+    // Chiamato quando il giocatore vede un enigma
     public void iniziaEnigma() {
         timerEnigma = new TimerEnigma(() -> {
-            System.out.println("DEBUG: Secondi → " + timerEnigma.getSecondi());
+            System.out.println("DEBUG: Secondi: " + timerEnigma.getSecondi());
         });
         timerEnigma.avvia();
         System.out.println("DEBUG: Enigma iniziato");
     }
 
-    // chiamato quando l'enigma viene risolto correttamente
+    // Chiamato quando l'enigma viene risolto correttamente
     public void enigmaRisolto(Enigma enigma) {
         if (timerEnigma != null) timerEnigma.ferma();
 
@@ -153,13 +149,13 @@ public class GameEngine {
         
         if (enigma.getReward() != null) {
             inventario_p.aggiungiOggetto(enigma.getReward());
-            System.out.println("DEBUG: Reward aggiunto → " + enigma.getReward().getNomeOggetto());
+            System.out.println("DEBUG: Reward aggiunto: " + enigma.getReward().getNomeOggetto());
         }
 
-        System.out.println("DEBUG: " + secondi + "s → " + punti + " punti, totale: " + punteggioTotale);
+        System.out.println("DEBUG: " + secondi + "s , " + punti + " punti, totale: " + punteggioTotale);
     }
     
-    //calcola il punteggio in base al tempo impiegato
+    //Calcola il punteggio in base al tempo impiegato
     private int calcolaPunti(int secondi) {
         int fascia;
         if (secondi <= 100)      fascia = 1;
@@ -185,19 +181,10 @@ public class GameEngine {
 
         if (fineGioco) {
             while (nome == null || nome.trim().isEmpty()) {
-                nome = JOptionPane.showInputDialog(
-                    frame,
-                    "Inserisci il tuo nome per salvare il punteggio:",
-                    "Fine gioco!",
-                    JOptionPane.PLAIN_MESSAGE
-                );
+                nome = JOptionPane.showInputDialog(frame,"Inserisci il tuo nome per salvare il punteggio:","Fine gioco!",JOptionPane.PLAIN_MESSAGE);
                 if (nome == null || nome.trim().isEmpty()) {
                     JOptionPane.showMessageDialog(
-                        frame,
-                        "Devi inserire un nome per continuare!",
-                        "Attenzione",
-                        JOptionPane.WARNING_MESSAGE
-                    );
+                        frame,"Devi inserire un nome per continuare!","Attenzione",JOptionPane.WARNING_MESSAGE);
                 }
             }
             punteggio = punteggioTotale;

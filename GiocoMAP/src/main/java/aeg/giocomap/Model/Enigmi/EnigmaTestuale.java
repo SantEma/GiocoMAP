@@ -22,8 +22,7 @@ public class EnigmaTestuale extends Enigma {
 
     private final String soluzione;
 
-    public EnigmaTestuale(String id, String testo, List<String> aiuti,
-                          Oggetto reward, String soluzione) {
+    public EnigmaTestuale(String id, String testo, List<String> aiuti,Oggetto reward, String soluzione) {
         super(id, testo, aiuti, reward);
         this.soluzione = soluzione.trim().toLowerCase();
     }
@@ -32,19 +31,17 @@ public class EnigmaTestuale extends Enigma {
     public boolean verifica(String risposta) {
         if (risposta == null) return false;
 
-        // pulizia input con Regex
-        // rimuove spazi extra e converte in minuscolo
-        String pulita = risposta.trim()
-                                .toLowerCase()
-                                .replaceAll("\\s+", " ");
-
+        /* Pulizia input con Regex, praticamente rimuove spazi extra e 
+           converte in minuscolo
+        */
+        String pulita = risposta.trim().toLowerCase().replaceAll("\\s+", " ");
         boolean corretta = pulita.equals(soluzione);
 
         if (corretta) {
             risolto = true;
-            System.out.println("DEBUG: Enigma " + id + " risolto!");
+            System.out.println("DEBUG: Enigma " + id + " risolto");
         } else {
-            System.out.println("DEBUG: Risposta errata → " + pulita);
+            System.out.println("DEBUG: Risposta errata: " + pulita);
         }
 
         return corretta;
