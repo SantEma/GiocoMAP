@@ -60,5 +60,6 @@ public class JsonLoader {
             System.err.println("Errore estrazione lista " + chiave + ": " + e.getMessage());
         }
         return lista;
+        }
+    
     }
-}
