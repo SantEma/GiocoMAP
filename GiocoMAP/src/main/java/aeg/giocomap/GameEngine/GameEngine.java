@@ -9,6 +9,7 @@ import aeg.giocomap.View.InventarioPanel;
 import aeg.giocomap.View.TitleScreen;
 import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.View.GameScreen;
+import aeg.giocomap.View.TitoliDiCoda;
 
 import aeg.giocomap.Model.Storage.*;
 import aeg.giocomap.Model.Giocatore.Inventario;
@@ -36,6 +37,10 @@ public class GameEngine {
     private boolean possiedeMappa = false;
     private boolean possiedeInventario = false;
 
+    // Variabili per il punteggio inserite dal collega
+    private long tempoInizioEnigma = 0;
+    private int punteggioTotale = 0;
+
     public GameEngine(MainFrame frame) {
         this.db = new ModelDB();
         this.txt = new ModelTXTOggetti();
@@ -52,18 +57,18 @@ public class GameEngine {
         
         this.sceneManager = new SceneManager(frame);
         this.title_screen = new TitleScreen();
-        sceneManager.registraScena("MENU_PRINCIPALE",title_screen);
+        sceneManager.registraScena("MENU_PRINCIPALE", title_screen);
         
         sceneManager.registraScena("MAPPA", new MappaPanel());
         impostaKeyBindingMappa();
         
-        this.inventario_p=new Inventario<>();
-        //Eryndor ha già il tessuto con se da inizio gioco
+        this.inventario_p = new Inventario<>();
+        // Eryndor ha già il tessuto con se da inizio gioco
         Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
-        if(tessutoIniziale_temp!=null) this.inventario_p.aggiungiOggetto(tessutoIniziale_temp); //Inserisco nella lista degli oggetti il primo oggetto
+        if(tessutoIniziale_temp != null) this.inventario_p.aggiungiOggetto(tessutoIniziale_temp);
         
-        sceneManager.registraScena("INVENTARIO",new InventarioPanel(inventario_p));
-        impostaKeyBlindingInventario();
+        sceneManager.registraScena("INVENTARIO", new InventarioPanel(inventario_p));
+        impostaKeyBindingInventario();
         
         TitleScreenImp();
         sceneManager.mostraScena("MENU_PRINCIPALE");
@@ -77,12 +82,13 @@ public class GameEngine {
         });
 
         title_screen.addCPListener(e -> {
+            music_player.stopMusic();
             avviaGioco(true);
         });
 
         title_screen.addRecordListener(e -> {
             music_player.stopMusic();
-            Statistiche();
+            Statistiche(false); 
         });
     }
 
@@ -94,55 +100,82 @@ public class GameEngine {
     }
 
     private void avviaGioco(boolean carica) {
-    String[] salvataggio = db.LoadGame();
+        String[] salvataggio = db.LoadGame();
 
-    if (carica) {
-        // ha premuto carica partita
-        if (salvataggio == null) {
-            JOptionPane.showMessageDialog(
-                frame,
-                "Nessuna partita salvata trovata!",
-                "Attenzione",
-                JOptionPane.WARNING_MESSAGE
-            );
-            return;  // torna al titolo senza fare nulla
+        if (carica) {
+            if (salvataggio == null) {
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Nessuna partita salvata trovata!",
+                    "Attenzione",
+                    JOptionPane.WARNING_MESSAGE
+                );
+                return;  
+            }
+            music_player.stopMusic();
+            
+            String stanza = salvataggio[0];
+            String enigma = salvataggio[1];
+            System.out.println("Carico partita dalla stanza: " + stanza);
+            return;
         }
-        // partita trovata → carica
-        music_player.stopMusic();
+
+        List<String> righe = leggiLetteraIniziale();
         
-        String stanza = salvataggio[0];
-        String enigma = salvataggio[1];
-        System.out.println("Carico partita dalla stanza: " + stanza);
-        // qui in futuro carichi la scena giusta
-        return;
+        JPanel giocoTest = new JPanel(new BorderLayout());
+        giocoTest.setBackground(Color.BLACK);
+        JLabel testo_test = new JLabel("Premi I per aprire inventario TEST");
+        testo_test.setForeground(Color.red);
+        testo_test.setFont(new Font("Arial", Font.BOLD, 24));
+        giocoTest.add(testo_test, BorderLayout.CENTER);
+        
+        sceneManager.registraScena("GIOCO_TEST", giocoTest);
+        
+        GameScreen game_screen = new GameScreen(righe, () -> {
+            System.out.println("DEBUG: Sigillo a schermo cliccato");
+            possiedeInventario = true;
+            
+            
+        });
+        
+        sceneManager.registraScena("LETTERA_INIZIALE", game_screen);
+        sceneManager.mostraScena("LETTERA_INIZIALE");
     }
 
-    // ha premuto nuova partita → mostra sempre la lettera
-    List<String> righe = leggiLetteraIniziale();
+    // Calcola quando inizia l'enigma
     
-    //Test per verificare la visiualizzazione dell'inventario
-    JPanel giocoTest = new JPanel(new BorderLayout());
-    giocoTest.setBackground(Color.BLACK);
-    JLabel testo_test=new JLabel("Premi I per aprire inventario TEST");
-    testo_test.setForeground(Color.red);
-    testo_test.setFont(new Font("Arial",Font.BOLD,24));
-    giocoTest.add(testo_test,BorderLayout.CENTER);
-    
-    // salvo la scena nel manager
-    sceneManager.registraScena("GIOCO_TEST", giocoTest);
-    
-    
-    // mostra lettera con click sul sigillo
-    GameScreen game_screen = new GameScreen(righe,()->{
-        System.out.println("DEBUG: Sigillo a schermo cliccato");
-        possiedeInventario=true;
-        sceneManager.mostraScena("GIOCO_TEST");
-    });
-    
-    sceneManager.registraScena("LETTERA_INIZIALE",game_screen);
-    sceneManager.mostraScena("LETTERA_INIZIALE");
-}
+    public void iniziaEnigma() {
+        tempoInizioEnigma = System.currentTimeMillis();
+        System.out.println("DEBUG: Enigma iniziato");
+    }
+    //Calcola il tempo per risolvere l'enigma e in base al tempo assegna un punteggio
+    public void risolviEnigma() {
+        if (tempoInizioEnigma == 0) return;
+        int punti = calcolaPunti(tempoInizioEnigma);
+        punteggioTotale += punti;
+        tempoInizioEnigma = 0;
+        System.out.println("DEBUG: Enigma risolto → " + punti + " punti, totale: " + punteggioTotale);
+    }
 
+     private int calcolaPunti(long inizioMs) {
+        int secondi = (int)((System.currentTimeMillis() - inizioMs) / 1000);
+
+        int fascia;
+        if (secondi <= 100)       fascia = 1;
+        else if (secondi <= 150)  fascia = 2;
+        else if (secondi <= 220) fascia = 3;
+        else if (secondi <= 380) fascia = 4;
+        else                     fascia = 5;
+
+        switch (fascia) {
+            case 1: return 1000;
+            case 2: return 700;
+            case 3: return 500;
+            case 4: return 300;
+            default: return 100;
+        }
+    }
+  
     public void setDialogueActive(boolean active) {
         this.isDialogoActive = active;
     }
@@ -152,11 +185,47 @@ public class GameEngine {
         if (possiede) System.out.println("DEBUG: Il giocatore ha ottenuto la mappa");
     }
 
-    private void Statistiche() {
-        // Da fare
+    //Chiede di inserire un nome per mostrare le statistiche nei titoli di coda
+    private void Statistiche(boolean fineGioco) {
+        String nome = "";
+        int punteggio = 0;
+
+        if (fineGioco) {
+            while (nome == null || nome.trim().isEmpty()) {
+                nome = JOptionPane.showInputDialog(
+                    frame,
+                    "Inserisci il tuo nome per salvare il punteggio:",
+                    "Fine gioco!",
+                    JOptionPane.PLAIN_MESSAGE
+                );
+                if (nome == null || nome.trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                        frame,
+                        "Devi inserire un nome per continuare!",
+                        "Attenzione",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                }
+            }
+            punteggio = punteggioTotale;
+            // Presuppone che ModelDB abbia il metodo salvaSeNecessario
+            db.salvaSeNecessario(nome.trim(), punteggio); 
+        }
+
+        // Presuppone che ModelDB abbia il metodo getRecords
+        List<String[]> records = db.getRecords(); 
+        TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome != null ? nome.trim() : "");
+
+        titoli.addIndietroListener(e -> {
+            music_player.playMusic(MusicPlayer.TITLE_SCREEN_MUSIC);
+            sceneManager.mostraScena("MENU_PRINCIPALE");
+        });
+
+        sceneManager.registraScena("TITOLI_CODA", titoli);
+        sceneManager.mostraScena("TITOLI_CODA");
     }
-    
-    // KeyBinding e Apertura/Chiusura del pannello
+
+    // KeyBinding e Apertura/Chiusura del pannello Mappa
     private void impostaKeyBindingMappa() {
         JRootPane rootPane = frame.getRootPane();
         InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -176,30 +245,26 @@ public class GameEngine {
             System.out.println("DEBUG: Il giocatore non possiede ancora la Mappa");
             return;
         }
-
         if (isDialogoActive) {
             System.out.println("DEBUG: Testo in corso mappa non apribile");
             return;
         }
-        
-        // Verifico che lo scenario precedente non sia l'inventario se no non tornerò mai alla scena di gioco
-        if(sceneManager.isOpenInventario()){
+        if (sceneManager.isOpenInventario()){
             sceneManager.ChiudiInventario();
-            System.out.println("TEST: Inventario chiuso brutalmente");
         }
         
-        if(!sceneManager.isMapOpen()) sceneManager.ApriMappa();
+        if (!sceneManager.isMapOpen()) sceneManager.ApriMappa();
         else sceneManager.ChiudiMappa();
     }
 
-    private void impostaKeyBlindingInventario() {
+    // KeyBinding e Apertura/Chiusura del pannello Inventario
+    private void impostaKeyBindingInventario() {
         JRootPane rootPane = frame.getRootPane();
         InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = rootPane.getActionMap();
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_I, 0), "toogle_inventario");
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_I, 0), "toggle_inventario");
         
-        // passa il segnale ricevuto inventario al posto di mappa
-        am.put("toogle_inventario", new AbstractAction() {
+        am.put("toggle_inventario", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 toggleInventario();
@@ -207,20 +272,16 @@ public class GameEngine {
         });
     }
     
-    // Come per mappa eseguo l'operazione dell'inventario
     private void toggleInventario() {
         if (isDialogoActive) {
             System.out.println("DEBUG: Testo in corso, inventario non apribile");
             return;
         }
-        
-        if(!possiedeInventario){
+        if (!possiedeInventario){
             System.out.println("DEBUG: Inventario non ancora disponibile");
             return;
         }
-
         if (sceneManager.isMapOpen()) {
-            System.out.println("DEBUG: Chiusura forzata mappa per aprire l'inventario");
             sceneManager.ChiudiMappa();
         }
 
@@ -228,11 +289,9 @@ public class GameEngine {
         else sceneManager.ChiudiInventario();
     }
     
-    
-    // Chiudiamo in modo pulito il gioco
     public void ExitGame(){
         System.out.println("WARNING: Stiamo uscendo dal gioco");
-        db.chiudiConnessione(); // chiudo il DB se è aperto
+        db.chiudiConnessione(); 
         System.exit(0);
     }
 }
