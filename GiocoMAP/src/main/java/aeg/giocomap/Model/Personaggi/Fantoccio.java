@@ -21,9 +21,7 @@ public class Fantoccio extends Entity{
     public void daiOggetto(Oggetto oggettoDaConsegnare, Giocatore giocatore) {
         if (oggettoDaConsegnare != null && giocatore != null) {
             giocatore.getInventario().aggiungi(oggettoDaConsegnare);
-            
-            System.out.println("DEBUG: Il fantoccio ha inserito silenziosamente l'oggetto [" 
-                    + oggettoDaConsegnare.getNomeOggetto() + "] nell'inventario.");
+            System.out.println("DEBUG: Il fantoccio ha inserito l'oggetto " + oggettoDaConsegnare.getNomeOggetto() +" nell'inventario.");
         }
         }
     }
