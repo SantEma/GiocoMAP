@@ -10,11 +10,14 @@ import aeg.giocomap.View.TitleScreen;
 import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.View.TitoliDiCoda;
+import aeg.giocomap.View.DialogueScreen;
 
 import aeg.giocomap.Model.Storage.*;
 import aeg.giocomap.Model.Giocatore.Inventario;
 import aeg.giocomap.Model.Oggetti.Oggetto;
+import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.Util.JsonLoader;
+import aeg.giocomap.View.LetteraScreen;
 
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
@@ -29,6 +32,13 @@ public class GameEngine {
     private JsonObject dbWallOfText;
     private JsonObject dbStoria;
     private JsonObject dbHint;
+    
+    // variabili gestione dei dialoghi
+    private DialogueScreen schermata_dialogo_corrente;
+    private Personaggio npcCorrente;
+    private ImageIcon spriteNpcAttuale;
+    private GameScreen scenaSfondoCorrente;
+    private Runnable azione_post_dialogo;
     
     private final ModelDB db;
     private final ModelTXTOggetti txt;
@@ -128,26 +138,20 @@ public class GameEngine {
             System.out.println("Carico partita dalla stanza: " + stanza);
             return;
         }
-
-        List<String> righe = leggiLetteraIniziale();
         
-        JPanel giocoTest = new JPanel(new BorderLayout());
-        giocoTest.setBackground(Color.BLACK);
-        JLabel testo_test = new JLabel("Premi I per aprire inventario TEST");
-        testo_test.setForeground(Color.red);
-        testo_test.setFont(new Font("Arial", Font.BOLD, 24));
-        giocoTest.add(testo_test, BorderLayout.CENTER);
+        // Estraggo lettera dal DB
+        List<String> lettera=JsonLoader.estraiLista(dbWallOfText.getAsJsonObject("Lettera"),"lettera_iniziale");
         
-        sceneManager.registraScena("GIOCO_TEST", giocoTest);
-        
-        GameScreen game_screen = new GameScreen(righe, () -> {
-            System.out.println("DEBUG: Sigillo a schermo cliccato");
-            possiedeInventario = true;
+        // Avvio la possibilità di usare il bottone
+        LetteraScreen schermata_lettera=new LetteraScreen(lettera,()->{
+            System.out.println("TEST: Lettera finita, gioco START");
             
-            
+            // Qui passo la variabile della piazza centrale sceneManager.mostraScena
+            // e faccio vedere il retro della lettera con l'enigma sopra e inizia l'esplorazione
         });
         
-        sceneManager.registraScena("LETTERA_INIZIALE", game_screen);
+        // Mostro scena
+        sceneManager.registraScena("LETTERA_INIZIALE", schermata_lettera);
         sceneManager.mostraScena("LETTERA_INIZIALE");
     }
 
