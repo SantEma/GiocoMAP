@@ -22,7 +22,7 @@ public class Giocatore {
     private Enigma enigma_corrente;
     
     public Giocatore(String nome){
-        this.nome_lore=nome_lore;
+        this.nome_lore=nome;
         this.nome_player="";// Inizialmente vuoto poi il player lo inserirà come sta in "Statistiche"
         this.possiedeInventario=false; // Non ancora ottenuto quando lo si crea
         this.possiedeMappa=false; // Non ha ancora la mappa all'inizio
@@ -68,7 +68,7 @@ public class Giocatore {
     }
     
     // facendo così andiamo ad agevolare il salvataggio
-    public void setPossiedeMappa(boolean possiedeMapppa){
+    public void setPossiedeMappa(boolean possiedeMappa){
         this.possiedeMappa=possiedeMappa;
     }
 }
