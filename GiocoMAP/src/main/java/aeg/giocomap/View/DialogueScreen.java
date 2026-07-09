@@ -35,6 +35,7 @@ public class DialogueScreen extends JLayeredPane {
         boxDialogo.setBackground(new Color(0,0,0,200));
         boxDialogo.setBorder(BorderFactory.createLineBorder(Color.WHITE,2));
         
+        // Area di testo dove andranno i dialoghi
         area_text = new JTextArea();
         area_text.setEditable(false);
         area_text.setLineWrap(true);
@@ -45,9 +46,10 @@ public class DialogueScreen extends JLayeredPane {
         area_text.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         boxDialogo.add(area_text,BorderLayout.CENTER); // Dialogo centrato
         
+        //(DA TESTARE) il bottone richiamato
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         southPanel.setOpaque(false);
-        southPanel.add(btnAvanti);
+        southPanel.add(btnAvanti=new BottoneAvanti(e -> azioneAvanti.run()));
         boxDialogo.add(southPanel,BorderLayout.SOUTH); // Pannello con il dialogo dentro sotto
         
         // Tutto ciò che abbiamo inserito va messo tutto nel gestore dei livelli di Layout

@@ -33,16 +33,8 @@ public class LetteraScreen extends JPanel {
 
         setLayout(null);
 
-        // Bottone Avanti per proseguire nella storia
-        btnAvanti = new JButton("Avanti ➔");
-        btnAvanti.setFont(new Font("Arial", Font.BOLD, 18));
-        btnAvanti.setBackground(new Color(60, 30, 10)); // Marrone in stile pergamena
-        btnAvanti.setForeground(Color.WHITE);
-        btnAvanti.setFocusPainted(false);
-        btnAvanti.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
-        // Esegue l'azione passata dal GameEngine
-        btnAvanti.addActionListener(e -> azioneAvanti.run());
+        // Bottone Avanti verrà chiamato per proseguire nella storia
+        btnAvanti = new BottoneAvanti(e -> azioneAvanti.run());
         this.add(btnAvanti);
 
         // Mantiene il bottone in basso a destra
@@ -74,14 +66,14 @@ public class LetteraScreen extends JPanel {
 
         // Disegna il testo partendo da coordinate precise sulla pergamena
         int testoX = (int)(w * 0.32);
-        int testoY = (int)(h * 0.28);
+        int testoY = (int)(h * 0.25);
         int testoW = (int)(w * 0.38);
-        int testoH = (int)(h * 0.55);
+        int testoH = (int)(h * 0.57);
 
-        disegnaTesto(g, testo, testoX, testoY, testoW, testoH, fontSize);
+        disegnaTesto(g, testo, testoX, testoY, testoW, testoH);
     }
     
-    private void disegnaTesto(Graphics g, String testo, int x, int y, int maxW, int maxH, int fontSize) {
+    private void disegnaTesto(Graphics g, String testo, int x, int y, int maxW, int maxH) {
        FontMetrics fm = g.getFontMetrics();
        int lineHeight = fm.getHeight();
        int currentY = y + fm.getAscent();
