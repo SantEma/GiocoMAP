@@ -6,7 +6,7 @@ package aeg.giocomap.Model.Giocatore;
 
 import aeg.giocomap.Model.Oggetti.Oggetto;
 import aeg.giocomap.Model.Stanza;
-import aeg.giocomap.Model.Enigmi;
+import aeg.giocomap.Model.Enigmi.Enigma;
 
 /**
  *
