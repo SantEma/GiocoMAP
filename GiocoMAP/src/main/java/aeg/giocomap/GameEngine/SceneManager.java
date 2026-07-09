@@ -8,6 +8,7 @@ import aeg.giocomap.View.MainFrame;
 import javax.swing.JPanel;
 import java.util.HashMap;
 import java.util.Map;
+import aeg.giocomap.View.ChatPanel;
 
 /**
  *
@@ -24,6 +25,10 @@ public class SceneManager {
     
     // variabili inventario
     private boolean inventarioOpen = false;
+    
+// variabili chat
+    private boolean chatOpen = false;
+    private JPanel chatPanel;
     
     public SceneManager(MainFrame frame){
         this.frame = frame;
@@ -100,4 +105,27 @@ public class SceneManager {
     public boolean isOpenInventario(){
         return inventarioOpen;
     }
+    // Logiche della Chat
+    public void toggleChat(JPanel chat) {
+        if (!chatOpen) {
+            // salvo la scena precedente
+            if (frame.getContentPane().getComponentCount() > 0)
+                scenario_precedente = (JPanel) frame.getContentPane().getComponent(0);
+
+            this.chatPanel = chat;
+            frame.mostraPannello(chat);
+            chatOpen = true;
+            System.out.println("DEBUG: Chat aperta");
+        } else {
+            // torno alla scena precedente
+            if (scenario_precedente != null)
+                frame.mostraPannello(scenario_precedente);
+            chatOpen = false;
+            System.out.println("DEBUG: Chat chiusa");
+        }
+    }
+
+    public boolean isChatOpen() {
+        return chatOpen;
+}
 }

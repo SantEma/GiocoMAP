@@ -12,22 +12,27 @@ import java.awt.Dimension;
  * @author Utente
  */
 public class MainFrame extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainFrame.class.getName());
+
+    // Bottone chat sempre visibile: viene messo sul JLayeredPane gia' integrato
+    // nel JFrame (getLayeredPane), su un livello sopra al content pane. Cosi
+    // fluttua sopra qualunque scena senza interferire con mostraPannello()
+    private javax.swing.JButton btnChatFluttuante;
 
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
         initComponents();
-        
+
         // Impedire di rimpicciolire o modificare la grandezza della finestra
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-        
+
         java.awt.Dimension screensize = java.awt.Toolkit.getDefaultToolkit().getScreenSize(); // Adatto alle dimensioni max dello schermo
         setMinimumSize(new Dimension(1024, 768));
-       
-        
+
+
         java.net.URL iconURL = getClass().getResource("/sprites/Oggetti/Tessuto.png");
         if(iconURL != null){
             javax.swing.ImageIcon icona = new javax.swing.ImageIcon(iconURL);
@@ -35,6 +40,45 @@ public class MainFrame extends javax.swing.JFrame {
             System.out.println("DEBUG: Immagine caricata");
         }
         else System.out.println("DEBUG: Errore di caricamento foto");
+
+        impostaBottoneChat();
+    }
+
+    private void impostaBottoneChat() {
+        // stesso stile dei bottoni del TitleScreen: bianco, testo nero, Arial bold
+        btnChatFluttuante = new javax.swing.JButton("Chat");
+        btnChatFluttuante.setFocusable(false);
+        btnChatFluttuante.setBackground(java.awt.Color.WHITE);
+        btnChatFluttuante.setForeground(java.awt.Color.BLACK);
+        btnChatFluttuante.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 16));
+        btnChatFluttuante.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+
+        // POPUP_LAYER sta sopra al content pane (dove vanno le scene)
+        getLayeredPane().add(btnChatFluttuante, javax.swing.JLayeredPane.POPUP_LAYER);
+
+        // riposiziona il bottone quando la finestra cambia dimensione
+        getRootPane().addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                riposizionaBottoneChat();
+            }
+        });
+        riposizionaBottoneChat();
+    }
+
+    private void riposizionaBottoneChat() {
+        if (btnChatFluttuante == null) return;
+        // angolo in alto a destra, cosi non copre la box di dialogo in basso
+        int btnW = 110;
+        int btnH = 38;
+        int margine = 20;
+        int w = getLayeredPane().getWidth();
+        btnChatFluttuante.setBounds(w - btnW - margine, margine, btnW, btnH);
+    }
+
+    // registra l'azione da eseguire al click del bottone chat fluttuante
+    public void setChatListener(java.awt.event.ActionListener listener) {
+        btnChatFluttuante.addActionListener(listener);
     }
 
     /**
@@ -94,16 +138,24 @@ public class MainFrame extends javax.swing.JFrame {
     public void mostraPannello(javax.swing.JPanel newPanel){
         // Rimuovo gli elementi della scena attuale
         this.getContentPane().removeAll();
-        
-        // Creo una nuova paginazione con nuove regole per la nuova scena 
+
+        // Creo una nuova paginazione con nuove regole per la nuova scena
         this.getContentPane().setLayout(new java.awt.BorderLayout());
-        
+
         // Inserisco la nuova scena
         this.getContentPane().add(newPanel, java.awt.BorderLayout.CENTER);
-        
+
         // Ricalibrare la finestra grafica
         this.revalidate();
         this.repaint();
+
+        // il bottone chat vive sul layeredPane del frame, lo tengo sempre
+        // in primo piano sopra la nuova scena
+        if (btnChatFluttuante != null) {
+            getLayeredPane().setLayer(btnChatFluttuante, javax.swing.JLayeredPane.POPUP_LAYER);
+            riposizionaBottoneChat();
+            btnChatFluttuante.repaint();
+        }
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

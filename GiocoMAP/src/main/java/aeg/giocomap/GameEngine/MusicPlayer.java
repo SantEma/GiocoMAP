@@ -27,7 +27,7 @@ public class MusicPlayer {
         tracceAudio = new String[3];
         
         tracceAudio[0] = "/musiche/GreenlandsTitleScreen.wav"; //Ttile screen
-        tracceAudio[1] = "/musiche/DEAF KEVEEndTitle.wav"; // End Screen
+        tracceAudio[1] = "/musiche/DEAFKEVEndTitle.wav"; // End Screen
         //tracceAudio[2] = "daviderechemettere";
     }
     
@@ -52,6 +52,7 @@ public class MusicPlayer {
             // Deallocare le risorse quando la musica si dovrà fermare
             clip.stop();
             clip.close();
+            clip=null;
         }
     } 
 }
