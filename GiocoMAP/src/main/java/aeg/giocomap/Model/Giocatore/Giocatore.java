@@ -18,12 +18,14 @@ public class Giocatore {
     private Stanza stanza_corrente;
     private Inventario<Oggetto> inventario;
     private boolean possiedeInventario;
+    private boolean possiedeMappa;
     private Enigma enigma_corrente;
     
     public Giocatore(String nome){
         this.nome_lore=nome_lore;
         this.nome_player="";// Inizialmente vuoto poi il player lo inserirà come sta in "Statistiche"
         this.possiedeInventario=false; // Non ancora ottenuto quando lo si crea
+        this.possiedeMappa=false; // Non ha ancora la mappa all'inizio
     }
     
     public Inventario<Oggetto> getInventario(){
@@ -59,5 +61,14 @@ public class Giocatore {
     
     public void setStanzaCorrente(Stanza stanza_corrente){
         this.stanza_corrente=stanza_corrente; // così sappiamo in che stanza è eryndor ogni volta che si sposta
+    }
+    
+    public boolean isPossiedeMappa(){
+        return possiedeMappa;
+    }
+    
+    // facendo così andiamo ad agevolare il salvataggio
+    public void setPossiedeMappa(boolean possiedeMapppa){
+        this.possiedeMappa=possiedeMappa;
     }
 }

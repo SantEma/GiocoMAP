@@ -14,14 +14,12 @@ import aeg.giocomap.View.DialogueScreen;
 import aeg.giocomap.View.LetteraScreen;
 
 import aeg.giocomap.Model.Storage.*;
-import aeg.giocomap.Model.Giocatore.Inventario;
 import aeg.giocomap.Model.Oggetti.Oggetto;
 import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.Model.Giocatore.Giocatore;
 import aeg.giocomap.Util.JsonLoader;
 
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.*;
 import java.awt.*;
@@ -29,10 +27,10 @@ import javax.swing.*;
 
 public class GameEngine {
 
-    // variabili per immagazzinare i dialoghi dei file JSON
-    private JsonObject dbWallOfText;
-    private JsonObject dbStoria;
-    private JsonObject dbHint;
+    // variabili per immagazzinare i dialoghi dei file JSON già da subito
+    private final JsonObject dbWallOfText;
+    private final JsonObject dbStoria;
+    private final JsonObject dbHint;
     
     // variabili gestione dei dialoghi
     private DialogueScreen schermata_dialogo_corrente;
@@ -50,7 +48,6 @@ public class GameEngine {
     private final Giocatore giocatore; 
     
     private boolean isDialogoActive = false;
-    private boolean possiedeMappa = false;
 
     // Variabili per il punteggio inserite dal collega
     private long tempoInizioEnigma = 0;
@@ -200,7 +197,7 @@ public class GameEngine {
     }
 
     public void setPossiedeMappa(boolean possiede) {
-        this.possiedeMappa = possiede;
+        this.giocatore.setPossiedeMappa(possiede);
         if (possiede) System.out.println("DEBUG: Il giocatore ha ottenuto la mappa");
     }
 
@@ -240,7 +237,7 @@ public class GameEngine {
         // Passiamo il nome del giocatore
         String nome_passato = (giocatore != null && giocatore.getNomePlayer()!= null ? giocatore.getNomePlayer():"");
         
-        TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome != null ? nome.trim() : "");
+        TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome_passato);
 
         titoli.addIndietroListener(e -> {
             music_player.playMusic(MusicPlayer.TITLE_SCREEN_MUSIC);
@@ -267,7 +264,7 @@ public class GameEngine {
     }
 
     private void toggleMappa() {
-        if (!possiedeMappa) {
+        if (!giocatore.isPossiedeMappa()) {
             System.out.println("DEBUG: Il giocatore non possiede ancora la Mappa");
             return;
         }
