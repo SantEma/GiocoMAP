@@ -24,7 +24,7 @@ import javax.swing.*;
 
 public class GameEngine {
 
-    // variabili per immagazzinare i dialoghi dei file JSON già da subito
+    // Variabili per immagazzinare i dialoghi dei file JSON già da subito
     private final JsonObject dbWallOfText;
     private final JsonObject dbStoria;
     private final JsonObject dbHint;
@@ -126,6 +126,10 @@ public class GameEngine {
         // Estraggo lettera dal DB
         List<String> lettera=JsonLoader.estraiLista(dbWallOfText.getAsJsonObject("Lettera"),"lettera_iniziale");
         
+        // Estraggo il testo dell'enigma e lo converto in lista
+        String enigmaText = dbWallOfText.getAsJsonObject("Schermo").get("Enigma_1_Lettera").getAsString();
+        List<String> letteraRetro = java.util.Arrays.asList(enigmaText);
+
         // Creiamo la schermata del menù
         JPanel giocoTest = new JPanel(new BorderLayout());
         giocoTest.setBackground(Color.BLACK);
@@ -136,15 +140,23 @@ public class GameEngine {
         giocoTest.add(testo_test, BorderLayout.CENTER);
         sceneManager.registraScena("GIOCO_TEST", giocoTest);
         
-        // Avvio la possibilità di usare il bottone
-        LetteraScreen schermata_lettera=new LetteraScreen(lettera,()->{
-            System.out.println("TEST: Lettera finita, gioco START");
+        // Nuovo oggetto di lettera per mostrare il retro
+        LetteraScreen schermata_retro = new LetteraScreen(letteraRetro, () -> {
+            System.out.println("TEST: Lettera retro finita, gioco START");
             
-            // Lettera finita alla prossima scena sblocca l'inventario
+            // Inizializzazione inventario
             giocatore.setPossiedeInventario(true);
-            // Qui passo la variabile della piazza centrale sceneManager.mostraScena
-            // e faccio vedere il retro della lettera con l'enigma sopra e inizia l'esplorazione
-            //sceneManager.mostraScena("GIOCO_TEST"); TEST MOMENTANEI ANDRANNO SOSTITUITI CON LE VERE SCENE
+            
+            sceneManager.mostraScena("GIOCO_TEST"); // TEST MOMENTANEI ANDRANNO SOSTITUITI CON LE VERE SCENE
+        });
+        sceneManager.registraScena("LETTERA_RETRO", schermata_retro);
+
+        // Lettera di default 
+        LetteraScreen schermata_lettera = new LetteraScreen(lettera, () -> {
+            System.out.println("TEST: Lettera finita, mostro retro");
+            
+            // Retro della lettera con l'enigma sopra
+            sceneManager.mostraScena("LETTERA_RETRO");
         });
         
         // Mostro scena
