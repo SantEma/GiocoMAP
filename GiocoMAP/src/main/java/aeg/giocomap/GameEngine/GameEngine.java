@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.GameEngine;
 
 import aeg.giocomap.View.MappaPanel;
@@ -17,8 +13,9 @@ import aeg.giocomap.Model.Storage.*;
 import aeg.giocomap.Model.Oggetti.Oggetto;
 import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.Model.Giocatore.Giocatore;
-import aeg.giocomap.Util.JsonLoader;
+import aeg.giocomap.Model.Enigmi.Enigma;
 
+import aeg.giocomap.Util.JsonLoader;
 import com.google.gson.JsonObject;
 import java.util.List;
 import java.awt.event.*;
@@ -52,6 +49,7 @@ public class GameEngine {
     // Variabili per il punteggio inserite dal collega
     private long tempoInizioEnigma = 0;
     private int punteggioTotale = 0;
+    private TimerEnigma timerEnigma;
 
     public GameEngine(MainFrame frame) {
         this.dbWallOfText = JsonLoader.caricaJson("/dialoghi/walloftext.json");
@@ -61,20 +59,22 @@ public class GameEngine {
         this.db = new ModelDB();
         this.txt = new ModelTXTOggetti();
         this.frame = frame;
-        this.frame.addWindowListener(new java.awt.event.WindowAdapter(){
+       
+
+        this.frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
-            public void windowClosing(java.awt.event.WindowEvent e){
+            public void windowClosing(java.awt.event.WindowEvent e) {
                 ExitGame();
             }
         });
-        
+
         this.music_player = new MusicPlayer();
         music_player.playMusic(MusicPlayer.TITLE_SCREEN_MUSIC);
-        
+
         this.sceneManager = new SceneManager(frame);
         this.title_screen = new TitleScreen();
         sceneManager.registraScena("MENU_PRINCIPALE", title_screen);
-        
+
         sceneManager.registraScena("MAPPA", new MappaPanel());
         impostaKeyBindingMappa();
         
@@ -85,7 +85,7 @@ public class GameEngine {
         
         sceneManager.registraScena("INVENTARIO", new InventarioPanel(this.giocatore.getInventario()));
         impostaKeyBindingInventario();
-        
+
         TitleScreenImp();
         sceneManager.mostraScena("MENU_PRINCIPALE");
     }
@@ -104,7 +104,7 @@ public class GameEngine {
 
         title_screen.addRecordListener(e -> {
             music_player.stopMusic();
-            Statistiche(false); 
+            Statistiche(false);
         });
     }
     
@@ -113,16 +113,10 @@ public class GameEngine {
 
         if (carica) {
             if (salvataggio == null) {
-                JOptionPane.showMessageDialog(
-                    frame,
-                    "Nessuna partita salvata trovata!",
-                    "Attenzione",
-                    JOptionPane.WARNING_MESSAGE
-                );
-                return;  
+                JOptionPane.showMessageDialog(frame,"Nessuna partita salvata trovata!","Attenzione",JOptionPane.WARNING_MESSAGE);
+                return;
             }
             music_player.stopMusic();
-            
             String stanza = salvataggio[0];
             String enigma = salvataggio[1];
             System.out.println("Carico partita dalla stanza: " + stanza);
@@ -158,27 +152,38 @@ public class GameEngine {
         sceneManager.mostraScena("LETTERA_INIZIALE");
     }
 
-    // Calcola quando inizia l'enigma
     
+    // Chiamato quando il giocatore vede un enigma
     public void iniziaEnigma() {
-        tempoInizioEnigma = System.currentTimeMillis();
+        timerEnigma = new TimerEnigma(() -> {
+            System.out.println("DEBUG: Secondi: " + timerEnigma.getSecondi());
+        });
+        timerEnigma.avvia();
         System.out.println("DEBUG: Enigma iniziato");
     }
-    //Calcola il tempo per risolvere l'enigma e in base al tempo assegna un punteggio
-    public void risolviEnigma() {
-        if (tempoInizioEnigma == 0) return;
-        int punti = calcolaPunti(tempoInizioEnigma);
+
+    // Chiamato quando l'enigma viene risolto correttamente
+    public void enigmaRisolto(Enigma enigma) {
+        if (timerEnigma != null) timerEnigma.ferma();
+
+        int secondi = timerEnigma != null ? timerEnigma.getSecondi() : 0;
+        int punti = calcolaPunti(secondi);
         punteggioTotale += punti;
-        tempoInizioEnigma = 0;
-        System.out.println("DEBUG: Enigma risolto → " + punti + " punti, totale: " + punteggioTotale);
+
+        
+        if (enigma.getReward() != null) {
+            giocatore.getInventario().aggiungiOggetto(enigma.getReward());
+            System.out.println("DEBUG: Reward aggiunto: " + enigma.getReward().getNomeOggetto());
+        }
+
+        System.out.println("DEBUG: " + secondi + "s , " + punti + " punti, totale: " + punteggioTotale);
     }
-
-     private int calcolaPunti(long inizioMs) {
-        int secondi = (int)((System.currentTimeMillis() - inizioMs) / 1000);
-
+    
+    //Calcola il punteggio in base al tempo impiegato
+    private int calcolaPunti(int secondi) {
         int fascia;
-        if (secondi <= 100)       fascia = 1;
-        else if (secondi <= 150)  fascia = 2;
+        if (secondi <= 100)      fascia = 1;
+        else if (secondi <= 150) fascia = 2;
         else if (secondi <= 220) fascia = 3;
         else if (secondi <= 380) fascia = 4;
         else                     fascia = 5;
@@ -191,17 +196,7 @@ public class GameEngine {
             default -> 100;
         };
     }
-  
-    public void setDialogueActive(boolean active) {
-        this.isDialogoActive = active;
-    }
 
-    public void setPossiedeMappa(boolean possiede) {
-        this.giocatore.setPossiedeMappa(possiede);
-        if (possiede) System.out.println("DEBUG: Il giocatore ha ottenuto la mappa");
-    }
-
-    //Chiede di inserire un nome per mostrare le statistiche nei titoli di coda
     private void Statistiche(boolean fineGioco) {
         String nome = "";
         int punteggio = 0;
@@ -210,25 +205,14 @@ public class GameEngine {
             punteggio = punteggioTotale;
             
             while (nome == null || nome.trim().isEmpty()) {
-                nome = JOptionPane.showInputDialog(
-                    frame,
-                    "Inserisci il tuo nome per salvare il punteggio:",
-                    "Fine gioco!",
-                    JOptionPane.PLAIN_MESSAGE
-                );
+                nome = JOptionPane.showInputDialog(frame,"Inserisci il tuo nome per salvare il punteggio:","Fine gioco!",JOptionPane.PLAIN_MESSAGE);
                 if (nome == null || nome.trim().isEmpty()) {
                     JOptionPane.showMessageDialog(
-                        frame,
-                        "Devi inserire un nome per continuare!",
-                        "Attenzione",
-                        JOptionPane.WARNING_MESSAGE
-                    );
+                        frame,"Devi inserire un nome per continuare!","Attenzione",JOptionPane.WARNING_MESSAGE);
                 }
             }
             giocatore.setNomePlayer(nome.trim());
             db.salvaSeNecessario(giocatore.getNomePlayer(), punteggio);
-            // Presuppone che ModelDB abbia il metodo salvaSeNecessario
-            db.salvaSeNecessario(nome.trim(), punteggio); 
         }
 
         // Presuppone che ModelDB abbia il metodo getRecords
@@ -248,7 +232,12 @@ public class GameEngine {
         sceneManager.mostraScena("TITOLI_CODA");
     }
 
-    // KeyBinding e Apertura/Chiusura del pannello Mappa
+    
+    public void setDialogueActive(boolean active) {
+        this.isDialogoActive = active;
+    }
+
+   
     private void impostaKeyBindingMappa() {
         JRootPane rootPane = frame.getRootPane();
         InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -272,21 +261,17 @@ public class GameEngine {
             System.out.println("DEBUG: Testo in corso mappa non apribile");
             return;
         }
-        if (sceneManager.isOpenInventario()){
-            sceneManager.ChiudiInventario();
-        }
-        
+        if (sceneManager.isOpenInventario()) sceneManager.ChiudiInventario();
         if (!sceneManager.isMapOpen()) sceneManager.ApriMappa();
         else sceneManager.ChiudiMappa();
     }
 
-    // KeyBinding e Apertura/Chiusura del pannello Inventario
     private void impostaKeyBindingInventario() {
         JRootPane rootPane = frame.getRootPane();
         InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = rootPane.getActionMap();
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_I, 0), "toggle_inventario");
-        
+
         am.put("toggle_inventario", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -294,7 +279,7 @@ public class GameEngine {
             }
         });
     }
-    
+
     private void toggleInventario() {
         if (isDialogoActive) {
             System.out.println("DEBUG: Testo in corso, inventario non apribile");
@@ -304,17 +289,14 @@ public class GameEngine {
             System.out.println("DEBUG: Inventario non ancora disponibile");
             return;
         }
-        if (sceneManager.isMapOpen()) {
-            sceneManager.ChiudiMappa();
-        }
-
+        if (sceneManager.isMapOpen()) sceneManager.ChiudiMappa();
         if (!sceneManager.isOpenInventario()) sceneManager.ApriInventario();
         else sceneManager.ChiudiInventario();
     }
-    
-    public void ExitGame(){
+
+    public void ExitGame() {
         System.out.println("WARNING: Stiamo uscendo dal gioco");
-        db.chiudiConnessione(); 
+        db.chiudiConnessione();
         System.exit(0);
     }
 }

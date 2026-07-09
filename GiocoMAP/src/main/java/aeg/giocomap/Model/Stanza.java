@@ -48,4 +48,3 @@ public class Stanza {
         return uscite.get(direzione.toUpperCase());
     }
 }
-
