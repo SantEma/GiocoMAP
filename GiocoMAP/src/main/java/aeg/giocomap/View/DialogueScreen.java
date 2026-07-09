@@ -55,27 +55,33 @@ public class DialogueScreen extends JLayeredPane {
         // Tutto ciò che abbiamo inserito va messo tutto nel gestore dei livelli di Layout
         this.add(boxDialogo,JLayeredPane.MODAL_LAYER);
         
-        // LOGICA DI RIDIMENSIONAMENTO
-        this.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                int w = getWidth();
-                int h = getHeight();
+    }
 
-                // Diciamo alla GameScreen di occupare tutto lo spazio
-                scena_stanza.setBounds(0, 0, w, h);
+    // Metodo per fare la "cornice morbida"
+    @Override
+    public void setBounds(int x, int y, int width, int height) {
+        super.setBounds(x, y, width, height);
 
-                // Posizioniamo il box in basso
-                int boxH = (int) (h * 0.28);
-                int boxW = (int) (w * 0.85);
-                boxDialogo.setBounds((w - boxW) / 2, h - boxH - 30, boxW, boxH);
+        if (scena_stanza != null) {
+            // Diciamo alla GameScreen di occupare tutto lo spazio
+            scena_stanza.setBounds(0, 0, width, height);
+        }
 
-                // Posizioniamo lo sprite
-                int spriteW = (int) (w * 0.40);
-                int spriteH = (int) (h * 0.70);
-                labelSpritePG.setBounds((w - spriteW) / 2, (h - boxH - 30) - spriteH + 60, spriteW, spriteH);
-            }
-        });
+        if (boxDialogo != null) {
+            // Posizioniamo il box in basso
+            int boxH = (int) (height * 0.28);
+            int boxW = (int) (width * 0.85);
+            boxDialogo.setBounds((width - boxW) / 2, height - boxH - 30, boxW, boxH);
+        }
+
+        if (labelSpritePG != null) {
+            // Posizioniamo lo sprite
+            int spriteW = (int) (width * 0.40);
+            int spriteH = (int) (height * 0.70);
+            // Evita il crash se boxDialogo è null (anche se in questo contesto non dovrebbe esserlo)
+            int boxH = (int) (height * 0.28);
+            labelSpritePG.setBounds((width - spriteW) / 2, (height - boxH - 30) - spriteH + 60, spriteW, spriteH);
+        }
     }
     
     // Metodo per aggiornare i testi seguenti

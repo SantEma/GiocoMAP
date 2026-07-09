@@ -5,7 +5,7 @@
 package aeg.giocomap.GameEngine;
 
 import aeg.giocomap.View.MainFrame;
-import javax.swing.JPanel;
+import javax.swing.JComponent;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,10 +16,10 @@ import java.util.Map;
 public class SceneManager {
     // variabili scene
     private final MainFrame frame;
-    private final Map<String, JPanel> sceneCache = new HashMap<>();
+    private final Map<String, JComponent> sceneCache = new HashMap<>();
     
     // varibili mappa
-    private JPanel scenario_precedente;
+    private JComponent scenario_precedente;
     private boolean mapOpen = false;
     
     // variabili inventario
@@ -30,13 +30,13 @@ public class SceneManager {
     }
     
     // carica scena all'avvio nella memoria
-    public void registraScena(String nomeScena, JPanel pannello){
+    public void registraScena(String nomeScena, JComponent pannello){
         sceneCache.put(nomeScena,pannello);
     }
     
     // cambia scena
     public void mostraScena(String nomeScena){
-        JPanel ns = sceneCache.get(nomeScena);
+        JComponent ns = sceneCache.get(nomeScena);
         if(ns!=null) frame.mostraPannello(ns);
         else System.err.println("ERROR: Scena "+nomeScena+" non registrata");
     }
@@ -46,7 +46,7 @@ public class SceneManager {
         if(!mapOpen){
             // salvo il contenuto della scena precedente
             if (frame.getContentPane().getComponentCount() > 0) 
-                scenario_precedente = (JPanel) frame.getContentPane().getComponent(0);
+                scenario_precedente = (JComponent) frame.getContentPane().getComponent(0);
             
             mostraScena("MAPPA");
             
@@ -72,11 +72,12 @@ public class SceneManager {
     public void ApriInventario(){
         if(!inventarioOpen){
             // Salvo la scena precedente di gioco
-            if(frame.getContentPane().getComponentCount()>0) 
-                scenario_precedente=(JPanel) frame.getContentPane().getComponent(0);
+            if(frame.getContentPane().getComponentCount()>0) {
+                scenario_precedente=(JComponent) frame.getContentPane().getComponent(0);
+            }
             
             // Recupero dalla cache l'inventario
-            JPanel invP = sceneCache.get("INVENTARIO");
+            JComponent invP = sceneCache.get("INVENTARIO");
             
             // Casting dell'oggetto prima di mostrarlo ed eliminazione dei duplicati
             if(invP instanceof aeg.giocomap.View.InventarioPanel inventarioPanel)

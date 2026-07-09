@@ -18,9 +18,14 @@ import aeg.giocomap.Model.Enigmi.Enigma;
 import aeg.giocomap.Util.JsonLoader;
 import com.google.gson.JsonObject;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import java.awt.event.*;
-import java.awt.*;
+import java.awt.image.BufferedImage;
 import javax.swing.*;
+import javax.imageio.ImageIO;
+import java.io.IOException;
 
 public class GameEngine {
 
@@ -123,31 +128,47 @@ public class GameEngine {
             return;
         }
         
-        // Estraggo lettera dal DB
+        // Estraggo lettera (dal database)
         List<String> lettera=JsonLoader.estraiLista(dbWallOfText.getAsJsonObject("Lettera"),"lettera_iniziale");
         
-        // Estraggo il testo dell'enigma e lo converto in lista
+        // Estrazione testo enigma
         String enigmaText = dbWallOfText.getAsJsonObject("Schermo").get("Enigma_1_Lettera").getAsString();
-        List<String> letteraRetro = java.util.Arrays.asList(enigmaText);
+        List<String> letteraRetro = Arrays.asList(enigmaText);
 
-        // Creiamo la schermata del menù
-        JPanel giocoTest = new JPanel(new BorderLayout());
-        giocoTest.setBackground(Color.BLACK);
-        JLabel testo_test = new JLabel("Premi I per aprire inventario TEST");
-        testo_test.setForeground(Color.RED);
-        testo_test.setFont(new Font("Arial", Font.BOLD, 24));
-        testo_test.setHorizontalAlignment(SwingConstants.CENTER);
-        giocoTest.add(testo_test, BorderLayout.CENTER);
-        sceneManager.registraScena("GIOCO_TEST", giocoTest);
+        // Estrazione dei 3 aiuti
+        List<String> hints = JsonLoader.estraiLista(dbHint.getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
+
+        // Mappa per fare storage delle posizioni dei personaggi
+        Map<double[], Runnable> zonePiazza = new HashMap<>();
+        final GameScreen[] piazzaCentraleArr = new GameScreen[1];
+
+        // Circa posizione NPC1
+        zonePiazza.put(new double[]{0.3090, 0.6083, 0.08, 0.25}, () -> mostraDialogo(piazzaCentraleArr[0], "PIAZZA_CENTRALE", "Abitante 1", hints.get(0), null));
+        // Circa posizione NPC2
+        zonePiazza.put(new double[]{0.5349, 0.4436, 0.08, 0.25}, () -> mostraDialogo(piazzaCentraleArr[0], "PIAZZA_CENTRALE", "Abitante 2", hints.get(1), null));
+        // Circa posizione NPC3
+        zonePiazza.put(new double[]{0.6228, 0.6285, 0.08, 0.25}, () -> mostraDialogo(piazzaCentraleArr[0], "PIAZZA_CENTRALE", "Abitante 3", hints.get(2), null));
+
+        BufferedImage sfondoPiazza = null;
+        try {
+            sfondoPiazza = ImageIO.read(getClass().getResourceAsStream("/sprites/Luoghi/PiazzaCentrale.png"));
+        } catch (IOException e) {
+            System.err.println("Errore caricamento sfondo: " + e.getMessage());
+        }
+
+        GameScreen piazzaCentrale = new GameScreen(sfondoPiazza, zonePiazza);
         
-        // Nuovo oggetto di lettera per mostrare il retro
+        piazzaCentraleArr[0] = piazzaCentrale;
+        sceneManager.registraScena("PIAZZA_CENTRALE", piazzaCentrale);
+        
+        // Avvio la possibilità di usare il bottone per il retro della lettera
         LetteraScreen schermata_retro = new LetteraScreen(letteraRetro, () -> {
             System.out.println("TEST: Lettera retro finita, gioco START");
             
-            // Inizializzazione inventario
+            // Lettera finita alla prossima scena sblocca l'inventario
             giocatore.setPossiedeInventario(true);
             
-            sceneManager.mostraScena("GIOCO_TEST"); // TEST MOMENTANEI ANDRANNO SOSTITUITI CON LE VERE SCENE
+            sceneManager.mostraScena("PIAZZA_CENTRALE");
         });
         sceneManager.registraScena("LETTERA_RETRO", schermata_retro);
 
@@ -164,7 +185,6 @@ public class GameEngine {
         sceneManager.mostraScena("LETTERA_INIZIALE");
     }
 
-    
     // Chiamato quando il giocatore vede un enigma
     public void iniziaEnigma() {
         timerEnigma = new TimerEnigma(() -> {
@@ -247,6 +267,18 @@ public class GameEngine {
     
     public void setDialogueActive(boolean active) {
         this.isDialogoActive = active;
+    }
+
+    private void mostraDialogo(GameScreen scenaSfondo, String idScenaSfondo, String nome, String battuta, ImageIcon sprite) {
+        if (isDialogoActive) return;
+        setDialogueActive(true);
+        DialogueScreen ds = new DialogueScreen(scenaSfondo, () -> {
+            setDialogueActive(false);
+            sceneManager.mostraScena(idScenaSfondo);
+        });
+        ds.aggiornaSchermata(nome, battuta, sprite);
+        sceneManager.registraScena("DIALOGO_CORRENTE", ds);
+        sceneManager.mostraScena("DIALOGO_CORRENTE");
     }
 
    
