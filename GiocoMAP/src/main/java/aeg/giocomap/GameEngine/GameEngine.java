@@ -11,13 +11,14 @@ import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.View.TitoliDiCoda;
 import aeg.giocomap.View.DialogueScreen;
+import aeg.giocomap.View.LetteraScreen;
 
 import aeg.giocomap.Model.Storage.*;
 import aeg.giocomap.Model.Giocatore.Inventario;
 import aeg.giocomap.Model.Oggetti.Oggetto;
 import aeg.giocomap.Model.Personaggi.Personaggio;
+import aeg.giocomap.Model.Giocatore.Giocatore;
 import aeg.giocomap.Util.JsonLoader;
-import aeg.giocomap.View.LetteraScreen;
 
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
@@ -46,11 +47,10 @@ public class GameEngine {
     private final TitleScreen title_screen;
     private final SceneManager sceneManager;
     private final MusicPlayer music_player;
-    private Inventario<Oggetto> inventario_p;
+    private final Giocatore giocatore; 
     
     private boolean isDialogoActive = false;
     private boolean possiedeMappa = false;
-    private boolean possiedeInventario = false;
 
     // Variabili per il punteggio inserite dal collega
     private long tempoInizioEnigma = 0;
@@ -81,12 +81,12 @@ public class GameEngine {
         sceneManager.registraScena("MAPPA", new MappaPanel());
         impostaKeyBindingMappa();
         
-        this.inventario_p = new Inventario<>();
-        // Eryndor ha già il tessuto con se da inizio gioco
-        Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
-        if(tessutoIniziale_temp != null) this.inventario_p.aggiungiOggetto(tessutoIniziale_temp);
+        this.giocatore=new Giocatore("Eryndor");
         
-        sceneManager.registraScena("INVENTARIO", new InventarioPanel(inventario_p));
+        Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
+        if(tessutoIniziale_temp != null) this.giocatore.getInventario().aggiungiOggetto(tessutoIniziale_temp);
+        
+        sceneManager.registraScena("INVENTARIO", new InventarioPanel(this.giocatore.getInventario()));
         impostaKeyBindingInventario();
         
         TitleScreenImp();
@@ -110,14 +110,7 @@ public class GameEngine {
             Statistiche(false); 
         });
     }
-
-    private List<String> leggiLetteraIniziale() {
-        JsonObject root = JsonLoader.caricaJson("/dialoghi/walloftext.json");
-        if (root == null) return new ArrayList<>();
-        JsonObject lettera = root.getAsJsonObject("Lettera");
-        return JsonLoader.estraiLista(lettera, "lettera_iniziale");
-    }
-
+    
     private void avviaGioco(boolean carica) {
         String[] salvataggio = db.LoadGame();
 
@@ -157,7 +150,7 @@ public class GameEngine {
             System.out.println("TEST: Lettera finita, gioco START");
             
             // Lettera finita alla prossima scena sblocca l'inventario
-            possiedeInventario=true;
+            giocatore.setPossiedeInventario(true);
             // Qui passo la variabile della piazza centrale sceneManager.mostraScena
             // e faccio vedere il retro della lettera con l'enigma sopra e inizia l'esplorazione
             //sceneManager.mostraScena("GIOCO_TEST"); TEST MOMENTANEI ANDRANNO SOSTITUITI CON LE VERE SCENE
@@ -193,13 +186,13 @@ public class GameEngine {
         else if (secondi <= 380) fascia = 4;
         else                     fascia = 5;
 
-        switch (fascia) {
-            case 1: return 1000;
-            case 2: return 700;
-            case 3: return 500;
-            case 4: return 300;
-            default: return 100;
-        }
+        return switch (fascia) {
+            case 1 -> 1000;
+            case 2 -> 700;
+            case 3 -> 500;
+            case 4 -> 300;
+            default -> 100;
+        };
     }
   
     public void setDialogueActive(boolean active) {
@@ -217,6 +210,8 @@ public class GameEngine {
         int punteggio = 0;
 
         if (fineGioco) {
+            punteggio = punteggioTotale;
+            
             while (nome == null || nome.trim().isEmpty()) {
                 nome = JOptionPane.showInputDialog(
                     frame,
@@ -233,13 +228,18 @@ public class GameEngine {
                     );
                 }
             }
-            punteggio = punteggioTotale;
+            giocatore.setNomePlayer(nome.trim());
+            db.salvaSeNecessario(giocatore.getNomePlayer(), punteggio);
             // Presuppone che ModelDB abbia il metodo salvaSeNecessario
             db.salvaSeNecessario(nome.trim(), punteggio); 
         }
 
         // Presuppone che ModelDB abbia il metodo getRecords
         List<String[]> records = db.getRecords(); 
+        
+        // Passiamo il nome del giocatore
+        String nome_passato = (giocatore != null && giocatore.getNomePlayer()!= null ? giocatore.getNomePlayer():"");
+        
         TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome != null ? nome.trim() : "");
 
         titoli.addIndietroListener(e -> {
@@ -303,7 +303,7 @@ public class GameEngine {
             System.out.println("DEBUG: Testo in corso, inventario non apribile");
             return;
         }
-        if (!possiedeInventario){
+        if (!giocatore.isPossiedeInventario()){
             System.out.println("DEBUG: Inventario non ancora disponibile");
             return;
         }

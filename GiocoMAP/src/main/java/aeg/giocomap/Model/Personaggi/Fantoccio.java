@@ -4,28 +4,28 @@
  */
 package aeg.giocomap.Model.Personaggi;
 
+import aeg.giocomap.Model.Giocatore.Giocatore;
+import aeg.giocomap.Model.Oggetti.Oggetto;
+
 /**
  *
  * @author emanuele
  */
-public class Fantoccio extends Entity{
+public class Fantoccio extends Personaggio{
 
     public Fantoccio() {
-        super("System_Fantoccio_Invisibile");
+        // Dando fantoccio come nome può recuperare i dialoghi del fantoccio (che sono quelli a schermo cammuffati)
+        super("Fantoccio");
     }
-    /*    
-    DA INSERIRE:
-    Giocatore deve essere ancora implementato, per questo ora il fantoccio è 
-    sottocommento per poter permettere al team di andare avanti
-    
+
     public void daiOggetto(Oggetto oggettoDaConsegnare, Giocatore giocatore) {
         if (oggettoDaConsegnare != null && giocatore != null) {
-            giocatore.getInventario().aggiungi(oggettoDaConsegnare);
+            giocatore.getInventario().aggiungiOggetto(oggettoDaConsegnare);
             
             System.out.println("DEBUG: Il fantoccio ha inserito silenziosamente l'oggetto [" 
                     + oggettoDaConsegnare.getNomeOggetto() + "] nell'inventario.");
         }
-        }
     }
-*/
+    
+    
 }
