@@ -6,13 +6,17 @@ import aeg.giocomap.View.TitleScreen;
 import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.View.TitoliDiCoda;
+import aeg.giocomap.View.DialogueScreen;
+import aeg.giocomap.View.LetteraScreen;
+
 import aeg.giocomap.Model.Storage.*;
-import aeg.giocomap.Model.Giocatore.Inventario;
 import aeg.giocomap.Model.Oggetti.Oggetto;
+import aeg.giocomap.Model.Personaggi.Personaggio;
+import aeg.giocomap.Model.Giocatore.Giocatore;
 import aeg.giocomap.Model.Enigmi.Enigma;
+
 import aeg.giocomap.Util.JsonLoader;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.*;
 import java.awt.*;
@@ -20,20 +24,38 @@ import javax.swing.*;
 
 public class GameEngine {
 
+    // variabili per immagazzinare i dialoghi dei file JSON già da subito
+    private final JsonObject dbWallOfText;
+    private final JsonObject dbStoria;
+    private final JsonObject dbHint;
+    
+    // variabili gestione dei dialoghi
+    private DialogueScreen schermata_dialogo_corrente;
+    private Personaggio npcCorrente;
+    private ImageIcon spriteNpcAttuale;
+    private GameScreen scenaSfondoCorrente;
+    private Runnable azione_post_dialogo;
+    
     private final ModelDB db;
     private final ModelTXTOggetti txt;
     private final MainFrame frame;
     private final TitleScreen title_screen;
     private final SceneManager sceneManager;
     private final MusicPlayer music_player;
-    private Inventario<Oggetto> inventario_p; //ToDo: appena si mergia, questo deve andare su Giocatore
+    private final Giocatore giocatore; 
+    
     private boolean isDialogoActive = false;
-    private boolean possiedeMappa = false;
-    private boolean possiedeInventario = false; //ToDo: appena si mergia, questo deve andare su Giocatore
+
+    // Variabili per il punteggio inserite dal collega
+    private long tempoInizioEnigma = 0;
     private int punteggioTotale = 0;
     private TimerEnigma timerEnigma;
 
     public GameEngine(MainFrame frame) {
+        this.dbWallOfText = JsonLoader.caricaJson("/dialoghi/walloftext.json");
+        this.dbStoria = JsonLoader.caricaJson("/dialoghi/dialoghi_storia.json");
+        this.dbHint=JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
+                
         this.db = new ModelDB();
         this.txt = new ModelTXTOggetti();
         this.frame = frame;
@@ -55,14 +77,13 @@ public class GameEngine {
 
         sceneManager.registraScena("MAPPA", new MappaPanel());
         impostaKeyBindingMappa();
-
-        this.inventario_p = new Inventario<>();
-        Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
-        if (tessutoIniziale_temp != null){
-            this.inventario_p.aggiungiOggetto(tessutoIniziale_temp);
-        }
         
-        sceneManager.registraScena("INVENTARIO", new InventarioPanel(inventario_p));
+        this.giocatore=new Giocatore("Eryndor");
+        
+        Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
+        if(tessutoIniziale_temp != null) this.giocatore.getInventario().aggiungiOggetto(tessutoIniziale_temp);
+        
+        sceneManager.registraScena("INVENTARIO", new InventarioPanel(this.giocatore.getInventario()));
         impostaKeyBindingInventario();
 
         TitleScreenImp();
@@ -86,14 +107,7 @@ public class GameEngine {
             Statistiche(false);
         });
     }
-
-    private List<String> leggiLetteraIniziale() {
-        JsonObject root = JsonLoader.caricaJson("/dialoghi/walloftext.json");
-        if (root == null) return new ArrayList<>();
-        JsonObject lettera = root.getAsJsonObject("Lettera");
-        return JsonLoader.estraiLista(lettera, "lettera_iniziale");
-    }
-
+    
     private void avviaGioco(boolean carica) {
         String[] salvataggio = db.LoadGame();
 
@@ -108,23 +122,33 @@ public class GameEngine {
             System.out.println("Carico partita dalla stanza: " + stanza);
             return;
         }
-
-        List<String> righe = leggiLetteraIniziale();
-
+        
+        // Estraggo lettera dal DB
+        List<String> lettera=JsonLoader.estraiLista(dbWallOfText.getAsJsonObject("Lettera"),"lettera_iniziale");
+        
+        // Creiamo la schermata del menù
         JPanel giocoTest = new JPanel(new BorderLayout());
         giocoTest.setBackground(Color.BLACK);
         JLabel testo_test = new JLabel("Premi I per aprire inventario TEST");
         testo_test.setForeground(Color.RED);
         testo_test.setFont(new Font("Arial", Font.BOLD, 24));
+        testo_test.setHorizontalAlignment(SwingConstants.CENTER);
         giocoTest.add(testo_test, BorderLayout.CENTER);
         sceneManager.registraScena("GIOCO_TEST", giocoTest);
-
-        GameScreen game_screen = new GameScreen(righe, () -> {
-            System.out.println("DEBUG: Sigillo cliccato");
-            possiedeInventario = true;
+        
+        // Avvio la possibilità di usare il bottone
+        LetteraScreen schermata_lettera=new LetteraScreen(lettera,()->{
+            System.out.println("TEST: Lettera finita, gioco START");
+            
+            // Lettera finita alla prossima scena sblocca l'inventario
+            giocatore.setPossiedeInventario(true);
+            // Qui passo la variabile della piazza centrale sceneManager.mostraScena
+            // e faccio vedere il retro della lettera con l'enigma sopra e inizia l'esplorazione
+            //sceneManager.mostraScena("GIOCO_TEST"); TEST MOMENTANEI ANDRANNO SOSTITUITI CON LE VERE SCENE
         });
-
-        sceneManager.registraScena("LETTERA_INIZIALE", game_screen);
+        
+        // Mostro scena
+        sceneManager.registraScena("LETTERA_INIZIALE", schermata_lettera);
         sceneManager.mostraScena("LETTERA_INIZIALE");
     }
 
@@ -148,7 +172,7 @@ public class GameEngine {
 
         
         if (enigma.getReward() != null) {
-            inventario_p.aggiungiOggetto(enigma.getReward());
+            giocatore.getInventario().aggiungiOggetto(enigma.getReward());
             System.out.println("DEBUG: Reward aggiunto: " + enigma.getReward().getNomeOggetto());
         }
 
@@ -164,22 +188,22 @@ public class GameEngine {
         else if (secondi <= 380) fascia = 4;
         else                     fascia = 5;
 
-        switch (fascia) {
-            case 1: return 1000;
-            case 2: return 700;
-            case 3: return 500;
-            case 4: return 300;
-            default: return 100;
-        }
+        return switch (fascia) {
+            case 1 -> 1000;
+            case 2 -> 700;
+            case 3 -> 500;
+            case 4 -> 300;
+            default -> 100;
+        };
     }
-
-   
 
     private void Statistiche(boolean fineGioco) {
         String nome = "";
         int punteggio = 0;
 
         if (fineGioco) {
+            punteggio = punteggioTotale;
+            
             while (nome == null || nome.trim().isEmpty()) {
                 nome = JOptionPane.showInputDialog(frame,"Inserisci il tuo nome per salvare il punteggio:","Fine gioco!",JOptionPane.PLAIN_MESSAGE);
                 if (nome == null || nome.trim().isEmpty()) {
@@ -187,13 +211,17 @@ public class GameEngine {
                         frame,"Devi inserire un nome per continuare!","Attenzione",JOptionPane.WARNING_MESSAGE);
                 }
             }
-            punteggio = punteggioTotale;
-            db.salvaSeNecessario(nome.trim(), punteggio);
+            giocatore.setNomePlayer(nome.trim());
+            db.salvaSeNecessario(giocatore.getNomePlayer(), punteggio);
         }
 
-        List<String[]> records = db.getRecords();
-        TitoliDiCoda titoli = new TitoliDiCoda(
-            records, punteggio, nome != null ? nome.trim() : "");
+        // Presuppone che ModelDB abbia il metodo getRecords
+        List<String[]> records = db.getRecords(); 
+        
+        // Passiamo il nome del giocatore
+        String nome_passato = (giocatore != null && giocatore.getNomePlayer()!= null ? giocatore.getNomePlayer():"");
+        
+        TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome_passato);
 
         titoli.addIndietroListener(e -> {
             music_player.playMusic(MusicPlayer.TITLE_SCREEN_MUSIC);
@@ -207,11 +235,6 @@ public class GameEngine {
     
     public void setDialogueActive(boolean active) {
         this.isDialogoActive = active;
-    }
-
-    public void setPossiedeMappa(boolean possiede) {
-        this.possiedeMappa = possiede;
-        if (possiede) System.out.println("DEBUG: Il giocatore ha ottenuto la mappa");
     }
 
    
@@ -230,7 +253,7 @@ public class GameEngine {
     }
 
     private void toggleMappa() {
-        if (!possiedeMappa) {
+        if (!giocatore.isPossiedeMappa()) {
             System.out.println("DEBUG: Il giocatore non possiede ancora la Mappa");
             return;
         }
@@ -262,7 +285,7 @@ public class GameEngine {
             System.out.println("DEBUG: Testo in corso, inventario non apribile");
             return;
         }
-        if (!possiedeInventario) {
+        if (!giocatore.isPossiedeInventario()){
             System.out.println("DEBUG: Inventario non ancora disponibile");
             return;
         }

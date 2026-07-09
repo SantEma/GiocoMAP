@@ -4,70 +4,71 @@
  */
 package aeg.giocomap.Model.Giocatore;
 
-import aeg.giocomap.Model.Stanza;
 import aeg.giocomap.Model.Oggetti.Oggetto;
+import aeg.giocomap.Model.Stanza;
+import aeg.giocomap.Model.Enigmi;
 
 /**
  *
  * @author emanuele
  */
-
 public class Giocatore {
-    
-    private String nome;
-    private Stanza stanzaCorrente;
+    private String nome_lore;
+    private String nome_player;
+    private Stanza stanza_corrente;
     private Inventario<Oggetto> inventario;
-    private int punteggio;
-    //private int idEnigma; Da scommentare appena enigma è implementato
+    private boolean possiedeInventario;
+    private boolean possiedeMappa;
+    private Enigma enigma_corrente;
     
-    public Giocatore() {
-        this.inventario = new Inventario<>();
-        this.punteggio = 0;
-    }
-
-    public String getNome(){
-        return nome; 
-    }
-    
-    public Stanza getStanzaCorrente() { 
-        return stanzaCorrente; 
+    public Giocatore(String nome){
+        this.nome_lore=nome;
+        this.nome_player="";// Inizialmente vuoto poi il player lo inserirà come sta in "Statistiche"
+        this.possiedeInventario=false; // Non ancora ottenuto quando lo si crea
+        this.possiedeMappa=false; // Non ha ancora la mappa all'inizio
     }
     
-    public int getPunteggio() { 
-        return punteggio; 
+    public Inventario<Oggetto> getInventario(){
+        // creamo l'inventario solo alla prima chiamata
+        if(this.inventario==null) this.inventario=new Inventario<>();
+        
+        return this.inventario; // se non esiste da questo inventario perché non ha ancora quello esistente
     }
     
-    public Inventario<Oggetto> getInventario() { 
-        return inventario; 
+    public boolean isPossiedeInventario(){
+        return possiedeInventario;
     }
     
-    public void setStanzaCorrente(Stanza stanza) { 
-        this.stanzaCorrente = stanza;
-        if(this.stanzaCorrente != null){
-            this.stanzaCorrente.entra();
-        }
+    public void setPossiedeInventario(boolean possiedeInventario){
+        this.possiedeInventario=possiedeInventario;
     }
     
-    public void aggiungiPunteggio(int punti) { 
-        this.punteggio += punti; 
-    }
-
-    public boolean spostati(String direzione) {
-        if (stanzaCorrente != null) {
-            Stanza prossimaStanza = stanzaCorrente.getStanzaAdiacente(direzione);
-            if (prossimaStanza != null) {
-                setStanzaCorrente(prossimaStanza);
-                return true;
-            }
-        }
-        return false;
+    public Stanza getStanzaCorrente(){
+        return stanza_corrente;
     }
     
-    /*
-    ToDo: bisogna controllare se questa cosa verrà utilizzata, probabilmente sì
-    per la progressione della storia
-    public boolean haOggetto(String nomeOggetto) {
-        return inventario.cercaOggetto(nomeOggetto)!=null;
+    public Enigma getIdEnigmaCorrente(){
+        return enigma_corrente;
     }
-    */
+    
+    public String getNomePlayer(){
+        return this.nome_player;
+    }
+    
+    public void setNomePlayer(String nome){
+        this.nome_player=nome;
+    }
+    
+    public void setStanzaCorrente(Stanza stanza_corrente){
+        this.stanza_corrente=stanza_corrente; // così sappiamo in che stanza è eryndor ogni volta che si sposta
+    }
+    
+    public boolean isPossiedeMappa(){
+        return possiedeMappa;
+    }
+    
+    // facendo così andiamo ad agevolare il salvataggio
+    public void setPossiedeMappa(boolean possiedeMappa){
+        this.possiedeMappa=possiedeMappa;
+    }
 }
