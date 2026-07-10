@@ -23,8 +23,14 @@ public class SceneManager {
     private final MainFrame frame;
     private final Map<String, JComponent> sceneCache = new HashMap<>();
     
-    private String scenaCorrente;
-    private String scenaPrecedente;
+// nome della scena mostrata al momento (serve per il salvataggio)
+    private String scenaCorrente = "MENU_PRINCIPALE";;
+    
+    // nome della scena "vera" sotto un overlay (mappa/inventario), per poterlo
+    // ripristinare alla chiusura ed evitare di salvare "MAPPA"/"INVENTARIO"
+    private String scenaPrecedente = "MENU_PRINCIPALE";
+    // Variabili per ricordare la scena precedente
+    private JComponent scenario_precedente;
     
     // varibili mappa
     private boolean mapOpen = false;
@@ -35,12 +41,6 @@ public class SceneManager {
 // variabili chat
     private boolean chatOpen = false;
     private JComponent chatPanel;
-
-    // nome della scena mostrata al momento (serve per il salvataggio)
-    private String scenaCorrente = "MENU_PRINCIPALE";
-    // nome della scena "vera" sotto un overlay (mappa/inventario), per poterlo
-    // ripristinare alla chiusura ed evitare di salvare "MAPPA"/"INVENTARIO"
-    private String scenaPrecedenteNome = "MENU_PRINCIPALE";
 
     public SceneManager(MainFrame frame){
         this.frame = frame;
@@ -61,7 +61,8 @@ public class SceneManager {
         }
         else System.err.println("ERROR: Scena "+nomeScena+" non registrata");
     }
-
+    
+    // In che zona della mappa stiamo, utile per salvarla
     public String getScenaCorrente(){
         return scenaCorrente;
     }
@@ -69,11 +70,6 @@ public class SceneManager {
     // Che elementi grafici ci sono nella scena
     public JComponent getScena(String nomeScena) {
         return sceneCache.get(nomeScena);
-    }
-    
-    // In che zona della mappa stiamo, utile per salvarla
-    public String getScenaCorrente() {
-        return scenaCorrente;
     }
     
     private void aggiornaVisibilitaFrecce(String nomeScena) {
@@ -86,6 +82,8 @@ public class SceneManager {
             nomeScena.equals("LETTERA") || 
             nomeScena.equals("LETTERA_RETRO") || 
             nomeScena.equals("DIALOGO_CORRENTE") ||
+            nomeScena.equals("MENU_PAUSA") ||
+            nomeScena.equals("COMANDI") ||
             chatOpen) {
             frame.setFrecceVisibili(false);
         } else {
@@ -99,7 +97,7 @@ public class SceneManager {
             // salvo il contenuto della scena precedente
             if (frame.getContentPane().getComponentCount() > 0)
                 scenario_precedente = (JComponent) frame.getContentPane().getComponent(0);
-            scenaPrecedenteNome = scenaCorrente;
+            scenaPrecedente = scenaCorrente;
 
             mostraScena("MAPPA");
 
@@ -112,7 +110,7 @@ public class SceneManager {
         if(mapOpen && scenaPrecedente != null){
             //Rinserimento scena precedente
             frame.mostraPannello(scenario_precedente);
-            scenaCorrente = scenaPrecedenteNome;
+            scenaCorrente = scenaPrecedente;
             mapOpen=false;
             System.out.println("DEBUG: Chisura Mappa");
         }
@@ -129,7 +127,7 @@ public class SceneManager {
             if(frame.getContentPane().getComponentCount()>0) {
                 scenario_precedente=(JComponent) frame.getContentPane().getComponent(0);
             }
-            scenaPrecedenteNome = scenaCorrente;
+            scenaPrecedente = scenaCorrente;
 
             // Recupero dalla cache l'inventario
             JComponent invP = sceneCache.get("INVENTARIO");
@@ -148,7 +146,7 @@ public class SceneManager {
     public void ChiudiInventario(){
         if(inventarioOpen && scenario_precedente!=null){
             frame.mostraPannello(scenario_precedente);
-            scenaCorrente = scenaPrecedenteNome;
+            scenaCorrente = scenaPrecedente;
             inventarioOpen = false;
             
             // Forza la rimozione del fumetto in sovraimpressione chiudendo
