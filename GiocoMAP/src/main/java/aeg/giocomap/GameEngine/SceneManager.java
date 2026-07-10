@@ -4,8 +4,13 @@
  */
 package aeg.giocomap.GameEngine;
 
+import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.View.MainFrame;
 import javax.swing.JComponent;
+import javax.swing.ToolTipManager;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -127,6 +132,11 @@ public class SceneManager {
         if(inventarioOpen && scenaPrecedente!=null){
             mostraScena(scenaPrecedente);
             inventarioOpen = false;
+            
+            // Forza la rimozione del fumetto in sovraimpressione chiudendo
+            ToolTipManager.sharedInstance().setEnabled(false);
+            ToolTipManager.sharedInstance().setEnabled(true);
+            
             System.out.println("DEBUG: Chisura inventario");
         }
     }
@@ -157,5 +167,16 @@ public class SceneManager {
 
     public boolean isChatOpen() {
         return chatOpen;
+    }
+    
+    // Metodo helper per creare velocemente le GameScreen
+    public GameScreen creaScenaBase(String imagePath, Map<double[], Runnable> zone) {
+        BufferedImage sfondo = null;
+        try {
+            sfondo = ImageIO.read(getClass().getResourceAsStream("/sprites/Luoghi/" + imagePath));
+        } catch (IOException e) {
+            System.err.println("Errore caricamento sfondo " + imagePath + ": " + e.getMessage());
+        }
+        return new GameScreen(sfondo, zone);
     }
 }

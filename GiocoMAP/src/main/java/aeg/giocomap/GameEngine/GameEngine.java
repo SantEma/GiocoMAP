@@ -150,7 +150,7 @@ public class GameEngine {
             }
         });
         
-        // Collegamenti condizionali per OVEST ed EST
+        // PIAZZA_CENTRALE - Rotte laterali (Con check di storyline)
         // Fantoccio per il testo a schermo senza nome (OVEST bloccato)
         String testoLocali = dbStoria.getAsJsonObject("Eryndor").getAsJsonObject("inizio").get("locali_chiusi").getAsString();
         Fantoccio fantoccioOvest = registraFantoccio("Fantoccio_Ovest", Arrays.asList(testoLocali));
@@ -172,12 +172,55 @@ public class GameEngine {
             // Controlla se il giocatore ha completato l'enigma della stalla
             // (TODO: Cambiare 'false' con il check reale quando verrà implementato l'enigma)
             if (false) {
-                sceneManager.mostraScena("PROSSIMA_ZONA");
+                sceneManager.mostraScena("BOSCO");
             } else {
                 GameScreen piazza = (GameScreen) sceneManager.getScena("PIAZZA_CENTRALE");
                 mostraDialogoNPC(piazza, "PIAZZA_CENTRALE", guardiano, null);
             }
         });
+
+        // ----------------------------------------------------
+        // STALLA: Uscita verso la Piazza (da NORD)
+        // ----------------------------------------------------
+        registraCollegamentoSemplice("STALLA", "NORD", "PIAZZA_CENTRALE");
+        
+        // ----------------------------------------------------
+        // BOSCO: Snodo principale (BoscoLosco.png)
+        // ----------------------------------------------------
+        // Ritorno in Piazza
+        registraCollegamentoSemplice("BOSCO", "SUD", "PIAZZA_CENTRALE");
+        // Verso Karundis
+        registraCollegamentoSemplice("BOSCO", "NORD", "KARUNDIS");
+        // Verso Bosco Deep (BoscoINN.png)
+        registraCollegamentoSemplice("BOSCO", "OVEST", "BOSCO_DEEP");
+        
+        // ----------------------------------------------------
+        // BOSCO_DEEP: Ritorno al Bosco (speculare a OVEST)
+        // ----------------------------------------------------
+        registraCollegamentoSemplice("BOSCO_DEEP", "EST", "BOSCO");
+        
+        // ----------------------------------------------------
+        // KARUNDIS E GROTTA
+        // ----------------------------------------------------
+        registraCollegamentoSemplice("KARUNDIS", "OVEST", "BOSCO");
+        registraCollegamentoSemplice("KARUNDIS", "NORD", "INGRESSO_PALAZZO");
+        // Nota: ingresso GROTTA gestito dalla zona cliccabile in "creaScene"
+        
+        registraCollegamentoSemplice("GROTTA", "SUD", "KARUNDIS");
+        
+        // ----------------------------------------------------
+        // CASTELLO E SOTTERRANEI
+        // ----------------------------------------------------
+        registraCollegamentoSemplice("INGRESSO_PALAZZO", "SUD", "KARUNDIS");
+        registraCollegamentoSemplice("INGRESSO_PALAZZO", "NORD", "SCALE");
+        
+        registraCollegamentoSemplice("SCALE", "SUD", "INGRESSO_PALAZZO");
+        registraCollegamentoSemplice("SCALE", "NORD", "PALAZZO_PRINCIPESSA");
+        registraCollegamentoSemplice("SCALE", "OVEST", "CRIPTA_ERIPETA");
+        
+        registraCollegamentoSemplice("PALAZZO_PRINCIPESSA", "SUD", "SCALE");
+        
+        registraCollegamentoSemplice("CRIPTA_ERIPETA", "EST", "SCALE");
     }
     
     // La possibilità di procedere nelle zone sarà gestita dai controlli
@@ -300,8 +343,8 @@ public class GameEngine {
         Personaggio david = registraNPC("David", Arrays.asList(dialogoDavid));
         ImageIcon spriteDavid = new ImageIcon(getClass().getResource("/sprites/Personaggi/David.png"));
 
-        // Circa posizione per cliccare David (ToDo: IN TEST, DA CAMBIARE CON COORDINATE GIUSTE)
-        zonePorto.put(new double[]{0.6228, 0.6285, 0.08, 0.25}, () -> {
+        // coordinate david (testa a 0.3525, piedi a 0.7270, da x=0.7187 a 0.8476)
+        zonePorto.put(new double[]{0.7187, 0.3525, 0.1289, 0.3745}, () -> {
             mostraDialogoNPC(portoScreenArr[0], "PORTO", david, spriteDavid);
             // Sblocca la mappa post interazione David
             giocatore.setPossiedeMappa(true);
@@ -314,12 +357,39 @@ public class GameEngine {
             System.err.println("Errore caricamento sfondo porto: " + e.getMessage());
         }
         GameScreen portoScreen = new GameScreen(sfondoPorto, zonePorto);
+        //DEBUG TEST COORDINATE
+        portoScreen.abilitaDebugCoordinate();
         portoScreenArr[0] = portoScreen;
         
-
         
         sceneManager.registraScena("PORTO", portoScreen);
         
+        // ---------------------------------------------------------------------------------
+        // Inizializzazione altre zone della mappa (Senza controlli o NPC per ora)
+        // ---------------------------------------------------------------------------------
+        
+        // Prima macro-zona (Piazza -> Stalla / Bosco)
+        sceneManager.registraScena("STALLA", sceneManager.creaScenaBase("Stalla.png", null));
+        // Il Bosco principale usa BoscoLosco.png
+        sceneManager.registraScena("BOSCO", sceneManager.creaScenaBase("BoscoLosco.png", null));
+        // Il Bosco Deep (raggiungibile ad Ovest) usa BoscoINN.png
+        sceneManager.registraScena("BOSCO_DEEP", sceneManager.creaScenaBase("BoscoINN.png", null));
+        
+        // Seconda macro-zona (Karundis)
+        Map<double[], Runnable> zoneKarundis = new HashMap<>();
+        // Hitbox temporanea al centro dello schermo. Usa abilitaDebugCoordinate() per aggiustarla!
+        zoneKarundis.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> sceneManager.mostraScena("GROTTA"));
+        GameScreen karundisScreen = sceneManager.creaScenaBase("Karundis.png", zoneKarundis);
+        // karundisScreen.abilitaDebugCoordinate(); // Scommentare per posizionare l'entrata della grotta
+        sceneManager.registraScena("KARUNDIS", karundisScreen);
+
+        // Terza macro-zona (Castello e sotterranei)
+        sceneManager.registraScena("GROTTA", sceneManager.creaScenaBase("GrottaDellaFucina.png", null));
+        sceneManager.registraScena("INGRESSO_PALAZZO", sceneManager.creaScenaBase("CancelloCastello.png", null));
+        sceneManager.registraScena("SCALE", sceneManager.creaScenaBase("ScalePalazzo.png", null));
+        sceneManager.registraScena("PALAZZO_PRINCIPESSA", sceneManager.creaScenaBase("SalaDellaPrincipessa.png", null));
+        sceneManager.registraScena("CRIPTA_ERIPETA", sceneManager.creaScenaBase("Cripta.png", null));
+
         // Utilizzo del bottone per il dietro della lettera
         LetteraScreen schermata_retro = new LetteraScreen(letteraRetro, () -> {
             System.out.println("DEBUG: Lettera retro finita, gioco START");

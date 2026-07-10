@@ -9,6 +9,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.Map;
@@ -112,6 +114,23 @@ public class GameScreen extends JPanel {
             //Disegno lo sfondo
             g.drawImage(immagine,0,0,getWidth(),getHeight(),this);
         }
+    }
+    
+    /**
+     * Metodo di debug richiamabile per farsi stampare a schermo
+     * le coordinate e le percentuali del click del mouse sulla scena.
+     * Molto utile per creare le hit-box dei personaggi.
+     */
+    public void abilitaDebugCoordinate() {
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                double xPerc = (double) e.getX() / getWidth();
+                double yPerc = (double) e.getY() / getHeight();
+                System.out.printf("DEBUG CLICK: x%% = %.4f, y%% = %.4f (pixel reali: x=%d, y=%d)\n", 
+                                  xPerc, yPerc, e.getX(), e.getY());
+            }
+        });
     }
 }
 
