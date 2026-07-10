@@ -13,7 +13,8 @@ import java.awt.event.*;
  */
 public class DialogueScreen extends JLayeredPane {
     private GameScreen scena_stanza;
-    private JLabel labelSpritePG;
+    private JPanel panelSpritePG;
+    private Image imageSprite;
     private JPanel boxDialogo;
     private JTextArea area_text;
     private JButton btnAvanti;
@@ -26,9 +27,35 @@ public class DialogueScreen extends JLayeredPane {
         this.add(scena_stanza,JLayeredPane.DEFAULT_LAYER);
         
         // Livello di personaggio
-        labelSpritePG = new JLabel();
-        labelSpritePG.setHorizontalAlignment(SwingConstants.CENTER);
-        this.add(labelSpritePG, JLayeredPane.PALETTE_LAYER);
+        panelSpritePG = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (imageSprite != null) {
+                    int imgW = imageSprite.getWidth(null);
+                    int imgH = imageSprite.getHeight(null);
+                    int compW = getWidth();
+                    int compH = getHeight();
+
+                    if (imgW > 0 && imgH > 0 && compW > 0 && compH > 0) {
+                        double scaleX = (double) compW / imgW;
+                        double scaleY = (double) compH / imgH;
+                        double scale = Math.min(scaleX, scaleY);
+
+                        int drawW = (int) (imgW * scale);
+                        int drawH = (int) (imgH * scale);
+
+                        // Allineato a sinistra e in basso
+                        int x = 0;
+                        int y = compH - drawH;
+
+                        g.drawImage(imageSprite, x, y, drawW, drawH, this);
+                    }
+                }
+            }
+        };
+        panelSpritePG.setOpaque(false);
+        this.add(panelSpritePG, JLayeredPane.PALETTE_LAYER);
         
         // Livello della BoxDialogo
         boxDialogo = new JPanel(new BorderLayout());
@@ -74,13 +101,16 @@ public class DialogueScreen extends JLayeredPane {
             boxDialogo.setBounds((width - boxW) / 2, height - boxH - 30, boxW, boxH);
         }
 
-        if (labelSpritePG != null) {
-            // Posizioniamo lo sprite
+        if (panelSpritePG != null) {
+            // Posizioniamo lo sprite in basso a sinistra
             int spriteW = (int) (width * 0.40);
             int spriteH = (int) (height * 0.70);
-            // Evita il crash se boxDialogo è null (anche se in questo contesto non dovrebbe esserlo)
             int boxH = (int) (height * 0.28);
-            labelSpritePG.setBounds((width - spriteW) / 2, (height - boxH - 30) - spriteH + 60, spriteW, spriteH);
+            
+            // Posizione X a sinistra, Y calcolata in modo da sovrapporsi poco sotto o pari al boxDialogo
+            int xPos = (int) (width * 0.05);
+            int yPos = height - boxH - spriteH + 30;
+            panelSpritePG.setBounds(xPos, yPos, spriteW, spriteH);
         }
     }
     
@@ -89,6 +119,14 @@ public class DialogueScreen extends JLayeredPane {
         if(nome!=null && !nome.equals("Fantoccio"))
             area_text.setText(nome+ ":\n"+ battuta);
         else area_text.setText(battuta);
-        labelSpritePG.setIcon(sprite);
+        
+        if (sprite != null) {
+            this.imageSprite = sprite.getImage();
+        } else {
+            this.imageSprite = null;
+        }
+        if (panelSpritePG != null) {
+            panelSpritePG.repaint();
+        }
     }
 }

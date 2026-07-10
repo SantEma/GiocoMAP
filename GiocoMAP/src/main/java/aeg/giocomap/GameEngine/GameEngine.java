@@ -186,23 +186,63 @@ public class GameEngine {
 
         GameScreen piazzaCentrale = new GameScreen(sfondoPiazza, zonePiazza);
         
+        // Tasto di test per passare al porto
+        // ToDo:DA RIMUOVERE APPENA IMPLEMENTIAMO IL MOVIMENTO
+        JButton btnToPorto = new JButton("Vai al Porto");
+        btnToPorto.setBounds(10, 10, 150, 40);
+        btnToPorto.addActionListener(e -> sceneManager.mostraScena("PORTO"));
+        piazzaCentrale.add(btnToPorto);
+        
         piazzaCentraleArr[0] = piazzaCentrale;
         sceneManager.registraScena("PIAZZA_CENTRALE", piazzaCentrale);
         
-        // Avvio la possibilità di usare il bottone per il retro della lettera
+        // Inizializzazione scena PORTO
+        Map<double[], Runnable> zonePorto = new HashMap<>();
+        final GameScreen[] portoScreenArr = new GameScreen[1];
+
+        // Estrazione dialogo di David e caricamento sprite
+        String dialogoDavid = dbStoria.getAsJsonObject("Dialoghi_NPC").getAsJsonObject("David").get("incontro_1").getAsString();
+        ImageIcon spriteDavid = new ImageIcon(getClass().getResource("/sprites/Personaggi/David.png"));
+
+        // Circa posizione per cliccare David (ToDo: IN TEST, DA CAMBIARE CON COORDINATE GIUSTE)
+        zonePorto.put(new double[]{0.6228, 0.6285, 0.08, 0.25}, () -> {
+            mostraDialogo(portoScreenArr[0], "PORTO", "David", dialogoDavid, spriteDavid);
+            // Sblocca la mappa post interazione David
+            giocatore.setPossiedeMappa(true);
+        });
+
+        BufferedImage sfondoPorto = null;
+        try {
+            sfondoPorto = ImageIO.read(getClass().getResourceAsStream("/sprites/Luoghi/PortoMareBlu.png"));
+        } catch (IOException e) {
+            System.err.println("Errore caricamento sfondo porto: " + e.getMessage());
+        }
+        GameScreen portoScreen = new GameScreen(sfondoPorto, zonePorto);
+        portoScreenArr[0] = portoScreen;
+        
+        // Tasto di test per tornare alla Piazza Centrale
+        // ToDo: DA RIMUOVERE APPENA IMPLEMENTIAMO IL MOVIMENTO
+        JButton btnToPiazza = new JButton("Torna alla Piazza");
+        btnToPiazza.setBounds(10, 10, 150, 40);
+        btnToPiazza.addActionListener(e -> sceneManager.mostraScena("PIAZZA_CENTRALE"));
+        portoScreen.add(btnToPiazza);
+        
+        sceneManager.registraScena("PORTO", portoScreen);
+        
+        // Utilizzo del bottone per il dietro della lettera
         LetteraScreen schermata_retro = new LetteraScreen(letteraRetro, () -> {
-            System.out.println("TEST: Lettera retro finita, gioco START");
+            System.out.println("DEBUG: Lettera retro finita, gioco START");
             
-            // Lettera finita alla prossima scena sblocca l'inventario
+            // Lettera finita, alla prossima scena sblocca l'inventario e mostro piazza centrale
             giocatore.setPossiedeInventario(true);
             
             sceneManager.mostraScena("PIAZZA_CENTRALE");
         });
         sceneManager.registraScena("LETTERA_RETRO", schermata_retro);
 
-        // Lettera di default 
+        // Lettera avanti, passa al retro appena finito
         LetteraScreen schermata_lettera = new LetteraScreen(lettera, () -> {
-            System.out.println("TEST: Lettera finita, mostro retro");
+            System.out.println("DEBUG: Lettera finita, mostro retro");
             
             // Retro della lettera con l'enigma sopra
             sceneManager.mostraScena("LETTERA_RETRO");
@@ -255,7 +295,12 @@ public class GameEngine {
     }
 
 
-    
+    /*
+    ToDo:
+    Ragazzi vi lascio questo commento qui in modo che possiate capire:
+    I COMMENTI PER FAVORE CONTROLLATELI. Si vede che non li avete scritti voi.
+    Aggiustateli sempre ASAP, anche con l'aiuto di AI se deve essere necessario
+    */
     public void toggleChat() {
         if (gameClient == null) {
             // nessuna sessione attiva: il primo che apre la chat diventa host
