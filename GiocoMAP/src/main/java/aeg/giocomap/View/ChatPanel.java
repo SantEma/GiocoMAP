@@ -10,6 +10,7 @@ import aeg.giocomap.Network.TipoMessaggio;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.List;
 
 /**
  *
@@ -109,7 +110,7 @@ public class ChatPanel extends JComponent {
         this.client = client;
 
         client.getThreadRicezione().setOnMessaggio(() -> {
-            java.util.List<String> messaggi = client.getThreadRicezione().getMessaggiRicevuti();
+            List<String> messaggi = client.getThreadRicezione().getMessaggiRicevuti();
             areaMessaggi.setText("");
             for (String msg : messaggi) {
                 areaMessaggi.append(msg + "\n");

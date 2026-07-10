@@ -18,6 +18,7 @@ import aeg.giocomap.Network.TipoMessaggio;
 import aeg.giocomap.Model.Storage.*;
 import aeg.giocomap.Model.Oggetti.Oggetto;
 import aeg.giocomap.Model.Personaggi.Personaggio;
+import aeg.giocomap.Model.Personaggi.Fantoccio;
 import aeg.giocomap.Model.Giocatore.Giocatore;
 import aeg.giocomap.Model.Enigmi.Enigma;
 
@@ -32,6 +33,12 @@ import java.awt.image.BufferedImage;
 import javax.swing.*;
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.Inet4Address;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 
 public class GameEngine {
 
@@ -67,6 +74,12 @@ public class GameEngine {
     private ChatPanel chatPanel;
     private boolean serverAvviato = false;
 
+    // Struttura dati per astrarre la logica dei percorsi (routing table)
+    private final Map<String, Map<String, Runnable>> collegamentiMappa = new HashMap<>();
+
+    // Registro dei personaggi attivi nella partita (ogni NPC usa setDialoghi/parla)
+    private final Map<String, Personaggio> registroNPC = new HashMap<>();
+
     public GameEngine(MainFrame frame) {
         this.dbWallOfText = JsonLoader.caricaJson("/dialoghi/walloftext.json");
         this.dbStoria = JsonLoader.caricaJson("/dialoghi/dialoghi_storia.json");
@@ -76,9 +89,9 @@ public class GameEngine {
         this.txt = new ModelTXTOggetti();
         this.frame = frame;
 
-        this.frame.addWindowListener(new java.awt.event.WindowAdapter() {
+        this.frame.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(java.awt.event.WindowEvent e) {
+            public void windowClosing(WindowEvent e) {
                 ExitGame();
             }
         });
@@ -105,7 +118,90 @@ public class GameEngine {
         impostaKeyBindingInventario();
 
         TitleScreenImp();
+        impostaFrecceLogica();
         sceneManager.mostraScena("MENU_PRINCIPALE");
+    }
+
+    private void impostaFrecceLogica() {
+        inizializzaRoot();
+        
+        frame.setFrecceListener(
+            e -> eseguiCollegamento("NORD"),
+            e -> eseguiCollegamento("SUD"),
+            e -> eseguiCollegamento("EST"),
+            e -> eseguiCollegamento("OVEST")
+        );
+    }
+    
+    private void inizializzaRoot() {
+        // Collegamenti semplici
+        registraCollegamentoSemplice("PIAZZA_CENTRALE", "NORD", "PORTO");
+        registraCollegamentoSemplice("PORTO", "SUD", "PIAZZA_CENTRALE");
+        
+        // Uscita dal regno verso SUD (dealloca DB e risorse prima di chiudere)
+        registraCollegamento("PIAZZA_CENTRALE", "SUD", () -> {
+            int scelta = JOptionPane.showConfirmDialog(frame, 
+                "Stai per uscire dal regno e andare nel regno di Luluna, sei sicuro di proseguire?", 
+                "Attenzione", 
+                JOptionPane.YES_NO_OPTION, 
+                JOptionPane.WARNING_MESSAGE);
+            if (scelta == JOptionPane.YES_OPTION) {
+                ExitGame();
+            }
+        });
+        
+        // Collegamenti condizionali per OVEST ed EST
+        // Fantoccio per il testo a schermo senza nome (OVEST bloccato)
+        String testoLocali = dbStoria.getAsJsonObject("Eryndor").getAsJsonObject("inizio").get("locali_chiusi").getAsString();
+        Fantoccio fantoccioOvest = registraFantoccio("Fantoccio_Ovest", Arrays.asList(testoLocali));
+        
+        registraCollegamento("PIAZZA_CENTRALE", "OVEST", () -> {
+            if (giocatore.isPossiedeMappa()) { // Dopo aver parlato con David ottiene la mappa
+                sceneManager.mostraScena("STALLA");
+            } else {
+                GameScreen piazza = (GameScreen) sceneManager.getScena("PIAZZA_CENTRALE");
+                mostraDialogoNPC(piazza, "PIAZZA_CENTRALE", fantoccioOvest, null);
+            }
+        });
+        
+        // Personaggio "Guardiano" per il blocco EST (mostra il nome)
+        String testoBlocco = dbStoria.getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Bloccatore").get("stop_carrozza").getAsString();
+        Personaggio guardiano = registraNPC("Guardiano", Arrays.asList(testoBlocco));
+        
+        registraCollegamento("PIAZZA_CENTRALE", "EST", () -> {
+            // Controlla se il giocatore ha completato l'enigma della stalla
+            // (TODO: Cambiare 'false' con il check reale quando verrà implementato l'enigma)
+            if (false) {
+                sceneManager.mostraScena("PROSSIMA_ZONA");
+            } else {
+                GameScreen piazza = (GameScreen) sceneManager.getScena("PIAZZA_CENTRALE");
+                mostraDialogoNPC(piazza, "PIAZZA_CENTRALE", guardiano, null);
+            }
+        });
+    }
+    
+    // La possibilità di procedere nelle zone sarà gestita dai controlli
+    private void registraCollegamento(String daScena, String direzione, Runnable azione) {
+        collegamentiMappa.computeIfAbsent(daScena, k -> new HashMap<>()).put(direzione, azione);
+    }
+    
+    // Spostamenti che non richiedono controlli
+    private void registraCollegamentoSemplice(String daScena, String direzione, String aScena) {
+        registraCollegamento(daScena, direzione, () -> sceneManager.mostraScena(aScena));
+    }
+    
+    // Esegue la direzione cliccata a cosa deve accadere
+    private void eseguiCollegamento(String direzione) {
+        String scena = sceneManager.getScenaCorrente();
+        if (scena == null) return;
+        
+        // Cerco nella tabella quali uscite posso prendere dalla scena attuale
+        Map<String, Runnable> uscite = collegamentiMappa.get(scena);
+        if (uscite != null && uscite.containsKey(direzione)) {
+            uscite.get(direzione).run();
+        } else {
+            System.out.println("DEBUG: Nessuna direzione a " + direzione + " da " + scena);
+        }
     }
 
     private void TitleScreenImp() {
@@ -170,12 +266,17 @@ public class GameEngine {
         Map<double[], Runnable> zonePiazza = new HashMap<>();
         final GameScreen[] piazzaCentraleArr = new GameScreen[1];
 
+        // Creazione NPC della piazza tramite Personaggio.setDialoghi()/parla()
+        Personaggio ab1 = registraNPC("Abitante 1", Arrays.asList(hints.get(0)));
+        Personaggio ab2 = registraNPC("Abitante 2", Arrays.asList(hints.get(1)));
+        Personaggio ab3 = registraNPC("Abitante 3", Arrays.asList(hints.get(2)));
+
         // Circa posizione NPC1
-        zonePiazza.put(new double[]{0.3090, 0.6083, 0.08, 0.25}, () -> mostraDialogo(piazzaCentraleArr[0], "PIAZZA_CENTRALE", "Abitante 1", hints.get(0), null));
+        zonePiazza.put(new double[]{0.3090, 0.6083, 0.08, 0.25}, () -> mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab1, null));
         // Circa posizione NPC2
-        zonePiazza.put(new double[]{0.5349, 0.4436, 0.08, 0.25}, () -> mostraDialogo(piazzaCentraleArr[0], "PIAZZA_CENTRALE", "Abitante 2", hints.get(1), null));
+        zonePiazza.put(new double[]{0.5349, 0.4436, 0.08, 0.25}, () -> mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab2, null));
         // Circa posizione NPC3
-        zonePiazza.put(new double[]{0.6228, 0.6285, 0.08, 0.25}, () -> mostraDialogo(piazzaCentraleArr[0], "PIAZZA_CENTRALE", "Abitante 3", hints.get(2), null));
+        zonePiazza.put(new double[]{0.6228, 0.6285, 0.08, 0.25}, () -> mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab3, null));
 
         BufferedImage sfondoPiazza = null;
         try {
@@ -186,27 +287,22 @@ public class GameEngine {
 
         GameScreen piazzaCentrale = new GameScreen(sfondoPiazza, zonePiazza);
         
-        // Tasto di test per passare al porto
-        // ToDo:DA RIMUOVERE APPENA IMPLEMENTIAMO IL MOVIMENTO
-        JButton btnToPorto = new JButton("Vai al Porto");
-        btnToPorto.setBounds(10, 10, 150, 40);
-        btnToPorto.addActionListener(e -> sceneManager.mostraScena("PORTO"));
-        piazzaCentrale.add(btnToPorto);
-        
         piazzaCentraleArr[0] = piazzaCentrale;
         sceneManager.registraScena("PIAZZA_CENTRALE", piazzaCentrale);
         
+
         // Inizializzazione scena PORTO
         Map<double[], Runnable> zonePorto = new HashMap<>();
         final GameScreen[] portoScreenArr = new GameScreen[1];
 
-        // Estrazione dialogo di David e caricamento sprite
+        // Creazione NPC David tramite Personaggio.setDialoghi()/parla() e caricamento sprite
         String dialogoDavid = dbStoria.getAsJsonObject("Dialoghi_NPC").getAsJsonObject("David").get("incontro_1").getAsString();
+        Personaggio david = registraNPC("David", Arrays.asList(dialogoDavid));
         ImageIcon spriteDavid = new ImageIcon(getClass().getResource("/sprites/Personaggi/David.png"));
 
         // Circa posizione per cliccare David (ToDo: IN TEST, DA CAMBIARE CON COORDINATE GIUSTE)
         zonePorto.put(new double[]{0.6228, 0.6285, 0.08, 0.25}, () -> {
-            mostraDialogo(portoScreenArr[0], "PORTO", "David", dialogoDavid, spriteDavid);
+            mostraDialogoNPC(portoScreenArr[0], "PORTO", david, spriteDavid);
             // Sblocca la mappa post interazione David
             giocatore.setPossiedeMappa(true);
         });
@@ -220,12 +316,7 @@ public class GameEngine {
         GameScreen portoScreen = new GameScreen(sfondoPorto, zonePorto);
         portoScreenArr[0] = portoScreen;
         
-        // Tasto di test per tornare alla Piazza Centrale
-        // ToDo: DA RIMUOVERE APPENA IMPLEMENTIAMO IL MOVIMENTO
-        JButton btnToPiazza = new JButton("Torna alla Piazza");
-        btnToPiazza.setBounds(10, 10, 150, 40);
-        btnToPiazza.addActionListener(e -> sceneManager.mostraScena("PIAZZA_CENTRALE"));
-        portoScreen.add(btnToPiazza);
+
         
         sceneManager.registraScena("PORTO", portoScreen);
         
@@ -387,8 +478,8 @@ public class GameEngine {
     // routing): funziona automaticamente sia su hotspot che su LAN normale,
     // senza bisogno di indovinare tra le varie interfacce di rete
     private String ottieniIP() {
-        try (java.net.DatagramSocket socket = new java.net.DatagramSocket()) {
-            socket.connect(java.net.InetAddress.getByName("8.8.8.8"), 10002);
+        try (DatagramSocket socket = new DatagramSocket()) {
+            socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
             String ip = socket.getLocalAddress().getHostAddress();
             if (ip != null && !ip.equals("0.0.0.0")) return ip;
         } catch (Exception e) {
@@ -397,22 +488,22 @@ public class GameEngine {
 
         // fallback: cerca manualmente tra le interfacce di rete
         try {
-            java.util.Enumeration<java.net.NetworkInterface> interfacce =
-                java.net.NetworkInterface.getNetworkInterfaces();
+            Enumeration<NetworkInterface> interfacce =
+                NetworkInterface.getNetworkInterfaces();
 
             while (interfacce.hasMoreElements()) {
-                java.net.NetworkInterface ni = interfacce.nextElement();
+                NetworkInterface ni = interfacce.nextElement();
                 if (!ni.isUp() || ni.isLoopback() || ni.isVirtual()) continue;
 
-                java.util.Enumeration<java.net.InetAddress> indirizzi = ni.getInetAddresses();
+                Enumeration<InetAddress> indirizzi = ni.getInetAddresses();
                 while (indirizzi.hasMoreElements()) {
-                    java.net.InetAddress addr = indirizzi.nextElement();
-                    if (addr instanceof java.net.Inet4Address && addr.isSiteLocalAddress()) {
+                    InetAddress addr = indirizzi.nextElement();
+                    if (addr instanceof Inet4Address && addr.isSiteLocalAddress()) {
                         return addr.getHostAddress();
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (SocketException e) {
             System.err.println("Errore fallback ricerca IP: " + e.getMessage());
         }
         return "127.0.0.1";
@@ -472,6 +563,38 @@ public class GameEngine {
         ds.aggiornaSchermata(nome, battuta, sprite);
         sceneManager.registraScena("DIALOGO_CORRENTE", ds);
         sceneManager.mostraScena("DIALOGO_CORRENTE");
+    }
+
+    // --- Metodi helper per il sistema NPC basato su Personaggio ---
+
+    // Crea e registra un Personaggio con i suoi dialoghi
+    private Personaggio registraNPC(String nome, List<String> dialoghi) {
+        Personaggio pg = new Personaggio(nome);
+        pg.setDialoghi(dialoghi);
+        registroNPC.put(nome, pg);
+        return pg;
+    }
+
+    // Crea e registra un Fantoccio (testi a schermo senza nome) con i suoi dialoghi
+    private Fantoccio registraFantoccio(String chiaveRegistro, List<String> dialoghi) {
+        Fantoccio f = new Fantoccio();
+        f.setDialoghi(dialoghi);
+        registroNPC.put(chiaveRegistro, f);
+        return f;
+    }
+
+    // Mostra dialogo prendendo la battuta da Personaggio.parla()
+    private void mostraDialogoNPC(GameScreen scenaSfondo, String idScenaSfondo,
+                                   Personaggio pg, ImageIcon sprite) {
+        String battuta = pg.parla();
+        if (battuta == null) {
+            // Dialoghi finiti, reset e riparte dal primo
+            pg.resetDialogo();
+            battuta = pg.parla();
+        }
+        if (battuta != null) {
+            mostraDialogo(scenaSfondo, idScenaSfondo, pg.getNome(), battuta, sprite);
+        }
     }
 
 
