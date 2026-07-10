@@ -19,50 +19,51 @@ public class ModelDB {
     
     public ModelDB(){
         connettiDatabase();
-        inizializzaTabelle();
     }
-    
-    private void inizializzaTabelle() {
-        try {
-        String saves = "CREATE TABLE IF NOT EXISTS saves (" +
-                       "id INT PRIMARY KEY," +
-                       "stanza_attuale VARCHAR(100)," +
-                       "enigma_attuale INT)";
 
-        String records = "CREATE TABLE IF NOT EXISTS records (" +
-                         "id INT AUTO_INCREMENT PRIMARY KEY," +
-                         "nome VARCHAR(50)," +
-                         "punteggio INT," +
-                         "data TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
-
-        conn.prepareStatement(saves).executeUpdate();
-        conn.prepareStatement(records).executeUpdate();
-        System.out.println("TEST: Tabelle inizializzate");
-    } catch (SQLException e) {
-        System.err.println("Errore creazione tabelle: " + e.getMessage());
-    }
-}
-    
-    // Funzione che connette al Database
+    // Funzione che connette al Database e crea/aggiorna le tabelle
     private void connettiDatabase(){
         try{
             conn = DriverManager.getConnection("jdbc:h2:./saves/DB");
             System.out.println("TEST: Connessione al DB avvenuta");
-            
-            // Se le tabelle non esistono al primo avvio le si creano
-            String querySaves = "CREATE TABLE IF NOT EXISTS saves"
-                    + "(id INT PRIMARY KEY,stanza_attuale INT,enigma_attuale INT)";
-            try (PreparedStatement pstmSaves = conn.prepareStatement(querySaves)) {
-                pstmSaves.executeUpdate();
+
+            // saves: la stanza e' il NOME della scena (testo), non un numero
+            eseguiUpdate("CREATE TABLE IF NOT EXISTS saves ("
+                    + "id INT PRIMARY KEY,"
+                    + "stanza_attuale VARCHAR(100),"
+                    + "enigma_attuale INT)");
+
+            // migrazione per i vecchi DB dove stanza_attuale era INT:
+            // converto la colonna in testo senza perdere l'eventuale riga
+            try {
+                eseguiUpdate("ALTER TABLE saves ALTER COLUMN stanza_attuale VARCHAR(100)");
+            } catch (SQLException e) {
+                // colonna gia' del tipo giusto: ignoro
             }
-            
-            String queryRecords = "CREATE TABLE IF NOT EXISTS records (id INT PRIMARY KEY AUTO_INCREMENT, punteggio INT)";
-            try (PreparedStatement pstmRecords = conn.prepareStatement(queryRecords)) {
-                pstmRecords.executeUpdate();
-            }         
+
+            // records: classifica dei punteggi
+            eseguiUpdate("CREATE TABLE IF NOT EXISTS records ("
+                    + "id INT AUTO_INCREMENT PRIMARY KEY,"
+                    + "nome VARCHAR(50),"
+                    + "punteggio INT,"
+                    + "data TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+
+            // difesa contro vecchi DB creati senza la colonna nome
+            try {
+                eseguiUpdate("ALTER TABLE records ADD COLUMN IF NOT EXISTS nome VARCHAR(50)");
+            } catch (SQLException e) {
+                // colonna gia' presente: ignoro
+            }
         }
         catch (SQLException e){
             System.err.println("Errore di connessione al DB: "+e.getMessage());
+        }
+    }
+
+    // piccolo helper per eseguire una CREATE/ALTER chiudendo lo statement
+    private void eseguiUpdate(String sql) throws SQLException {
+        try (PreparedStatement pstm = conn.prepareStatement(sql)) {
+            pstm.executeUpdate();
         }
     }
     
@@ -176,11 +177,27 @@ public class ModelDB {
             pstm.close();
             return null;    // nessun salvataggio trovato
 
-        } 
+        }
         catch (SQLException e) {
             System.err.println(e.getMessage());
             return null;
         }
     }
-    
+
+    // Salva (o aggiorna) la partita corrente nella riga id=1
+    public void salvaPartita(String stanzaAttuale, String enigmaAttuale) {
+        try {
+            // MERGE = insert o update: funziona sia se il salvataggio esiste già
+            // sia se è il primo, senza violare la primary key id=1
+            String query = "MERGE INTO saves (id, stanza_attuale, enigma_attuale) KEY(id) VALUES (1, ?, ?)";
+            PreparedStatement pstm = conn.prepareStatement(query);
+            pstm.setString(1, stanzaAttuale);
+            pstm.setString(2, enigmaAttuale);
+            pstm.executeUpdate();
+            pstm.close();
+            System.out.println("TEST: Partita salvata → " + stanzaAttuale);
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
 }
