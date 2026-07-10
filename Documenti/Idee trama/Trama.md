@@ -32,17 +32,10 @@ Il protagonista non conosce la via per andare verso il castello ma si accorge ch
 
 Il protagonista arrivato al porto della città vedrà tante persone portuali, ma la sua attenzione si soffermerà su questa strana creatura. E' un costrutto ideato dal Re in persona che sta analizzando tutti gli arrivati per capire chi sono i mercanti che hanno risolto la prima prova.
 	
-*   **David**: *"Complimenti! Hai superato il primo ostacolo, ma il tuo cammino sarà ancora più tortuoso, sua maestà cerca solamente gente competente nel suo castello." Per ora ti sei meritato la mappa per andare verso il castello.*
-	
->[!TODO] Da implementare
->Inseriremo nel programma una possibilità su 1000 che il clanker sia danneggiato e che risponda con rumori robotici e dia al protagonista una **strana birra**.
->
->Da implementare inoltre che se il giocatore non ha nell'inventario il tessuto il robot lo farà tornare indietro a prenderlo per proseguire nella storia.
+*   **David**: *"Complimenti! Hai superato il primo ostacolo, ma il tuo cammino sarà ancora più tortuoso, sua maestà cerca solamente gente competente nel suo castello." Per ora ti sei meritato la mappa per andare verso il castello.
 
 Da questo momento in poi il protagonista aprendo la mappa capirà ( e se non lo capirà lo diranno gli NPC) e la prossima tappa è il bosco. 
->[!TODO] Mappa open
->Per aprire la mappa il player potrà sempre vederla tranne nei dialoghi con *M*
->
+
 
 Per arrivare nel bosco gli serve una **carrozza**, quindi deve andare alla stalla. Se prova ad andare nel bosco senza un signore random NPC basic lo rispedirà indietro.
 

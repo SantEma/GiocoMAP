@@ -135,7 +135,7 @@ public class MainFrame extends javax.swing.JFrame {
     }
     
     // Funzione per cambiare scenari
-    public void mostraPannello(javax.swing.JPanel newPanel){
+    public void mostraPannello(javax.swing.JComponent newPanel){
         // Rimuovo gli elementi della scena attuale
         this.getContentPane().removeAll();
 

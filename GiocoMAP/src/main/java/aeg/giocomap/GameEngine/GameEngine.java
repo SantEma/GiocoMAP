@@ -24,12 +24,18 @@ import aeg.giocomap.Model.Enigmi.Enigma;
 import aeg.giocomap.Util.JsonLoader;
 import com.google.gson.JsonObject;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 import java.awt.event.*;
-import java.awt.*;
+import java.awt.image.BufferedImage;
 import javax.swing.*;
+import javax.imageio.ImageIO;
+import java.io.IOException;
 
 public class GameEngine {
 
+    // Variabili per immagazzinare i dialoghi dei file JSON già da subito
     private final JsonObject dbWallOfText;
     private final JsonObject dbStoria;
     private final JsonObject dbHint;
@@ -149,29 +155,105 @@ public class GameEngine {
             System.out.println("Carico partita dalla stanza: " + stanza);
             return;
         }
+        
+        // Estraggo lettera (dal database)
+        List<String> lettera=JsonLoader.estraiLista(dbWallOfText.getAsJsonObject("Lettera"),"lettera_iniziale");
+        
+        // Estrazione testo enigma
+        String enigmaText = dbWallOfText.getAsJsonObject("Schermo").get("Enigma_1_Lettera").getAsString();
+        List<String> letteraRetro = Arrays.asList(enigmaText);
 
-        List<String> lettera = JsonLoader.estraiLista(
-            dbWallOfText.getAsJsonObject("Lettera"), "lettera_iniziale");
+        // Estrazione dei 3 aiuti
+        List<String> hints = JsonLoader.estraiLista(dbHint.getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
 
-        JPanel giocoTest = new JPanel(new BorderLayout());
-        giocoTest.setBackground(Color.BLACK);
-        JLabel testo_test = new JLabel("Premi I per aprire inventario TEST");
-        testo_test.setForeground(Color.RED);
-        testo_test.setFont(new Font("Arial", Font.BOLD, 24));
-        testo_test.setHorizontalAlignment(SwingConstants.CENTER);
-        giocoTest.add(testo_test, BorderLayout.CENTER);
-        sceneManager.registraScena("GIOCO_TEST", giocoTest);
-        LetteraScreen schermata_lettera = new LetteraScreen(lettera, () -> {
-            System.out.println("TEST: Lettera finita, gioco START");
+        // Mappa per fare storage delle posizioni dei personaggi
+        Map<double[], Runnable> zonePiazza = new HashMap<>();
+        final GameScreen[] piazzaCentraleArr = new GameScreen[1];
+
+        // Circa posizione NPC1
+        zonePiazza.put(new double[]{0.3090, 0.6083, 0.08, 0.25}, () -> mostraDialogo(piazzaCentraleArr[0], "PIAZZA_CENTRALE", "Abitante 1", hints.get(0), null));
+        // Circa posizione NPC2
+        zonePiazza.put(new double[]{0.5349, 0.4436, 0.08, 0.25}, () -> mostraDialogo(piazzaCentraleArr[0], "PIAZZA_CENTRALE", "Abitante 2", hints.get(1), null));
+        // Circa posizione NPC3
+        zonePiazza.put(new double[]{0.6228, 0.6285, 0.08, 0.25}, () -> mostraDialogo(piazzaCentraleArr[0], "PIAZZA_CENTRALE", "Abitante 3", hints.get(2), null));
+
+        BufferedImage sfondoPiazza = null;
+        try {
+            sfondoPiazza = ImageIO.read(getClass().getResourceAsStream("/sprites/Luoghi/PiazzaCentrale.png"));
+        } catch (IOException e) {
+            System.err.println("Errore caricamento sfondo: " + e.getMessage());
+        }
+
+        GameScreen piazzaCentrale = new GameScreen(sfondoPiazza, zonePiazza);
+        
+        // Tasto di test per passare al porto
+        // ToDo:DA RIMUOVERE APPENA IMPLEMENTIAMO IL MOVIMENTO
+        JButton btnToPorto = new JButton("Vai al Porto");
+        btnToPorto.setBounds(10, 10, 150, 40);
+        btnToPorto.addActionListener(e -> sceneManager.mostraScena("PORTO"));
+        piazzaCentrale.add(btnToPorto);
+        
+        piazzaCentraleArr[0] = piazzaCentrale;
+        sceneManager.registraScena("PIAZZA_CENTRALE", piazzaCentrale);
+        
+        // Inizializzazione scena PORTO
+        Map<double[], Runnable> zonePorto = new HashMap<>();
+        final GameScreen[] portoScreenArr = new GameScreen[1];
+
+        // Estrazione dialogo di David e caricamento sprite
+        String dialogoDavid = dbStoria.getAsJsonObject("Dialoghi_NPC").getAsJsonObject("David").get("incontro_1").getAsString();
+        ImageIcon spriteDavid = new ImageIcon(getClass().getResource("/sprites/Personaggi/David.png"));
+
+        // Circa posizione per cliccare David (ToDo: IN TEST, DA CAMBIARE CON COORDINATE GIUSTE)
+        zonePorto.put(new double[]{0.6228, 0.6285, 0.08, 0.25}, () -> {
+            mostraDialogo(portoScreenArr[0], "PORTO", "David", dialogoDavid, spriteDavid);
+            // Sblocca la mappa post interazione David
+            giocatore.setPossiedeMappa(true);
+        });
+
+        BufferedImage sfondoPorto = null;
+        try {
+            sfondoPorto = ImageIO.read(getClass().getResourceAsStream("/sprites/Luoghi/PortoMareBlu.png"));
+        } catch (IOException e) {
+            System.err.println("Errore caricamento sfondo porto: " + e.getMessage());
+        }
+        GameScreen portoScreen = new GameScreen(sfondoPorto, zonePorto);
+        portoScreenArr[0] = portoScreen;
+        
+        // Tasto di test per tornare alla Piazza Centrale
+        // ToDo: DA RIMUOVERE APPENA IMPLEMENTIAMO IL MOVIMENTO
+        JButton btnToPiazza = new JButton("Torna alla Piazza");
+        btnToPiazza.setBounds(10, 10, 150, 40);
+        btnToPiazza.addActionListener(e -> sceneManager.mostraScena("PIAZZA_CENTRALE"));
+        portoScreen.add(btnToPiazza);
+        
+        sceneManager.registraScena("PORTO", portoScreen);
+        
+        // Utilizzo del bottone per il dietro della lettera
+        LetteraScreen schermata_retro = new LetteraScreen(letteraRetro, () -> {
+            System.out.println("DEBUG: Lettera retro finita, gioco START");
+            
+            // Lettera finita, alla prossima scena sblocca l'inventario e mostro piazza centrale
             giocatore.setPossiedeInventario(true);
-            // TEST MOMENTANEI ANDRANNO SOSTITUITI CON LE VERE SCENE
+            
+            sceneManager.mostraScena("PIAZZA_CENTRALE");
+        });
+        sceneManager.registraScena("LETTERA_RETRO", schermata_retro);
+
+        // Lettera avanti, passa al retro appena finito
+        LetteraScreen schermata_lettera = new LetteraScreen(lettera, () -> {
+            System.out.println("DEBUG: Lettera finita, mostro retro");
+            
+            // Retro della lettera con l'enigma sopra
+            sceneManager.mostraScena("LETTERA_RETRO");
+
         });
         sceneManager.registraScena("LETTERA", schermata_lettera);
         sceneManager.mostraScena("LETTERA");
     }
-    
 
 
+    // Chiamato quando il giocatore vede un enigma
     public void iniziaEnigma() {
         timerEnigma = new TimerEnigma(() -> {
             System.out.println("DEBUG: Secondi: " + timerEnigma.getSecondi());
@@ -213,7 +295,12 @@ public class GameEngine {
     }
 
 
-    
+    /*
+    ToDo:
+    Ragazzi vi lascio questo commento qui in modo che possiate capire:
+    I COMMENTI PER FAVORE CONTROLLATELI. Si vede che non li avete scritti voi.
+    Aggiustateli sempre ASAP, anche con l'aiuto di AI se deve essere necessario
+    */
     public void toggleChat() {
         if (gameClient == null) {
             // nessuna sessione attiva: il primo che apre la chat diventa host
@@ -373,6 +460,18 @@ public class GameEngine {
 
     public void setDialogueActive(boolean active) {
         this.isDialogoActive = active;
+    }
+
+    private void mostraDialogo(GameScreen scenaSfondo, String idScenaSfondo, String nome, String battuta, ImageIcon sprite) {
+        if (isDialogoActive) return;
+        setDialogueActive(true);
+        DialogueScreen ds = new DialogueScreen(scenaSfondo, () -> {
+            setDialogueActive(false);
+            sceneManager.mostraScena(idScenaSfondo);
+        });
+        ds.aggiornaSchermata(nome, battuta, sprite);
+        sceneManager.registraScena("DIALOGO_CORRENTE", ds);
+        sceneManager.mostraScena("DIALOGO_CORRENTE");
     }
 
 

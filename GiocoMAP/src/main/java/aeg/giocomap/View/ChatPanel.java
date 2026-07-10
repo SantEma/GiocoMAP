@@ -16,7 +16,16 @@ import java.awt.event.*;
  * @author murgo
  */
 
-public class ChatPanel extends JPanel {
+public class ChatPanel extends JComponent {
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (isOpaque()) {
+            g.setColor(getBackground());
+            g.fillRect(0, 0, getWidth(), getHeight());
+        }
+    }
 
     private final JTextArea areaMessaggi;
     private final JTextField campoTesto;
@@ -26,9 +35,21 @@ public class ChatPanel extends JPanel {
     public ChatPanel() {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(300, 400));
+        setOpaque(true);
         setBackground(new Color(20, 20, 20));
 
-        JPanel top = new JPanel(new BorderLayout());
+        JComponent top = new JComponent() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (isOpaque()) {
+                    g.setColor(getBackground());
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                }
+            }
+        };
+        top.setLayout(new BorderLayout());
+        top.setOpaque(true);
         top.setBackground(new Color(20, 20, 20));
         JLabel titolo = new JLabel("Chat", SwingConstants.LEFT);
         titolo.setForeground(Color.WHITE);
@@ -49,7 +70,18 @@ public class ChatPanel extends JPanel {
         scroll.setBorder(BorderFactory.createEmptyBorder());
         add(scroll, BorderLayout.CENTER);
 
-        JPanel bottom = new JPanel(new BorderLayout());
+        JComponent bottom = new JComponent() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (isOpaque()) {
+                    g.setColor(getBackground());
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                }
+            }
+        };
+        bottom.setLayout(new BorderLayout());
+        bottom.setOpaque(true);
         bottom.setBackground(new Color(20, 20, 20));
 
         campoTesto = new JTextField();
