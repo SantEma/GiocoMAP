@@ -4,21 +4,52 @@
  */
 package aeg.giocomap.View;
 
-import java.awt.event.WindowEvent;
-import javax.swing.JFrame;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLayeredPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.WindowConstants;
 /**
  *
  * @author Utente
  */
 public class MainFrame extends javax.swing.JFrame {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainFrame.class.getName());
+    private static final Logger logger = Logger.getLogger(MainFrame.class.getName());
 
     // Bottone chat sempre visibile: viene messo sul JLayeredPane gia' integrato
     // nel JFrame (getLayeredPane), su un livello sopra al content pane. Cosi
     // fluttua sopra qualunque scena senza interferire con mostraPannello()
-    private javax.swing.JButton btnChatFluttuante;
+    private JButton btnChatFluttuante;
+    
+    // Frecce direzionali in sovraimpressione
+    private JButton btnNord;
+    private JButton btnSud;
+    private JButton btnEst;
+    private JButton btnOvest;
+    
+    // Immagini originali delle frecce per il ridimensionamento
+    private Image imgNord;
+    private Image imgSud;
+    private Image imgEst;
+    private Image imgOvest;
 
     /**
      * Creates new form MainFrame
@@ -28,43 +59,82 @@ public class MainFrame extends javax.swing.JFrame {
 
         // Impedire di rimpicciolire o modificare la grandezza della finestra
         setExtendedState(JFrame.MAXIMIZED_BOTH);
-
-        java.awt.Dimension screensize = java.awt.Toolkit.getDefaultToolkit().getScreenSize(); // Adatto alle dimensioni max dello schermo
         setMinimumSize(new Dimension(1024, 768));
 
 
-        java.net.URL iconURL = getClass().getResource("/sprites/Oggetti/Tessuto.png");
+        URL iconURL = getClass().getResource("/sprites/Oggetti/Tessuto.png");
         if(iconURL != null){
-            javax.swing.ImageIcon icona = new javax.swing.ImageIcon(iconURL);
+            ImageIcon icona = new ImageIcon(iconURL);
             this.setIconImage(icona.getImage());
             System.out.println("DEBUG: Immagine caricata");
         }
         else System.out.println("DEBUG: Errore di caricamento foto");
 
         impostaBottoneChat();
+        impostaFrecceDirezionali();
     }
 
     private void impostaBottoneChat() {
         // stesso stile dei bottoni del TitleScreen: bianco, testo nero, Arial bold
-        btnChatFluttuante = new javax.swing.JButton("Chat");
+        btnChatFluttuante = new JButton("Chat");
         btnChatFluttuante.setFocusable(false);
-        btnChatFluttuante.setBackground(java.awt.Color.WHITE);
-        btnChatFluttuante.setForeground(java.awt.Color.BLACK);
-        btnChatFluttuante.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 16));
-        btnChatFluttuante.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnChatFluttuante.setBackground(Color.WHITE);
+        btnChatFluttuante.setForeground(Color.BLACK);
+        btnChatFluttuante.setFont(new Font("Arial", Font.BOLD, 16));
+        btnChatFluttuante.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // POPUP_LAYER sta sopra al content pane (dove vanno le scene)
-        getLayeredPane().add(btnChatFluttuante, javax.swing.JLayeredPane.POPUP_LAYER);
+        getLayeredPane().add(btnChatFluttuante, JLayeredPane.POPUP_LAYER);
 
-        // riposiziona il bottone quando la finestra cambia dimensione
-        getRootPane().addComponentListener(new java.awt.event.ComponentAdapter() {
+        // riposiziona i bottoni quando la finestra cambia dimensione
+        getRootPane().addComponentListener(new ComponentAdapter() {
             @Override
-            public void componentResized(java.awt.event.ComponentEvent e) {
+            public void componentResized(ComponentEvent e) {
                 riposizionaBottoneChat();
+                riposizionaFrecce();
             }
         });
         riposizionaBottoneChat();
     }
+    
+    // recuperiamo il file delle frecce
+    private void impostaFrecceDirezionali() {
+        imgNord = caricaImmagineOriginale("/sprites/StrumentiGrafici/NORDarrow.png");
+        imgSud = caricaImmagineOriginale("/sprites/StrumentiGrafici/SUDarrow.png");
+        imgEst = caricaImmagineOriginale("/sprites/StrumentiGrafici/ESTarrow.png");
+        imgOvest = caricaImmagineOriginale("/sprites/StrumentiGrafici/OVESTarrow.png");
+        
+        btnNord = creaBottoneFrecciaVuoto();
+        btnSud = creaBottoneFrecciaVuoto();
+        btnEst = creaBottoneFrecciaVuoto();
+        btnOvest = creaBottoneFrecciaVuoto();
+        
+        getLayeredPane().add(btnNord, JLayeredPane.POPUP_LAYER);
+        getLayeredPane().add(btnSud, JLayeredPane.POPUP_LAYER);
+        getLayeredPane().add(btnEst, JLayeredPane.POPUP_LAYER);
+        getLayeredPane().add(btnOvest, JLayeredPane.POPUP_LAYER);
+        
+        setFrecceVisibili(false);
+    }
+    
+    private Image caricaImmagineOriginale(String path) {
+        URL url = getClass().getResource(path);
+        if (url != null) {
+            return new ImageIcon(url).getImage();
+        }
+        return null;
+    }
+
+    private JButton creaBottoneFrecciaVuoto() {
+        JButton btn = new JButton();
+        btn.setBorderPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setFocusPainted(false);
+        btn.setOpaque(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
+    }
+
 
     private void riposizionaBottoneChat() {
         if (btnChatFluttuante == null) return;
@@ -75,10 +145,70 @@ public class MainFrame extends javax.swing.JFrame {
         int w = getLayeredPane().getWidth();
         btnChatFluttuante.setBounds(w - btnW - margine, margine, btnW, btnH);
     }
+    
+    // riposizioniamo le frecce quando si torna su una scena dove servono
+    private void riposizionaFrecce() {
+        if (btnNord == null) return;
+        int w = getLayeredPane().getWidth();
+        int h = getLayeredPane().getHeight();
+        
+        // Ridimensionamento dinamico: le frecce saranno circa l'8% della larghezza o altezza dello schermo
+        int dimFreccia = Math.min(w, h) * 8 / 100;
+        
+        ridimensionaEImposta(btnNord, imgNord, dimFreccia);
+        ridimensionaEImposta(btnSud, imgSud, dimFreccia);
+        ridimensionaEImposta(btnEst, imgEst, dimFreccia);
+        ridimensionaEImposta(btnOvest, imgOvest, dimFreccia);
+        
+        int margine = 15; // Più vicine ai bordi
+        
+        btnNord.setLocation((w - btnNord.getWidth()) / 2, margine);
+        btnSud.setLocation((w - btnSud.getWidth()) / 2, h - btnSud.getHeight() - margine);
+        btnEst.setLocation(w - btnEst.getWidth() - margine, (h - btnEst.getHeight()) / 2);
+        btnOvest.setLocation(margine, (h - btnOvest.getHeight()) / 2);
+    }
+
+    private void ridimensionaEImposta(JButton btn, Image imgOriginale, int targetDim) {
+        if (imgOriginale != null) {
+            int origW = imgOriginale.getWidth(null);
+            int origH = imgOriginale.getHeight(null);
+            if (origW <= 0 || origH <= 0) return;
+            
+            int newW, newH;
+            if (origW > origH) {
+                newW = targetDim;
+                newH = (int)((double)origH / origW * targetDim);
+            } else {
+                newH = targetDim;
+                newW = (int)((double)origW / origH * targetDim);
+            }
+            
+            Image scaled = imgOriginale.getScaledInstance(newW, newH, Image.SCALE_SMOOTH);
+            btn.setIcon(new ImageIcon(scaled));
+            btn.setSize(newW, newH);
+        }
+    }
+
+    public void setFrecceVisibili(boolean visibili) {
+        if (btnNord != null) {
+            btnNord.setVisible(visibili);
+            btnSud.setVisible(visibili);
+            btnEst.setVisible(visibili);
+            btnOvest.setVisible(visibili);
+        }
+    }
 
     // registra l'azione da eseguire al click del bottone chat fluttuante
-    public void setChatListener(java.awt.event.ActionListener listener) {
+    public void setChatListener(ActionListener listener) {
         btnChatFluttuante.addActionListener(listener);
+    }
+
+    // registra le azioni per le frecce direzionali
+    public void setFrecceListener(ActionListener nord, ActionListener sud, ActionListener est, ActionListener ovest) {
+        if (nord != null) btnNord.addActionListener(nord);
+        if (sud != null) btnSud.addActionListener(sud);
+        if (est != null) btnEst.addActionListener(est);
+        if (ovest != null) btnOvest.addActionListener(ovest);
     }
 
     /**
@@ -125,36 +255,44 @@ public class MainFrame extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (ReflectiveOperationException | UnsupportedLookAndFeelException ex) {
+            logger.log(Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new MainFrame().setVisible(true));
+        EventQueue.invokeLater(() -> new MainFrame().setVisible(true));
     }
     
     // Funzione per cambiare scenari
-    public void mostraPannello(javax.swing.JComponent newPanel){
+    public void mostraPannello(JComponent newPanel){
         // Rimuovo gli elementi della scena attuale
         this.getContentPane().removeAll();
 
         // Creo una nuova paginazione con nuove regole per la nuova scena
-        this.getContentPane().setLayout(new java.awt.BorderLayout());
+        this.getContentPane().setLayout(new BorderLayout());
 
         // Inserisco la nuova scena
-        this.getContentPane().add(newPanel, java.awt.BorderLayout.CENTER);
+        this.getContentPane().add(newPanel, BorderLayout.CENTER);
 
         // Ricalibrare la finestra grafica
         this.revalidate();
         this.repaint();
 
-        // il bottone chat vive sul layeredPane del frame, lo tengo sempre
+        // il bottone chat e le frecce vivono sul layeredPane del frame, li tengo sempre
         // in primo piano sopra la nuova scena
         if (btnChatFluttuante != null) {
-            getLayeredPane().setLayer(btnChatFluttuante, javax.swing.JLayeredPane.POPUP_LAYER);
+            getLayeredPane().setLayer(btnChatFluttuante, JLayeredPane.POPUP_LAYER);
             riposizionaBottoneChat();
             btnChatFluttuante.repaint();
+        }
+        if (btnNord != null) {
+            getLayeredPane().setLayer(btnNord, JLayeredPane.POPUP_LAYER);
+            getLayeredPane().setLayer(btnSud, JLayeredPane.POPUP_LAYER);
+            getLayeredPane().setLayer(btnEst, JLayeredPane.POPUP_LAYER);
+            getLayeredPane().setLayer(btnOvest, JLayeredPane.POPUP_LAYER);
+            riposizionaFrecce();
+            btnNord.repaint(); btnSud.repaint(); btnEst.repaint(); btnOvest.repaint();
         }
     }
     

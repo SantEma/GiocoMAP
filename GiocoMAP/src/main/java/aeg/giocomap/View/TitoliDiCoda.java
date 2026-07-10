@@ -5,6 +5,7 @@
 package aeg.giocomap.View;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.List;
 
 /**
@@ -79,7 +80,7 @@ public class TitoliDiCoda extends JPanel {
         add(contenuto, gb);
     }
 
-    public void addIndietroListener(java.awt.event.ActionListener listener) {
+    public void addIndietroListener(ActionListener listener) {
         for (Component c : ((JPanel) getComponent(0)).getComponents()) {
             if (c instanceof JButton) {
                 ((JButton) c).addActionListener(listener);

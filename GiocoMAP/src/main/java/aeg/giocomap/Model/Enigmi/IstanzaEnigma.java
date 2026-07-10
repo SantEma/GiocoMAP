@@ -8,6 +8,7 @@ import aeg.giocomap.Model.Oggetti.Oggetto;
 import aeg.giocomap.Util.JsonLoader;
 import com.google.gson.JsonObject;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ public class IstanzaEnigma {
     // Metodo privato per caricare gli aiuti dal file dialoghi
     private static List<String> caricaAiuti(String enigmaId) {
         JsonObject root = JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
-        if (root == null) return java.util.Collections.emptyList();
+        if (root == null) return Collections.emptyList();
         return JsonLoader.estraiLista(root, enigmaId);
     }
 
