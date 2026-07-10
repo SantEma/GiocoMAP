@@ -45,8 +45,8 @@ public final class MappaPanel extends JPanel {
         
         add(istruzioni,BorderLayout.SOUTH);
         
-        this.addComponentListener(new java.awt.event.ComponentAdapter() {
-           public void componenentResized(java.awt.event.ComponentEvent e){
+        this.addComponentListener(new ComponentAdapter() {
+           public void componenentResized(ComponentEvent e){
                rigeneraMappa();
                repaint();
            }
