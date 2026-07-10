@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
+import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import javax.swing.*;
@@ -67,6 +68,10 @@ public class GameEngine {
     private ChatPanel chatPanel;
     private boolean serverAvviato = false;
 
+    // scena di gioco da cui e' stato aperto il menu di pausa (per "Continua"
+    // e per il salvataggio: la scena vera, non "MENU_PAUSA")
+    private String scenaDaSalvare = "MENU_PRINCIPALE";
+
     public GameEngine(MainFrame frame) {
         this.dbWallOfText = JsonLoader.caricaJson("/dialoghi/walloftext.json");
         this.dbStoria = JsonLoader.caricaJson("/dialoghi/dialoghi_storia.json");
@@ -103,6 +108,10 @@ public class GameEngine {
 
         sceneManager.registraScena("INVENTARIO", new InventarioPanel(this.giocatore.getInventario()));
         impostaKeyBindingInventario();
+        impostaKeyBindingEsc();
+
+        registraMenuPausa();
+        registraComandi();
 
         TitleScreenImp();
         sceneManager.mostraScena("MENU_PRINCIPALE");
@@ -151,10 +160,25 @@ public class GameEngine {
             }
             music_player.stopMusic();
             String stanza = salvataggio[0];
-            String enigma = salvataggio[1];
             System.out.println("Carico partita dalla stanza: " + stanza);
+
+            // ricreo e registro le scene cosi quella salvata esiste,
+            // ripristino lo stato del giocatore e la mostro
+            costruisciScene();
+            giocatore.setPossiedeInventario(true);
+            giocatore.setPossiedeMappa(true);
+            sceneManager.mostraScena(stanza);
             return;
         }
+
+        costruisciScene();
+        sceneManager.mostraScena("LETTERA");
+    }
+
+    // Costruisce e registra tutte le scene di gioco (piazza, porto, lettere).
+    // Va chiamato sia in partita nuova sia in caricamento, cosi le scene
+    // esistono prima di essere mostrate.
+    private void costruisciScene() {
         
         // Estraggo lettera (dal database)
         List<String> lettera=JsonLoader.estraiLista(dbWallOfText.getAsJsonObject("Lettera"),"lettera_iniziale");
@@ -249,7 +273,6 @@ public class GameEngine {
 
         });
         sceneManager.registraScena("LETTERA", schermata_lettera);
-        sceneManager.mostraScena("LETTERA");
     }
 
 
@@ -572,6 +595,121 @@ public class GameEngine {
         if (sceneManager.isMapOpen()) sceneManager.ChiudiMappa();
         if (!sceneManager.isOpenInventario()) sceneManager.ApriInventario();
         else sceneManager.ChiudiInventario();
+    }
+
+    private void impostaKeyBindingEsc() {
+        JRootPane rootPane = frame.getRootPane();
+        InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap am = rootPane.getActionMap();
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "esc");
+
+        am.put("esc", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                gestisciEsc();
+            }
+        });
+    }
+
+    private void gestisciEsc() {
+        // durante un dialogo l'ESC non apre il menu
+        if (isDialogoActive) return;
+
+        // ESC come "indietro": prima chiude eventuali pannelli sovrapposti.
+        // chat/mappa/inventario NON aggiornano scenaCorrente, vanno intercettati coi flag
+        if (sceneManager.isChatOpen()) { toggleChat(); return; }
+        if (sceneManager.isMapOpen()) { sceneManager.ChiudiMappa(); return; }
+        if (sceneManager.isOpenInventario()) { sceneManager.ChiudiInventario(); return; }
+
+        switch (sceneManager.getScenaCorrente()) {
+            // scene "finali": ESC non fa nulla
+            case "MENU_PRINCIPALE":
+            case "TITOLI_CODA":
+                return;
+
+            // gia' nel menu di pausa: ESC riprende il gioco
+            case "MENU_PAUSA":
+                sceneManager.mostraScena(scenaDaSalvare);
+                return;
+
+            // nella schermata comandi: ESC torna al menu di pausa
+            case "COMANDI":
+                sceneManager.mostraScena("MENU_PAUSA");
+                return;
+
+            // scene di gioco: apre il menu di pausa
+            default:
+                scenaDaSalvare = sceneManager.getScenaCorrente();
+                sceneManager.mostraScena("MENU_PAUSA");
+                break;
+        }
+    }
+
+    // menu di pausa: immagine unica (Menu.png) con 3 zone cliccabili sui bottoni
+    private void registraMenuPausa() {
+        BufferedImage sfondoMenu = null;
+        try {
+            sfondoMenu = ImageIO.read(getClass().getResourceAsStream(
+                "/sprites/StrumentiGrafici/Menu.png"));
+        } catch (IOException e) {
+            System.err.println("Errore caricamento Menu.png: " + e.getMessage());
+        }
+
+        // zone in percentuale {x, y, larghezza, altezza} sui tre bottoni
+        Map<double[], Runnable> zone = new HashMap<>();
+        zone.put(new double[]{0.085, 0.375, 0.28, 0.105},           // Continua
+            () -> sceneManager.mostraScena(scenaDaSalvare));
+        zone.put(new double[]{0.085, 0.535, 0.29, 0.105},           // Comandi gioco
+            () -> sceneManager.mostraScena("COMANDI"));
+        zone.put(new double[]{0.085, 0.690, 0.28, 0.105},           // Salva ed esci
+            this::salvaEdEsci);
+
+        GameScreen menuPausa = new GameScreen(sfondoMenu, zone);
+        sceneManager.registraScena("MENU_PAUSA", menuPausa);
+    }
+
+    // schermata con la lista dei comandi (testo provvisorio, da rifinire)
+    private void registraComandi() {
+        JPanel comandi = new JPanel(new BorderLayout());
+        comandi.setBackground(new Color(30, 20, 20));
+
+        JLabel titolo = new JLabel("Comandi di gioco", SwingConstants.CENTER);
+        titolo.setForeground(Color.WHITE);
+        titolo.setFont(new Font("Arial", Font.BOLD, 34));
+        titolo.setBorder(BorderFactory.createEmptyBorder(40, 0, 20, 0));
+        comandi.add(titolo, BorderLayout.NORTH);
+
+        JTextArea lista = new JTextArea(
+            "   I      Apri / chiudi Inventario\n\n" +
+            "   M      Apri / chiudi Mappa\n\n" +
+            "   C      Apri / chiudi Chat\n\n" +
+            "   ESC    Menu di pausa\n\n" +
+            "   Click sui personaggi per parlare\n"
+        );
+        lista.setEditable(false);
+        lista.setOpaque(false);
+        lista.setForeground(Color.WHITE);
+        lista.setFont(new Font("Monospaced", Font.BOLD, 24));
+        lista.setBorder(BorderFactory.createEmptyBorder(20, 80, 20, 80));
+        comandi.add(lista, BorderLayout.CENTER);
+
+        JButton indietro = new JButton("Indietro");
+        indietro.setFont(new Font("Arial", Font.BOLD, 18));
+        indietro.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        indietro.addActionListener(e -> sceneManager.mostraScena("MENU_PAUSA"));
+        JPanel sud = new JPanel();
+        sud.setOpaque(false);
+        sud.setBackground(new Color(30, 20, 20));
+        sud.add(indietro);
+        comandi.add(sud, BorderLayout.SOUTH);
+
+        sceneManager.registraScena("COMANDI", comandi);
+    }
+
+    private void salvaEdEsci() {
+        db.NewStart();
+        db.salvaPartita(scenaDaSalvare, "0");
+        ExitGame();
     }
 
     public void ExitGame() {
