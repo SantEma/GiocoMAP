@@ -8,6 +8,12 @@ import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.View.TitoliDiCoda;
 import aeg.giocomap.View.DialogueScreen;
 import aeg.giocomap.View.LetteraScreen;
+import aeg.giocomap.View.ChatPanel;
+
+import aeg.giocomap.Network.GameServer;
+import aeg.giocomap.Network.GameClient;
+import aeg.giocomap.Network.Message;
+import aeg.giocomap.Network.TipoMessaggio;
 
 import aeg.giocomap.Model.Storage.*;
 import aeg.giocomap.Model.Oggetti.Oggetto;
@@ -33,38 +39,42 @@ public class GameEngine {
     private final JsonObject dbWallOfText;
     private final JsonObject dbStoria;
     private final JsonObject dbHint;
-    
-    // variabili gestione dei dialoghi
+
     private DialogueScreen schermata_dialogo_corrente;
     private Personaggio npcCorrente;
     private ImageIcon spriteNpcAttuale;
     private GameScreen scenaSfondoCorrente;
     private Runnable azione_post_dialogo;
-    
+
     private final ModelDB db;
     private final ModelTXTOggetti txt;
     private final MainFrame frame;
     private final TitleScreen title_screen;
     private final SceneManager sceneManager;
     private final MusicPlayer music_player;
-    private final Giocatore giocatore; 
-    
+    private final Giocatore giocatore;
+
     private boolean isDialogoActive = false;
 
-    // Variabili per il punteggio inserite dal collega
+    // punteggio e timer
     private long tempoInizioEnigma = 0;
     private int punteggioTotale = 0;
     private TimerEnigma timerEnigma;
 
+    // networking
+    private GameServer gameServer;
+    private GameClient gameClient;
+    private ChatPanel chatPanel;
+    private boolean serverAvviato = false;
+
     public GameEngine(MainFrame frame) {
         this.dbWallOfText = JsonLoader.caricaJson("/dialoghi/walloftext.json");
         this.dbStoria = JsonLoader.caricaJson("/dialoghi/dialoghi_storia.json");
-        this.dbHint=JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
-                
+        this.dbHint = JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
+
         this.db = new ModelDB();
         this.txt = new ModelTXTOggetti();
         this.frame = frame;
-       
 
         this.frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -82,12 +92,15 @@ public class GameEngine {
 
         sceneManager.registraScena("MAPPA", new MappaPanel());
         impostaKeyBindingMappa();
-        
-        this.giocatore=new Giocatore("Eryndor");
-        
+        impostaKeyBindingChat();
+        this.frame.setChatListener(e -> chatButtonClick());
+
+        this.giocatore = new Giocatore("Eryndor");
+
         Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
-        if(tessutoIniziale_temp != null) this.giocatore.getInventario().aggiungiOggetto(tessutoIniziale_temp);
-        
+        if (tessutoIniziale_temp != null)
+            this.giocatore.getInventario().aggiungiOggetto(tessutoIniziale_temp);
+
         sceneManager.registraScena("INVENTARIO", new InventarioPanel(this.giocatore.getInventario()));
         impostaKeyBindingInventario();
 
@@ -111,14 +124,29 @@ public class GameEngine {
             music_player.stopMusic();
             Statistiche(false);
         });
+
+       
+        title_screen.addConnettiListener(e -> {
+            String ip = JOptionPane.showInputDialog(
+                frame,
+                "Inserisci l'IP dell'host:",
+                "Partecipa alla Chat",
+                JOptionPane.PLAIN_MESSAGE
+            );
+            if (ip != null && !ip.trim().isEmpty()) {
+                connettiComeClient(ip.trim());
+            }
+        });
     }
-    
+
     private void avviaGioco(boolean carica) {
         String[] salvataggio = db.LoadGame();
 
         if (carica) {
             if (salvataggio == null) {
-                JOptionPane.showMessageDialog(frame,"Nessuna partita salvata trovata!","Attenzione",JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(frame,
+                    "Nessuna partita salvata trovata!", "Attenzione",
+                    JOptionPane.WARNING_MESSAGE);
                 return;
             }
             music_player.stopMusic();
@@ -178,12 +206,12 @@ public class GameEngine {
             
             // Retro della lettera con l'enigma sopra
             sceneManager.mostraScena("LETTERA_RETRO");
+
         });
-        
-        // Mostro scena
-        sceneManager.registraScena("LETTERA_INIZIALE", schermata_lettera);
-        sceneManager.mostraScena("LETTERA_INIZIALE");
+        sceneManager.registraScena("LETTERA", schermata_lettera);
+        sceneManager.mostraScena("LETTERA");
     }
+
 
     // Chiamato quando il giocatore vede un enigma
     public void iniziaEnigma() {
@@ -194,7 +222,6 @@ public class GameEngine {
         System.out.println("DEBUG: Enigma iniziato");
     }
 
-    // Chiamato quando l'enigma viene risolto correttamente
     public void enigmaRisolto(Enigma enigma) {
         if (timerEnigma != null) timerEnigma.ferma();
 
@@ -202,16 +229,14 @@ public class GameEngine {
         int punti = calcolaPunti(secondi);
         punteggioTotale += punti;
 
-        
         if (enigma.getReward() != null) {
             giocatore.getInventario().aggiungiOggetto(enigma.getReward());
             System.out.println("DEBUG: Reward aggiunto: " + enigma.getReward().getNomeOggetto());
         }
 
-        System.out.println("DEBUG: " + secondi + "s , " + punti + " punti, totale: " + punteggioTotale);
+        System.out.println("DEBUG: " + secondi + "s, " + punti + " punti, totale: " + punteggioTotale);
     }
-    
-    //Calcola il punteggio in base al tempo impiegato
+
     private int calcolaPunti(int secondi) {
         int fascia;
         if (secondi <= 100)      fascia = 1;
@@ -229,33 +254,156 @@ public class GameEngine {
         };
     }
 
+
+    
+    public void toggleChat() {
+        if (gameClient == null) {
+            // nessuna sessione attiva: il primo che apre la chat diventa host
+            gameServer = new GameServer();
+            gameServer.avvia();
+            serverAvviato = true;
+
+            gameClient = new GameClient("Eryndor");
+            chatPanel = new ChatPanel();
+            gameClient.connetti("127.0.0.1");
+            chatPanel.setClient(gameClient);
+
+            JOptionPane.showMessageDialog(
+                frame,
+                "Chat avviata! Il tuo IP: " + ottieniIP() +
+                "\nCondividilo con i tuoi amici!",
+                "Server Online",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        }
+        sceneManager.toggleChat(chatPanel);
+    }
+
+    // CLIENT → si connette al server dell'host
+    private void connettiComeClient(String ip) {
+        String nome = JOptionPane.showInputDialog(
+            frame,
+            "Inserisci il tuo nome:",
+            "Partecipa alla Chat",
+            JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (nome == null || nome.trim().isEmpty()) return;
+
+        // Eryndor è riservato all'host
+        if (nome.trim().equalsIgnoreCase("Eryndor")) {
+            JOptionPane.showMessageDialog(
+                frame,
+                "Il nome Eryndor è riservato all'host!",
+                "Nome non valido",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        gameClient = new GameClient(nome.trim());
+        chatPanel = new ChatPanel();
+        boolean ok = gameClient.connetti(ip);
+
+        if (ok) {
+            // gestisci nome duplicato
+            gameClient.getThreadRicezione().setOnNomeDuplicato(() -> {
+                JOptionPane.showMessageDialog(
+                    frame,
+                    "Nome già in uso! Riprova con un altro nome.",
+                    "Nome duplicato",
+                    JOptionPane.WARNING_MESSAGE
+                );
+                gameClient.disconnetti();
+                gameClient = null;
+            });
+
+            chatPanel.setClient(gameClient);
+            JOptionPane.showMessageDialog(
+                frame,
+                "Connesso alla chat!",
+                "Connessione riuscita",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            sceneManager.toggleChat(chatPanel);
+        } else {
+            JOptionPane.showMessageDialog(
+                frame,
+                "Server non trovato! Assicurati che l'host abbia avviato la chat.",
+                "Errore connessione",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    // chiede al sistema operativo quale indirizzo locale userebbe per
+    // raggiungere l'esterno (non serve connessione reale, la connect() su
+    // UDP fa solo scegliere l'interfaccia giusta in base alla tabella di
+    // routing): funziona automaticamente sia su hotspot che su LAN normale,
+    // senza bisogno di indovinare tra le varie interfacce di rete
+    private String ottieniIP() {
+        try (java.net.DatagramSocket socket = new java.net.DatagramSocket()) {
+            socket.connect(java.net.InetAddress.getByName("8.8.8.8"), 10002);
+            String ip = socket.getLocalAddress().getHostAddress();
+            if (ip != null && !ip.equals("0.0.0.0")) return ip;
+        } catch (Exception e) {
+            System.err.println("Errore rilevamento IP (routing): " + e.getMessage());
+        }
+
+        // fallback: cerca manualmente tra le interfacce di rete
+        try {
+            java.util.Enumeration<java.net.NetworkInterface> interfacce =
+                java.net.NetworkInterface.getNetworkInterfaces();
+
+            while (interfacce.hasMoreElements()) {
+                java.net.NetworkInterface ni = interfacce.nextElement();
+                if (!ni.isUp() || ni.isLoopback() || ni.isVirtual()) continue;
+
+                java.util.Enumeration<java.net.InetAddress> indirizzi = ni.getInetAddresses();
+                while (indirizzi.hasMoreElements()) {
+                    java.net.InetAddress addr = indirizzi.nextElement();
+                    if (addr instanceof java.net.Inet4Address && addr.isSiteLocalAddress()) {
+                        return addr.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Errore fallback ricerca IP: " + e.getMessage());
+        }
+        return "127.0.0.1";
+    }
+
     private void Statistiche(boolean fineGioco) {
         String nome = "";
         int punteggio = 0;
 
         if (fineGioco) {
             punteggio = punteggioTotale;
-            
+
             while (nome == null || nome.trim().isEmpty()) {
-                nome = JOptionPane.showInputDialog(frame,"Inserisci il tuo nome per salvare il punteggio:","Fine gioco!",JOptionPane.PLAIN_MESSAGE);
+                nome = JOptionPane.showInputDialog(frame,
+                    "Inserisci il tuo nome per salvare il punteggio:",
+                    "Fine gioco!", JOptionPane.PLAIN_MESSAGE);
                 if (nome == null || nome.trim().isEmpty()) {
-                    JOptionPane.showMessageDialog(
-                        frame,"Devi inserire un nome per continuare!","Attenzione",JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(frame,
+                        "Devi inserire un nome per continuare!",
+                        "Attenzione", JOptionPane.WARNING_MESSAGE);
                 }
             }
             giocatore.setNomePlayer(nome.trim());
             db.salvaSeNecessario(giocatore.getNomePlayer(), punteggio);
         }
 
-        // Presuppone che ModelDB abbia il metodo getRecords
-        List<String[]> records = db.getRecords(); 
-        
-        // Passiamo il nome del giocatore
-        String nome_passato = (giocatore != null && giocatore.getNomePlayer()!= null ? giocatore.getNomePlayer():"");
-        
+        List<String[]> records = db.getRecords();
+        String nome_passato = (giocatore != null && giocatore.getNomePlayer() != null
+            ? giocatore.getNomePlayer() : "");
+        music_player.stopMusic();
+        if (fineGioco) music_player.playMusic(MusicPlayer.END_TITLE_MUSIC);
         TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome_passato);
+        
 
         titoli.addIndietroListener(e -> {
+            music_player.stopMusic();
             music_player.playMusic(MusicPlayer.TITLE_SCREEN_MUSIC);
             sceneManager.mostraScena("MENU_PRINCIPALE");
         });
@@ -264,7 +412,7 @@ public class GameEngine {
         sceneManager.mostraScena("TITOLI_CODA");
     }
 
-    
+
     public void setDialogueActive(boolean active) {
         this.isDialogoActive = active;
     }
@@ -281,7 +429,7 @@ public class GameEngine {
         sceneManager.mostraScena("DIALOGO_CORRENTE");
     }
 
-   
+
     private void impostaKeyBindingMappa() {
         JRootPane rootPane = frame.getRootPane();
         InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -297,6 +445,7 @@ public class GameEngine {
     }
 
     private void toggleMappa() {
+        if (sceneManager.isChatOpen()) return;
         if (!giocatore.isPossiedeMappa()) {
             System.out.println("DEBUG: Il giocatore non possiede ancora la Mappa");
             return;
@@ -308,6 +457,47 @@ public class GameEngine {
         if (sceneManager.isOpenInventario()) sceneManager.ChiudiInventario();
         if (!sceneManager.isMapOpen()) sceneManager.ApriMappa();
         else sceneManager.ChiudiMappa();
+    }
+
+    private void impostaKeyBindingChat() {
+        JRootPane rootPane = frame.getRootPane();
+        InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap am = rootPane.getActionMap();
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), "toggle_chat");
+
+        am.put("toggle_chat", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                apriChatDaTastiera();
+            }
+        });
+    }
+
+    // la chat si chiude solo dal bottone "Chiudi Chat" nel pannello,
+    // cosi digitare "c" in un messaggio non la richiude accidentalmente
+    private void apriChatDaTastiera() {
+        if (sceneManager.isChatOpen()) return;
+        if (isDialogoActive) {
+            System.out.println("DEBUG: Testo in corso, chat non apribile");
+            return;
+        }
+        if (sceneManager.isMapOpen()) sceneManager.ChiudiMappa();
+        if (sceneManager.isOpenInventario()) sceneManager.ChiudiInventario();
+        toggleChat();
+    }
+
+    // bottone fluttuante: a differenza del tasto rapido puo anche chiudere
+    // la chat (un click non ha conflitti con la digitazione dei messaggi)
+    private void chatButtonClick() {
+        if (!sceneManager.isChatOpen()) {
+            if (isDialogoActive) {
+                System.out.println("DEBUG: Testo in corso, chat non apribile");
+                return;
+            }
+            if (sceneManager.isMapOpen()) sceneManager.ChiudiMappa();
+            if (sceneManager.isOpenInventario()) sceneManager.ChiudiInventario();
+        }
+        toggleChat();
     }
 
     private void impostaKeyBindingInventario() {
@@ -325,11 +515,12 @@ public class GameEngine {
     }
 
     private void toggleInventario() {
+        if (sceneManager.isChatOpen()) return;
         if (isDialogoActive) {
             System.out.println("DEBUG: Testo in corso, inventario non apribile");
             return;
         }
-        if (!giocatore.isPossiedeInventario()){
+        if (!giocatore.isPossiedeInventario()) {
             System.out.println("DEBUG: Inventario non ancora disponibile");
             return;
         }
@@ -340,6 +531,8 @@ public class GameEngine {
 
     public void ExitGame() {
         System.out.println("WARNING: Stiamo uscendo dal gioco");
+        if (gameClient != null) gameClient.disconnetti();
+        if (gameServer != null) gameServer.ferma();
         db.chiudiConnessione();
         System.exit(0);
     }
