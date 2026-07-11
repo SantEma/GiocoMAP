@@ -41,6 +41,15 @@ public class ModelDB {
                 // colonna gia' del tipo giusto: ignoro
             }
 
+            // colonne per lo stato di avanzamento (aggiunte se mancano)
+            try {
+                eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS stato_city INT DEFAULT 0");
+                eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS possiede_mappa BOOLEAN DEFAULT FALSE");
+                eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS enigmi_risolti VARCHAR(1000)");
+            } catch (SQLException e) {
+                System.err.println("Errore aggiornamento colonne saves: " + e.getMessage());
+            }
+
             // records: classifica dei punteggi
             eseguiUpdate("CREATE TABLE IF NOT EXISTS records ("
                     + "id INT AUTO_INCREMENT PRIMARY KEY,"
@@ -158,19 +167,24 @@ public class ModelDB {
         }
     }
     
-    // Metodo se l'utente carica una partita
+    // Carica la partita. Restituisce:
+    //   [0] = nome scena, [1] = statoCity, [2] = possiedeMappa,
+    //   [3] = enigmi risolti (id separati da virgola)
     public String[] LoadGame() {
         try {
-            String query = "SELECT stanza_attuale, enigma_attuale FROM saves WHERE id = 1";
+            String query = "SELECT stanza_attuale, stato_city, possiede_mappa, enigmi_risolti FROM saves WHERE id = 1";
             PreparedStatement pstm = conn.prepareStatement(query);
             ResultSet rs = pstm.executeQuery();
 
             if (rs.next()) {
                 String stanza = rs.getString("stanza_attuale");
-                String enigma = rs.getString("enigma_attuale");
+                String statoCity = String.valueOf(rs.getInt("stato_city"));
+                String possiedeMappa = String.valueOf(rs.getBoolean("possiede_mappa"));
+                String enigmi = rs.getString("enigmi_risolti");
+                if (enigmi == null) enigmi = "";
                 rs.close();
                 pstm.close();
-                return new String[]{stanza, enigma};
+                return new String[]{stanza, statoCity, possiedeMappa, enigmi};
             }
 
             rs.close();
@@ -185,17 +199,22 @@ public class ModelDB {
     }
 
     // Salva (o aggiorna) la partita corrente nella riga id=1
-    public void salvaPartita(String stanzaAttuale, String enigmaAttuale) {
+    public void salvaPartita(String stanzaAttuale, int statoCity,
+                             boolean possiedeMappa, String enigmiRisolti) {
         try {
             // MERGE = insert o update: funziona sia se il salvataggio esiste già
             // sia se è il primo, senza violare la primary key id=1
-            String query = "MERGE INTO saves (id, stanza_attuale, enigma_attuale) KEY(id) VALUES (1, ?, ?)";
+            String query = "MERGE INTO saves (id, stanza_attuale, enigma_attuale, stato_city, possiede_mappa, enigmi_risolti) "
+                    + "KEY(id) VALUES (1, ?, 0, ?, ?, ?)";
             PreparedStatement pstm = conn.prepareStatement(query);
             pstm.setString(1, stanzaAttuale);
-            pstm.setString(2, enigmaAttuale);
+            pstm.setInt(2, statoCity);
+            pstm.setBoolean(3, possiedeMappa);
+            pstm.setString(4, enigmiRisolti);
             pstm.executeUpdate();
             pstm.close();
-            System.out.println("TEST: Partita salvata → " + stanzaAttuale);
+            System.out.println("TEST: Partita salvata → " + stanzaAttuale
+                    + " (statoCity=" + statoCity + ", enigmi=[" + enigmiRisolti + "])");
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }

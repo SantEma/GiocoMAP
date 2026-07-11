@@ -13,6 +13,7 @@ public class GameStatistics {
     private long tempoInizioEnigma = 0;
     private int punteggioTotale = 0;
     private TimerEnigma timerEnigma;
+    private String enigmaCorrenteId;   // id dell'enigma attualmente cronometrato
 
     private final MainFrame frame;
     private final Giocatore giocatore;
@@ -28,15 +29,31 @@ public class GameStatistics {
         this.sceneManager = sceneManager;
     }
 
-    public void iniziaEnigma() {
+    public void iniziaEnigma(Enigma enigma) {
+        String id = (enigma != null) ? enigma.getId() : null;
+
+        // se sto gia' cronometrando LO STESSO enigma non ancora risolto,
+        // NON resetto il timer (evita che ri-cliccando l'NPC riparta il tempo)
+        if (timerEnigma != null && timerEnigma.isAttivo()
+                && id != null && id.equals(enigmaCorrenteId)) {
+            System.out.println("DEBUG: Timer gia' attivo per " + id + ", non resetto");
+            return;
+        }
+
+        // enigma diverso (o nessun timer attivo): fermo il precedente e riparto
+        if (timerEnigma != null) timerEnigma.ferma();
+        enigmaCorrenteId = id;
         timerEnigma = new TimerEnigma(() -> {
             System.out.println("DEBUG: Secondi: " + timerEnigma.getSecondi());
         });
         timerEnigma.avvia();
-        System.out.println("DEBUG: Enigma iniziato");
+        System.out.println("DEBUG: Enigma iniziato: " + id);
     }
 
     public void enigmaRisolto(Enigma enigma) {
+        // registro l'enigma come risolto (per il salvataggio / no-redo)
+        if (enigma != null) giocatore.aggiungiEnigmaRisolto(enigma.getId());
+
         if (timerEnigma != null) timerEnigma.ferma();
 
         int secondi = timerEnigma != null ? timerEnigma.getSecondi() : 0;
@@ -94,13 +111,21 @@ public class GameStatistics {
             ? giocatore.getNomePlayer() : "");
         music_player.stopMusic();
         if (fineGioco) music_player.playMusic(MusicPlayer.END_TITLE_MUSIC);
-        TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome_passato);
-        
-        titoli.addIndietroListener(e -> {
+
+        // dal menu (fineGioco=false) mostro solo la Hall of Fame;
+        // a fine partita (fineGioco=true) i titoli di coda completi
+        TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome_passato, !fineGioco);
+
+        Runnable tornaAlMenu = () -> {
             music_player.stopMusic();
             music_player.playMusic(MusicPlayer.TITLE_SCREEN_MUSIC);
             sceneManager.mostraScena("MENU_PRINCIPALE");
-        });
+        };
+
+        if (fineGioco)
+            titoli.setOnFine(tornaAlMenu);              // titoli: tornano da soli a fine scorrimento
+        else
+            titoli.addIndietroListener(e -> tornaAlMenu.run()); // statistiche: bottone indietro
 
         sceneManager.registraScena("TITOLI_CODA", titoli);
         sceneManager.mostraScena("TITOLI_CODA");

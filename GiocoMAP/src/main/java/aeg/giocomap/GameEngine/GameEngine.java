@@ -25,6 +25,7 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Arrays;
 
 public class GameEngine {
 
@@ -182,11 +183,20 @@ public class GameEngine {
             }
             music_player.stopMusic();
             String stanza = salvataggio[0];
+            int statoCitySalvato = Integer.parseInt(salvataggio[1]);
+            boolean possiedeMappa = Boolean.parseBoolean(salvataggio[2]);
+            String enigmiStr = salvataggio[3];
             System.out.println("Carico partita dalla stanza: " + stanza);
 
-            progression.costruisciScene();
+            // ripristino lo stato PRIMA di costruire le scene, cosi vengono
+            // ricreate coerenti con l'avanzamento (enigmi gia' risolti compresi)
+            progression.setStatoCity(statoCitySalvato);
             giocatore.setPossiedeInventario(true);
-            giocatore.setPossiedeMappa(true);
+            giocatore.setPossiedeMappa(possiedeMappa);
+            if (enigmiStr != null && !enigmiStr.isEmpty())
+                giocatore.setEnigmiRisolti(Arrays.asList(enigmiStr.split(",")));
+
+            progression.costruisciScene();
             sceneManager.mostraScena(stanza);
             return;
         }
@@ -295,6 +305,7 @@ public class GameEngine {
 
     private void apriChatDaTastiera() {
         if (sceneManager.isChatOpen()) return;
+        if (chatNonApribileQui()) return;
         if (isDialogoActive) {
             System.out.println("DEBUG: Testo in corso, chat non apribile");
             return;
@@ -306,6 +317,7 @@ public class GameEngine {
 
     private void chatButtonClick() {
         if (!sceneManager.isChatOpen()) {
+            if (chatNonApribileQui()) return;
             if (isDialogoActive) {
                 System.out.println("DEBUG: Testo in corso, chat non apribile");
                 return;
@@ -314,6 +326,11 @@ public class GameEngine {
             if (sceneManager.isOpenInventario()) sceneManager.ChiudiInventario();
         }
         network.toggleChat();
+    }
+
+    // la chat non si apre nei titoli di coda / statistiche
+    private boolean chatNonApribileQui() {
+        return "TITOLI_CODA".equals(sceneManager.getScenaCorrente());
     }
 
     private void impostaKeyBindingInventario() {
@@ -443,7 +460,9 @@ public class GameEngine {
 
     private void salvaEdEsci() {
         db.NewStart();
-        db.salvaPartita(scenaDaSalvare, "0");
+        String enigmi = String.join(",", giocatore.getEnigmiRisolti());
+        db.salvaPartita(scenaDaSalvare, progression.getStatoCity(),
+                        giocatore.isPossiedeMappa(), enigmi);
         ExitGame();
     }
 

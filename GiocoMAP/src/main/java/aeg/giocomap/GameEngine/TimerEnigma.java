@@ -4,55 +4,62 @@
  */
 package aeg.giocomap.GameEngine;
 
+import javax.swing.Timer;
+
 /**
  *
  * @author murgo
+ *
+ * Il tempo trascorso viene calcolato dall'orologio di sistema (non da un
+ * contatore incrementato in un thread): cosi getSecondi() e' sempre corretto,
+ * anche mentre una finestra modale (JOptionPane) tiene occupato l'EDT.
  */
+public class TimerEnigma {
 
-public class TimerEnigma implements Runnable {
-
+    private long inizioMs;
+    private int secondiFinali;
     private boolean attivo;
-    private int secondi;
-    private final Runnable onTick;//azione eseguita ogni secondo
+
+    // usato solo per l'azione periodica di debug, eseguita sull'EDT
+    private final Timer tickTimer;
 
     public TimerEnigma(Runnable onTick) {
-        this.onTick = onTick;
-        this.secondi = 0;
+        this.tickTimer = new Timer(1000, e -> {
+            if (onTick != null) onTick.run();
+        });
+        this.secondiFinali = 0;
         this.attivo = false;
     }
-    
-    //Metodo che restituisce i secondi trascorsi
-    public int getSecondi() { 
-        return secondi; 
+
+    public boolean isAttivo() {
+        return attivo;
     }
-    
-    //Avvia il timer
+
+    // Secondi trascorsi: calcolati in tempo reale mentre e' attivo,
+    // oppure il valore finale congelato dopo ferma()
+    public int getSecondi() {
+        if (attivo) {
+            return (int) ((System.currentTimeMillis() - inizioMs) / 1000);
+        }
+        return secondiFinali;
+    }
+
+    // Avvia il timer
     public void avvia() {
+        inizioMs = System.currentTimeMillis();
+        secondiFinali = 0;
         attivo = true;
-        secondi = 0;
-        new Thread(this).start();
+        tickTimer.start();
         System.out.println("DEBUG: Timer avviato");
     }
 
-    //Ferma il timer
+    // Ferma il timer e congela i secondi trascorsi
     public void ferma() {
-        attivo = false;
-        System.out.println("DEBUG: Timer fermato a " + secondi + "s");
-    }
-
-    @Override
-    public void run() {
-        while (attivo) {
-            try {
-                Thread.sleep(1000);
-                secondi++;
-                if (onTick != null) {
-                    javax.swing.SwingUtilities.invokeLater(onTick);
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
+        if (attivo) {
+            secondiFinali = (int) ((System.currentTimeMillis() - inizioMs) / 1000);
+            attivo = false;
         }
+        tickTimer.stop();
+        System.out.println("DEBUG: Timer fermato a " + secondiFinali + "s");
     }
 }
