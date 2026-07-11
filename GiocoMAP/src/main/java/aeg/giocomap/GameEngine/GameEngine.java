@@ -22,6 +22,8 @@ import java.awt.image.BufferedImage;
 import javax.swing.*;
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
@@ -485,9 +487,9 @@ public class GameEngine {
         db.NewStart();
         String enigmi = String.join(",", giocatore.getEnigmiRisolti());
         
-        List<String> invIds = new ArrayList<>();
-        for (aeg.giocomap.Model.Oggetti.Oggetto o : giocatore.getInventario().getListaOggetti()) {
-            invIds.add(String.valueOf(o.getId()));
+        ArrayList<String> invIds = new ArrayList<>();
+        for (Oggetto o : giocatore.getInventario().getListaOggetti()) {
+            invIds.add(String.valueOf(o.getIdOggetto()));
         }
         String inventario = String.join(",", invIds);
         
