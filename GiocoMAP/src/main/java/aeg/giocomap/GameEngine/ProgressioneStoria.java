@@ -115,7 +115,15 @@ public class ProgressioneStoria {
         registraCollegamentoSemplice("STALLA", "NORD", "PIAZZA_CENTRALE");
         
         registraCollegamentoSemplice("BOSCO", "SUD", "PIAZZA_CENTRALE");
-        registraCollegamentoSemplice("BOSCO", "NORD", "KARUNDIS");
+        registraCollegamento("BOSCO", "NORD", () -> {
+            if (statoCity[0] >= 7) {
+                engine.getSceneManager().mostraScena("KARUNDIS");
+            } else {
+                String bloccoFox = engine.getDbWallOfText().getAsJsonObject("Schermo").get("blocco_fox_karundis").getAsString();
+                GameScreen bosco = (GameScreen) engine.getSceneManager().getScena("BOSCO");
+                engine.mostraDialogoCallback(bosco, "BOSCO", "Fox", bloccoFox, new ImageIcon(getClass().getResource("/sprites/Personaggi/Fox.png")), null);
+            }
+        });
         registraCollegamentoSemplice("BOSCO", "OVEST", "BOSCO_DEEP");
         
         registraCollegamento("BOSCO_DEEP", "EST", () -> {
@@ -475,7 +483,15 @@ public class ProgressioneStoria {
         JsonObject eryndorFoxDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Fox");
         Personaggio ladroFox = registraNPC("Fox", new ArrayList<>());
         ImageIcon spriteFox = new ImageIcon(getClass().getResource("/sprites/Personaggi/Fox.png"));
-        
+
+        Map<double[], Runnable> zoneBoscoDeep = new HashMap<>();
+        final GameScreen[] boscoDeepScreenArr = new GameScreen[1];        // Array per bypassare final e permettere di capire se il cartello è stato letto (anche per il raccogliFiore)
+        final boolean[] cartelloLetto = {false};
+
+        double[] hitboxFioreBlu = new double[]{0.28, 0.43, 0.06, 0.06}; // ID 6
+        double[] hitboxFioreRosso = new double[]{0.84, 0.48, 0.06, 0.09}; // ID 5
+        double[] hitboxFioreViola = new double[]{0.61, 0.44, 0.06, 0.06}; // ID 7
+
         java.util.function.Consumer<String> verificaFiore = (scelta) -> {
             if (statoCity[0] != 6) return;
             EnigmaSceltaMultipla enigma3 = IstanzaEnigma.creaEnigma3(engine.getTxt().getOggettoDaCatalogo(1));
@@ -495,6 +511,11 @@ public class ProgressioneStoria {
                                         // Rimuovi il fiore viola dall'inventario
                                         Oggetto fv = engine.getGiocatore().getInventario().cercaOggetto("Fiore Viola");
                                         if (fv != null) engine.getGiocatore().getInventario().rimuoviOggetto(fv);
+
+                                        // Rimuovo le zone cliccabili dei fiori per non far apparire la manina se si ripassa in Bosco Deep
+                                        zoneBoscoDeep.remove(hitboxFioreBlu);
+                                        zoneBoscoDeep.remove(hitboxFioreRosso);
+                                        zoneBoscoDeep.remove(hitboxFioreViola);
 
                                         String recTessuto = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Recuper_tessuto").getAsString();
                                         String narrBorsa = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Narrazione_Fox_Borsa").getAsString();
@@ -567,9 +588,6 @@ public class ProgressioneStoria {
             }
         };
 
-        Map<double[], Runnable> zoneBoscoDeep = new HashMap<>();
-        final GameScreen[] boscoDeepScreenArr = new GameScreen[1];        // Array per bypassare final e permettere di capire se il cartello è stato letto (anche per il raccogliFiore)
-        final boolean[] cartelloLetto = {false};
 
         java.util.function.Consumer<Integer> raccogliFiore = (idFiore) -> {
             if (statoCity[0] != 6) return;
@@ -607,6 +625,8 @@ public class ProgressioneStoria {
             }
         };
 
+
+
         // Ripristino hitboxes se l'utente ha già letto il cartello / ha già un fiore ricaricando
         if (statoCity[0] == 6) {
             boolean haGiaUnFiore = engine.getGiocatore().getInventario().cercaOggetto("Fiore Rosso") != null ||
@@ -614,9 +634,9 @@ public class ProgressioneStoria {
                                    engine.getGiocatore().getInventario().cercaOggetto("Fiore Viola") != null;
             if (haGiaUnFiore) {
                 cartelloLetto[0] = true;
-                zoneBoscoDeep.put(new double[]{0.28, 0.43, 0.06, 0.06}, () -> raccogliFiore.accept(6));
-                zoneBoscoDeep.put(new double[]{0.84, 0.48, 0.06, 0.09}, () -> raccogliFiore.accept(5));
-                zoneBoscoDeep.put(new double[]{0.61, 0.44, 0.06, 0.06}, () -> raccogliFiore.accept(7));
+                zoneBoscoDeep.put(hitboxFioreBlu, () -> raccogliFiore.accept(6));
+                zoneBoscoDeep.put(hitboxFioreRosso, () -> raccogliFiore.accept(5));
+                zoneBoscoDeep.put(hitboxFioreViola, () -> raccogliFiore.accept(7));
             }
         }
 
@@ -625,9 +645,9 @@ public class ProgressioneStoria {
             if (statoCity[0] == 6) {
                 cartelloLetto[0] = true;
                 // Aggiungiamo i fiori dinamicamente in modo che il cursore a mano si attivi solo ora
-                zoneBoscoDeep.put(new double[]{0.28, 0.43, 0.06, 0.06}, () -> raccogliFiore.accept(6));
-                zoneBoscoDeep.put(new double[]{0.84, 0.48, 0.06, 0.09}, () -> raccogliFiore.accept(5));
-                zoneBoscoDeep.put(new double[]{0.61, 0.44, 0.06, 0.06}, () -> raccogliFiore.accept(7));
+                zoneBoscoDeep.put(hitboxFioreBlu, () -> raccogliFiore.accept(6));
+                zoneBoscoDeep.put(hitboxFioreRosso, () -> raccogliFiore.accept(5));
+                zoneBoscoDeep.put(hitboxFioreViola, () -> raccogliFiore.accept(7));
 
                 EnigmaSceltaMultipla enigma3 = IstanzaEnigma.creaEnigma3(engine.getTxt().getOggettoDaCatalogo(1));
                 engine.getStatistics().iniziaEnigma(enigma3);

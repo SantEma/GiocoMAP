@@ -79,7 +79,7 @@ public class GameEngine {
         this.title_screen = new TitleScreen();
         sceneManager.registraScena("MENU_PRINCIPALE", title_screen);
 
-        sceneManager.registraScena("MAPPA", new MappaPanel());
+        sceneManager.registraScena("MAPPA", new MappaPanel(sceneManager));
 
         this.giocatore = new Giocatore("Eryndor");
 
@@ -450,7 +450,6 @@ public class GameEngine {
 
         JLabel titolo = new JLabel("Comandi di gioco", SwingConstants.CENTER);
         titolo.setForeground(Color.WHITE);
-        titolo.setFont(new Font("Arial", Font.BOLD, 34));
         titolo.setBorder(BorderFactory.createEmptyBorder(40, 0, 20, 0));
         comandi.add(titolo, BorderLayout.NORTH);
 
@@ -466,12 +465,12 @@ public class GameEngine {
         lista.setEditable(false);
         lista.setOpaque(false);
         lista.setForeground(Color.WHITE);
-        lista.setFont(new Font("Monospaced", Font.BOLD, 24));
+        lista.setLineWrap(true);
+        lista.setWrapStyleWord(true);
         lista.setBorder(BorderFactory.createEmptyBorder(20, 80, 20, 80));
         comandi.add(lista, BorderLayout.CENTER);
 
         JButton indietro = new JButton("Indietro");
-        indietro.setFont(new Font("Arial", Font.BOLD, 18));
         indietro.setCursor(new Cursor(Cursor.HAND_CURSOR));
         indietro.addActionListener(e -> sceneManager.mostraScena("MENU_PAUSA"));
         JPanel sud = new JPanel();
@@ -479,6 +478,23 @@ public class GameEngine {
         sud.setBackground(new Color(30, 20, 20));
         sud.add(indietro);
         comandi.add(sud, BorderLayout.SOUTH);
+
+        comandi.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                int w = comandi.getWidth();
+                int titleSize = Math.max(20, w / 35);
+                int listSize = Math.max(14, w / 55);
+                int btnSize = Math.max(14, w / 70);
+                
+                titolo.setFont(new Font("Arial", Font.BOLD, titleSize));
+                lista.setFont(new Font("Monospaced", Font.BOLD, listSize));
+                indietro.setFont(new Font("Arial", Font.BOLD, btnSize));
+                
+                int marginLR = Math.max(20, w / 15);
+                lista.setBorder(BorderFactory.createEmptyBorder(20, marginLR, 20, marginLR));
+            }
+        });
 
         sceneManager.registraScena("COMANDI", comandi);
     }

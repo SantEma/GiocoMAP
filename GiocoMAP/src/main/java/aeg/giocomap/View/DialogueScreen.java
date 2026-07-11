@@ -17,7 +17,6 @@ public class DialogueScreen extends JLayeredPane {
     private Image imageSprite;
     private final JPanel boxDialogo;
     private final JTextArea area_text;
-    private final JButton btnAvanti;
     
     public DialogueScreen(GameScreen scena_stanza,Runnable azioneAvanti){
         this.scena_stanza=scena_stanza;
@@ -76,7 +75,7 @@ public class DialogueScreen extends JLayeredPane {
         //(DA TESTARE) il bottone richiamato
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         southPanel.setOpaque(false);
-        southPanel.add(btnAvanti=new BottoneAvanti(e -> azioneAvanti.run()));
+        southPanel.add(new BottoneAvanti(e -> azioneAvanti.run()));
         boxDialogo.add(southPanel,BorderLayout.SOUTH); // Pannello con il dialogo dentro sotto
         
         // Tutto ciò che abbiamo inserito va messo tutto nel gestore dei livelli di Layout

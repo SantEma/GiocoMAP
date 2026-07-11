@@ -67,6 +67,11 @@ public class SceneManager {
         return scenaCorrente;
     }
     
+    // In che scenario si trovava il player prima di aprire la mappa
+    public String getScenaPrecedente(){
+        return scenaPrecedente;
+    }
+    
     // Che elementi grafici ci sono nella scena
     public JComponent getScena(String nomeScena) {
         return sceneCache.get(nomeScena);
@@ -134,8 +139,10 @@ public class SceneManager {
             JComponent invP = sceneCache.get("INVENTARIO");
             
             // Casting dell'oggetto prima di mostrarlo ed eliminazione dei duplicati
-            if(invP instanceof aeg.giocomap.View.InventarioPanel inventarioPanel)
+            if(invP instanceof aeg.giocomap.View.InventarioPanel) {
+                aeg.giocomap.View.InventarioPanel inventarioPanel = (aeg.giocomap.View.InventarioPanel) invP;
                 inventarioPanel.aggiornaVista();
+            }
            
             // Apro la scena a schermo
             mostraScena("INVENTARIO");

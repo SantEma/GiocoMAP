@@ -15,7 +15,7 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.Map;
 
-public class GameScreen extends JPanel {
+public class GameScreen extends JPanel implements CoordinateDebuggable {
     private BufferedImage immagine;
     
     // Riferimenti ai bottoni direzionali (se impostati)
@@ -37,6 +37,11 @@ public class GameScreen extends JPanel {
                 }
             }
         });
+    }
+    
+    @Override
+    public JPanel getPanel() {
+        return this;
     }
     
     public void setSfondo(BufferedImage nuovoSfondo){
@@ -114,22 +119,6 @@ public class GameScreen extends JPanel {
             //Disegno lo sfondo
             g.drawImage(immagine,0,0,getWidth(),getHeight(),this);
         }
-    }
-    
-    /*
-    Questo metodo permette di trovare le coordinate nell'immagine, visto che
-    allochiamo staticamente le posizioni degli NPC
-     */
-    public void abilitaDebugCoordinate() {
-        this.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                double xPerc = (double) e.getX() / getWidth();
-                double yPerc = (double) e.getY() / getHeight();
-                System.out.printf("DEBUG CLICK: x%% = %.4f, y%% = %.4f (pixel reali: x=%d, y=%d)\n", 
-                                  xPerc, yPerc, e.getX(), e.getY());
-            }
-        });
     }
 }
 
