@@ -18,40 +18,50 @@ import java.util.List;
  */
 public class TitoliDiCoda extends JPanel {
 
-    private final JButton btn_indietro;
+    private JButton btn_indietro;          // presente solo nelle Statistiche
+    private PannelloScorrimento scroll;    // presente solo nei titoli di coda
 
     /**
-     * @param soloHallOfFame true = mostra solo la Hall of Fame statica
-     *                       (schermata Statistiche dal menu);
-     *                       false = titoli di coda completi che scorrono
-     *                       (fine gioco).
+     * @param soloHallOfFame true = mostra solo la Hall of Fame statica con il
+     *                       bottone indietro (schermata Statistiche dal menu);
+     *                       false = titoli di coda che scorrono, senza bottone,
+     *                       che tornano da soli al menu a fine scorrimento.
      */
     public TitoliDiCoda(List<String[]> records, int punteggioAttuale,
                         String nomeGiocatore, boolean soloHallOfFame) {
         setBackground(Color.BLACK);
         setLayout(new BorderLayout());
 
-        if (soloHallOfFame)
+        if (soloHallOfFame) {
+            // Statistiche: Hall of Fame statica + bottone indietro in basso
             add(creaHallOfFameStatica(records, punteggioAttuale, nomeGiocatore), BorderLayout.CENTER);
-        else
-            add(new PannelloScorrimento(records, punteggioAttuale, nomeGiocatore), BorderLayout.CENTER);
 
-        // bottone indietro sempre visibile in basso (non scorre)
-        JPanel sud = new JPanel();
-        sud.setOpaque(false);
-        btn_indietro = new JButton("[ indietro ]");
-        btn_indietro.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        btn_indietro.setBackground(Color.BLACK);
-        btn_indietro.setForeground(new Color(170, 170, 170));
-        btn_indietro.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-        btn_indietro.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn_indietro.setFocusable(false);
-        sud.add(btn_indietro);
-        add(sud, BorderLayout.SOUTH);
+            JPanel sud = new JPanel();
+            sud.setOpaque(false);
+            btn_indietro = new JButton("[ indietro ]");
+            btn_indietro.setFont(new Font("Monospaced", Font.PLAIN, 14));
+            btn_indietro.setBackground(Color.BLACK);
+            btn_indietro.setForeground(new Color(170, 170, 170));
+            btn_indietro.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+            btn_indietro.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            btn_indietro.setFocusable(false);
+            sud.add(btn_indietro);
+            add(sud, BorderLayout.SOUTH);
+        } else {
+            // Titoli di coda: solo lo scorrimento, nessun bottone
+            scroll = new PannelloScorrimento(records, punteggioAttuale, nomeGiocatore);
+            add(scroll, BorderLayout.CENTER);
+        }
     }
 
+    // Statistiche: il bottone indietro torna al menu
     public void addIndietroListener(ActionListener listener) {
-        btn_indietro.addActionListener(listener);
+        if (btn_indietro != null) btn_indietro.addActionListener(listener);
+    }
+
+    // Titoli di coda: azione eseguita quando lo scorrimento e' terminato
+    public void setOnFine(Runnable onFine) {
+        if (scroll != null) scroll.setOnFine(onFine);
     }
 
     // Hall of Fame statica (schermata Statistiche dal menu): niente scorrimento,
@@ -115,17 +125,26 @@ public class TitoliDiCoda extends JPanel {
         private double scrollY;
         private int altezzaTotale;
         private boolean iniziato = false;
+        private Runnable onFine;
 
         PannelloScorrimento(List<String[]> records, int punteggio, String nomeGiocatore) {
             setOpaque(false);
             costruisciRighe(records, punteggio, nomeGiocatore);
 
-            // ~50 px al secondo: scorrimento lento e cinematografico
+            // ~80 px al secondo: scorre una volta, poi esegue onFine (torna al menu)
             timer = new Timer(20, e -> {
-                scrollY -= 1.0;
-                if (altezzaTotale > 0 && scrollY < -altezzaTotale) scrollY = getHeight();
+                scrollY -= 1.6;
+                if (altezzaTotale > 0 && scrollY < -altezzaTotale) {
+                    ((Timer) e.getSource()).stop();
+                    if (onFine != null) onFine.run();
+                    return;
+                }
                 repaint();
             });
+        }
+
+        void setOnFine(Runnable onFine) {
+            this.onFine = onFine;
         }
 
         private void costruisciRighe(List<String[]> records, int punteggio, String nomeGiocatore) {

@@ -632,11 +632,16 @@ public class GameEngine {
         TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome_passato, !fineGioco);
 
 
-        titoli.addIndietroListener(e -> {
+        Runnable tornaAlMenu = () -> {
             music_player.stopMusic();
             music_player.playMusic(MusicPlayer.TITLE_SCREEN_MUSIC);
             sceneManager.mostraScena("MENU_PRINCIPALE");
-        });
+        };
+
+        if (fineGioco)
+            titoli.setOnFine(tornaAlMenu);              // titoli: tornano da soli a fine scorrimento
+        else
+            titoli.addIndietroListener(e -> tornaAlMenu.run()); // statistiche: bottone indietro
 
         sceneManager.registraScena("TITOLI_CODA", titoli);
         sceneManager.mostraScena("TITOLI_CODA");
