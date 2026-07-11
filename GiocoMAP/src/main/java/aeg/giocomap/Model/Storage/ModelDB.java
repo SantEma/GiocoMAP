@@ -46,6 +46,7 @@ public class ModelDB {
                 eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS stato_city INT DEFAULT 0");
                 eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS possiede_mappa BOOLEAN DEFAULT FALSE");
                 eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS enigmi_risolti VARCHAR(1000)");
+                eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS inventario VARCHAR(1000)");
             } catch (SQLException e) {
                 System.err.println("Errore aggiornamento colonne saves: " + e.getMessage());
             }
@@ -169,10 +170,10 @@ public class ModelDB {
     
     // Carica la partita. Restituisce:
     //   [0] = nome scena, [1] = statoCity, [2] = possiedeMappa,
-    //   [3] = enigmi risolti (id separati da virgola)
+    //   [3] = enigmi risolti (id separati da virgola), [4] = inventario
     public String[] LoadGame() {
         try {
-            String query = "SELECT stanza_attuale, stato_city, possiede_mappa, enigmi_risolti FROM saves WHERE id = 1";
+            String query = "SELECT stanza_attuale, stato_city, possiede_mappa, enigmi_risolti, inventario FROM saves WHERE id = 1";
             PreparedStatement pstm = conn.prepareStatement(query);
             ResultSet rs = pstm.executeQuery();
 
@@ -182,9 +183,11 @@ public class ModelDB {
                 String possiedeMappa = String.valueOf(rs.getBoolean("possiede_mappa"));
                 String enigmi = rs.getString("enigmi_risolti");
                 if (enigmi == null) enigmi = "";
+                String inventario = rs.getString("inventario");
+                if (inventario == null) inventario = "";
                 rs.close();
                 pstm.close();
-                return new String[]{stanza, statoCity, possiedeMappa, enigmi};
+                return new String[]{stanza, statoCity, possiedeMappa, enigmi, inventario};
             }
 
             rs.close();
@@ -200,21 +203,22 @@ public class ModelDB {
 
     // Salva (o aggiorna) la partita corrente nella riga id=1
     public void salvaPartita(String stanzaAttuale, int statoCity,
-                             boolean possiedeMappa, String enigmiRisolti) {
+                             boolean possiedeMappa, String enigmiRisolti, String inventario) {
         try {
             // MERGE = insert o update: funziona sia se il salvataggio esiste già
             // sia se è il primo, senza violare la primary key id=1
-            String query = "MERGE INTO saves (id, stanza_attuale, enigma_attuale, stato_city, possiede_mappa, enigmi_risolti) "
-                    + "KEY(id) VALUES (1, ?, 0, ?, ?, ?)";
+            String query = "MERGE INTO saves (id, stanza_attuale, enigma_attuale, stato_city, possiede_mappa, enigmi_risolti, inventario) "
+                    + "KEY(id) VALUES (1, ?, 0, ?, ?, ?, ?)";
             PreparedStatement pstm = conn.prepareStatement(query);
             pstm.setString(1, stanzaAttuale);
             pstm.setInt(2, statoCity);
             pstm.setBoolean(3, possiedeMappa);
             pstm.setString(4, enigmiRisolti);
+            pstm.setString(5, inventario);
             pstm.executeUpdate();
             pstm.close();
             System.out.println("TEST: Partita salvata → " + stanzaAttuale
-                    + " (statoCity=" + statoCity + ", enigmi=[" + enigmiRisolti + "])");
+                    + " (statoCity=" + statoCity + ", enigmi=[" + enigmiRisolti + "], inventario=[" + inventario + "])");
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }

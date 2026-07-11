@@ -23,7 +23,9 @@ public class Inventario<T extends Oggetto> {
     }
 
     public void aggiungiOggetto(T oggetto) {
-        listaOggetti.add(oggetto);
+        if (cercaOggetto(oggetto.getNomeOggetto()) == null) {
+            listaOggetti.add(oggetto);
+        }
     }
 
     public void rimuoviOggetto(T oggetto) {

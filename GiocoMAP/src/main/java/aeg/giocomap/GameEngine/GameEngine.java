@@ -196,8 +196,26 @@ public class GameEngine {
             progression.setStatoCity(statoCitySalvato);
             giocatore.setPossiedeInventario(true);
             giocatore.setPossiedeMappa(possiedeMappa);
-            if (enigmiStr != null && !enigmiStr.isEmpty())
+            if (enigmiStr != null && !enigmiStr.isEmpty()) {
                 giocatore.setEnigmiRisolti(Arrays.asList(enigmiStr.split(",")));
+            }
+
+            // Ricostruzione Dinamica dell'Inventario
+            giocatore.getInventario().getListaOggetti().clear(); // Svuoto l'inventario dai default
+            if (salvataggio.length > 4 && salvataggio[4] != null && !salvataggio[4].isEmpty()) {
+                String inventarioStr = salvataggio[4];
+                for (String idStr : inventarioStr.split(",")) {
+                    try {
+                        int id = Integer.parseInt(idStr.trim());
+                        Oggetto obj = txt.getOggettoDaCatalogo(id);
+                        if (obj != null) {
+                            giocatore.getInventario().aggiungiOggetto(obj);
+                        }
+                    } catch (NumberFormatException e) {
+                        System.err.println("Errore parsing ID oggetto salvato: " + idStr);
+                    }
+                }
+            }
 
             progression.costruisciScene();
             sceneManager.mostraScena(stanza);
@@ -439,7 +457,9 @@ public class GameEngine {
             "   M      Apri / chiudi Mappa\n\n" +
             "   C      Apri / chiudi Chat\n\n" +
             "   ESC    Menu di pausa\n\n" +
-            "   Click sui personaggi per parlare\n"
+            "   Click sui personaggi per parlare\n\n" +
+            "   Suggerimento: Mentre si leggono alcuni enigmi si può tornare indietro\n" +
+            "   per parlare con i personaggi, qualcuno saprà sicuramente darti un consiglio!\n"
         );
         lista.setEditable(false);
         lista.setOpaque(false);
@@ -464,8 +484,15 @@ public class GameEngine {
     private void salvaEdEsci() {
         db.NewStart();
         String enigmi = String.join(",", giocatore.getEnigmiRisolti());
+        
+        List<String> invIds = new ArrayList<>();
+        for (aeg.giocomap.Model.Oggetti.Oggetto o : giocatore.getInventario().getListaOggetti()) {
+            invIds.add(String.valueOf(o.getId()));
+        }
+        String inventario = String.join(",", invIds);
+        
         db.salvaPartita(scenaDaSalvare, progression.getStatoCity(),
-                        giocatore.isPossiedeMappa(), enigmi);
+                        giocatore.isPossiedeMappa(), enigmi, inventario);
         ExitGame();
     }
 

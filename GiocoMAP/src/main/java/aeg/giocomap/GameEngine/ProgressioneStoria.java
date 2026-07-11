@@ -466,38 +466,137 @@ public class ProgressioneStoria {
         Personaggio ladroFox = registraNPC("Fox", new ArrayList<>());
         ImageIcon spriteFox = new ImageIcon(getClass().getResource("/sprites/Personaggi/Fox.png"));
         
-        foxInteraction = () -> {
-            ladroFox.setDialoghi(Arrays.asList(foxDb.get("incontro_iniziale").getAsString()));
-            engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
-                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("reazione_furto").getAsString(), null, () -> {
-                    ladroFox.setDialoghi(Arrays.asList(foxDb.get("ricatto").getAsString()));
+        java.util.function.Consumer<String> verificaFiore = (scelta) -> {
+            if (statoCity[0] != 6) return;
+            EnigmaSceltaMultipla enigma3 = IstanzaEnigma.creaEnigma3(engine.getTxt().getOggettoDaCatalogo(1));
+            if (enigma3.verifica(scelta)) {
+                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("consegna_corretta").getAsString(), null, () -> {
+                    ladroFox.setDialoghi(Arrays.asList(foxDb.get("reazione_pianta_corretta_1").getAsString()));
                     engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
-                        engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("reazione_inseguimento").getAsString(), null, () -> {
-                            ladroFox.setDialoghi(Arrays.asList(foxDb.get("richiesta_pianta").getAsString()));
+                        ladroFox.setDialoghi(Arrays.asList(foxDb.get("reazione_pianta_corretta_2").getAsString()));
+                        engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
+                            ladroFox.setDialoghi(Arrays.asList(foxDb.get("addormentato").getAsString()));
                             engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
-                                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("accordo").getAsString(), null, () -> {
-                                    Oggetto tessuto = engine.getGiocatore().getInventario().cercaOggetto("Tessuto");
-                                    if (tessuto != null) {
-                                        engine.getGiocatore().getInventario().rimuoviOggetto(tessuto);
-                                    }
-                                    statoCity[0] = 6;
-                                    ladroFox.setDialoghi(new ArrayList<>());
+                                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("pensiero_vittoria_1").getAsString(), null, () -> {
+                                    engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("pensiero_vittoria_2").getAsString(), null, () -> {
+                                        engine.getStatistics().enigmaRisolto(enigma3);
+                                        engine.getGiocatore().getInventario().aggiungiOggetto(engine.getTxt().getOggettoDaCatalogo(8)); // Chiave Fox
+                                        JOptionPane.showMessageDialog(engine.getFrame(), "Hai recuperato il Tessuto e trovato la Chiave Fox!");
+                                        statoCity[0] = 7;
+                                        // Rimuovi il fiore viola dall'inventario
+                                        Oggetto fv = engine.getGiocatore().getInventario().cercaOggetto("Fiore Viola");
+                                        if (fv != null) engine.getGiocatore().getInventario().rimuoviOggetto(fv);
+                                    });
                                 });
                             });
                         });
                     });
                 });
-            });
+            } else {
+                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("consegna_errata").getAsString(), null, () -> {
+                    ladroFox.setDialoghi(Arrays.asList(foxDb.get("reazione_pianta_errata").getAsString()));
+                    engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
+                        engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("pensiero_consegna_errata_1").getAsString(), null, () -> {
+                            engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("pensiero_consegna_errata_2").getAsString(), null, () -> {
+                                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("correzione_consegna").getAsString(), null, () -> {
+                                    // Rimuovi il fiore sbagliato dall'inventario
+                                    Oggetto f = engine.getGiocatore().getInventario().cercaOggetto(scelta.equals("0") ? "Fiore Rosso" : "Fiore Blu");
+                                    if (f != null) engine.getGiocatore().getInventario().rimuoviOggetto(f);
+                                });
+                            });
+                        });
+                    });
+                });
+            }
         };
 
-        zoneBosco.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
-            System.out.println("Click su Fox/Cartello, da implementare in seguito.");
+        foxInteraction = () -> {
+            if (statoCity[0] < 6) {
+                ladroFox.setDialoghi(Arrays.asList(foxDb.get("incontro").getAsString()));
+                engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
+                    engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("reazione_furto").getAsString(), null, () -> {
+                        ladroFox.setDialoghi(Arrays.asList(foxDb.get("ricatto").getAsString()));
+                        engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
+                            engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("reazione_inseguimento").getAsString(), null, () -> {
+                                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Fox", foxDb.get("parlato_richiesta_pianta").getAsString(), spriteFox, () -> {
+                                    engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Fox", foxDb.get("pensiero_richiesta_pianta").getAsString(), spriteFox, () -> {
+                                        engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("pensiero_accordo").getAsString(), null, () -> {
+                                            engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("parlato_accordo").getAsString(), null, () -> {
+                                                Oggetto tessuto = engine.getGiocatore().getInventario().cercaOggetto("Tessuto");
+                                                if (tessuto != null) {
+                                                    engine.getGiocatore().getInventario().rimuoviOggetto(tessuto);
+                                                }
+                                                statoCity[0] = 6;
+                                                ladroFox.setDialoghi(new ArrayList<>());
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            } else if (statoCity[0] == 6) {
+                if (engine.getGiocatore().getInventario().cercaOggetto("Fiore Viola") != null) {
+                    verificaFiore.accept("2");
+                } else if (engine.getGiocatore().getInventario().cercaOggetto("Fiore Rosso") != null) {
+                    verificaFiore.accept("0");
+                } else if (engine.getGiocatore().getInventario().cercaOggetto("Fiore Blu") != null) {
+                    verificaFiore.accept("1");
+                } else {
+                    engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Fox", foxDb.get("sbrigati").getAsString(), spriteFox, null);
+                }
+            } else {
+                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Fox", foxDb.get("addormentato").getAsString(), spriteFox, null);
+            }
+        };
+
+        Map<double[], Runnable> zoneBoscoDeep = new HashMap<>();
+        final GameScreen[] boscoDeepScreenArr = new GameScreen[1];
+
+        java.util.function.Consumer<Integer> raccogliFiore = (idFiore) -> {
+            if (statoCity[0] != 6) return;
+            // Rimuoviamo eventuali altri fiori presenti
+            Oggetto fR = engine.getGiocatore().getInventario().cercaOggetto("Fiore Rosso");
+            Oggetto fB = engine.getGiocatore().getInventario().cercaOggetto("Fiore Blu");
+            Oggetto fV = engine.getGiocatore().getInventario().cercaOggetto("Fiore Viola");
+            if (fR != null) engine.getGiocatore().getInventario().rimuoviOggetto(fR);
+            if (fB != null) engine.getGiocatore().getInventario().rimuoviOggetto(fB);
+            if (fV != null) engine.getGiocatore().getInventario().rimuoviOggetto(fV);
+            
+            Oggetto nuovoFiore = engine.getTxt().getOggettoDaCatalogo(idFiore);
+            engine.getGiocatore().getInventario().aggiungiOggetto(nuovoFiore);
+            JOptionPane.showMessageDialog(engine.getFrame(), "Hai raccolto: " + nuovoFiore.getNomeOggetto());
+        };
+
+        // Hitbox Cartello
+        zoneBoscoDeep.put(new double[]{0.10, 0.68, 0.08, 0.08}, () -> {
+            if (statoCity[0] == 6) {
+                EnigmaSceltaMultipla enigma3 = IstanzaEnigma.creaEnigma3(engine.getTxt().getOggettoDaCatalogo(1));
+                engine.getStatistics().iniziaEnigma(enigma3);
+                engine.mostraDialogoCallback(boscoDeepScreenArr[0], "BOSCO_DEEP", "Cartello", enigma3.getTesto(), null, null);
+            } else if (statoCity[0] >= 7) {
+                JOptionPane.showMessageDialog(engine.getFrame(), "Hai già raccolto l'erba giusta, Fox sta dormendo.");
+            }
         });
+
+        // Hitbox Fiore Rosso (ID 6, Scelta 0)
+        zoneBoscoDeep.put(new double[]{0.28, 0.43, 0.06, 0.06}, () -> raccogliFiore.accept(6));
+        
+        // Hitbox Fiore Blu (ID 5, Scelta 1)
+        zoneBoscoDeep.put(new double[]{0.84, 0.48, 0.06, 0.09}, () -> raccogliFiore.accept(5));
+        
+        // Hitbox Fiore Viola (ID 7, Scelta 2 - Corretta)
+        zoneBoscoDeep.put(new double[]{0.61, 0.44, 0.06, 0.06}, () -> raccogliFiore.accept(7));
+
         GameScreen boscoScreen = engine.getSceneManager().creaScenaBase("BoscoLosco.png", zoneBosco);
         boscoScreenArr[0] = boscoScreen;
         engine.getSceneManager().registraScena("BOSCO", boscoScreen);
         
-        engine.getSceneManager().registraScena("BOSCO_DEEP", engine.getSceneManager().creaScenaBase("BoscoINN.png", null));
+        GameScreen boscoDeepScreen = engine.getSceneManager().creaScenaBase("BoscoINN.png", zoneBoscoDeep);
+        boscoDeepScreen.abilitaDebugCoordinate();
+        boscoDeepScreenArr[0] = boscoDeepScreen;
+        engine.getSceneManager().registraScena("BOSCO_DEEP", boscoDeepScreen);
         
         Map<double[], Runnable> zoneKarundis = new HashMap<>();
         zoneKarundis.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> engine.getSceneManager().mostraScena("GROTTA"));

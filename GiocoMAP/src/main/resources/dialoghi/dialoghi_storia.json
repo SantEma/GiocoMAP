@@ -1,7 +1,8 @@
 {
     "Eryndor":{
         "inizio":{
-            "lettera_retro": "(Mmm... Non so come arrivarci però. Fammi controllare se sul retro c'è qualcosa). Il retro riporta una sottospecie di enigma, dice:",
+            "lettera_retro_pensiero": "(Mmm... Non so come arrivarci però. Fammi controllare se sul retro c'è qualcosa).",
+            "lettera_retro_parlato": "Il retro riporta una sottospecie di enigma, dice:",
             "locali_chiusi": "Sembra attualmente chiuso, ci ripasserò dopo",
             "passaggio_cavaglieri": "Diavolo, mi son perso l'armata reale ma almeno ora la strada è libera",
             "post_sbronza": "Come ci son finito qui... e tu chi sei?"
@@ -17,12 +18,13 @@
             "cena_green": "Sono qui per ritirare la cena di Green"
         },
         "Fox": {
-            "reazione_furto": "Ridammela ne ho bisogno per il mio scopo. Non ti darò pace fin quando non ti trovo.",
+            "reazione_furto": "Ridammela né ho bisogno per il mio scopo. Non ti darò pace fin quando non ti trovo.",
             "reazione_inseguimento": "Mi stavi seguendo dall'inizio quindi... Va bene, ne va del mio onore, dimmi cosa vuoi.",
-            "accordo": "(Ottimo e ora... Un attimo, se nessuno sa dov'è o com'è fatta posso fregarlo a mio vantaggio). Va bene, resta qui. La cerco immediatamente!",
+            "pensiero_accordo": "(Ottimo e ora... Un attimo, se nessuno sa dov'è o com'è fatta posso fregarlo a mio vantaggio).",
+            "parlato_accordo": "Va bene, resta qui. La cerco immediatamente!",
             "consegna_errata": "Ecco, prendi questa. È la pianta che cercavi.",
             "pensiero_consegna_errata_1": "(Un attimo! Se gli do la cura reale o un'erba qualunque, questo furfante si rimetterà in sesto o scapperà comunque con la mia stoffa... Mi sta palesemente truffando!)",
-            "pensiero_consegna_errata_2": "(Non posso rischiare. Devo dargli la pianta giusta per addormentarlo, così potrò riprendermi il tessuto dalle sue tasche mentre è svenuto. Meglio fermarlo prima che scappi!)",
+            "pensiero_consegna_errata_2": "(Non posso rischiare. Devo dargli la pianta velenosa viola per addormentarlo, così potrò riprendermi il tessuto dalle sue tasche mentre è svenuto. Meglio fermarlo prima che scappi!)",
             "correzione_consegna": "Aspetta, Fox! Mi sono sbagliato, quella non è la pianta giusta. Guarda meglio nella mia borsa...",
             "consegna_corretta": "Ecco a te. Questa è la rarissima erba medica che cercavi.",
             "pensiero_vittoria_1": "(Perfetto. Il cartello degli esploratori aveva ragione: il fiore viola è un potente sonnifero, altro che medicina!)",
@@ -36,15 +38,18 @@
         "Eripeta": {
             "domanda": "Si e lei chi sarebbe?",
             "risposta": "Cosa posso fare per lei dunque?",
-            "difesa": "(Diamine! Dovevo immaginarlo che avrebbero scoperto il mio obiettivo prima o poi...).\nLa prego, le prometto che adempirò al mio dovere e non farò nulla di male al regno.\nIn cambio di qualche favore può chiudere un occhio, tutti lo fanno no? E tutti hanno bisogno di qualcosa, parola di mercante.",
+            "pensiero_difesa": "(Diamine! Dovevo immaginarlo che avrebbero scoperto il mio obiettivo prima o poi...).",
+            "parlato_difesa": "La prego, le prometto che adempirò al mio dovere e non farò nulla di male al regno.\nIn cambio di qualche favore può chiudere un occhio, tutti lo fanno no? E tutti hanno bisogno di qualcosa, parola di mercante.",
             "domanda_sfida": "Come posso fare allora?",
             "comprensione": "Si capisco, perdonami se ti ho incuso timore e se ho scoperto della tua storia non era mia intenzione. Ecco... quindi... Io proseguo"
         },
         "Marien": {
             "presentazione": "Eryndor, sua signoria. Al suo servizio.",
             "racconto": "Sua altezza, il viaggio per giungere fin qui è stato il mio vero maestro d'astuzia.\nHo dovuto decifrare i segreti delle maree al porto di MareBlu, comprendere i pericoli del Bosco Losco per sventare i piani di un furfante, e persino svelare i misteri dello scorrere del tempo.",
-            "seduzione_1": "(Le sue parole confermano ciò che speravo. Ho la sua totale ammirazione. Devo continuare a tessere questa tela e assecondarla... lei è la mia chiave per ottenere ciò che merito davvero).\nSiete troppo gentile, mia signora. La vera forza non risiede sempre nell'acciaio, ma nella trama delle nostre scelte.\nOgni tappa del mio viaggio era solo un filo necessario per tessere la strada che mi avrebbe condotto al cospetto della vostra impareggiabile intelligenza.",
-            "seduzione_2": "(Perfetto. È completamente rapita. Un mercante sa sempre cogliere l'occasione quando gli si presenta davanti).\nHo sfidato le insidie del regno intero per portarvi il mio tessuto migliore, Principessa.\nEssere compreso e apprezzato da una mente brillante come la vostra... è un onore che per me vale molto più di qualsiasi ricompensa in oro.",
+            "pensiero_seduzione_1": "(Le sue parole confermano ciò che speravo. Ho la sua totale ammirazione. Devo continuare a tessere questa tela e assecondarla... lei è la mia chiave per ottenere ciò che merito davvero).",
+            "parlato_seduzione_1": "Siete troppo gentile, mia signora. La vera forza non risiede sempre nell'acciaio, ma nella trama delle nostre scelte.\nOgni tappa del mio viaggio era solo un filo necessario per tessere la strada che mi avrebbe condotto al cospetto della vostra impareggiabile intelligenza.",
+            "pensiero_seduzione_2": "(Perfetto. È completamente rapita. Un mercante sa sempre cogliere l'occasione quando gli si presenta davanti).",
+            "parlato_seduzione_2": "Ho sfidato le insidie del regno intero per portarvi il mio tessuto migliore, Principessa.\nEssere compreso e apprezzato da una mente brillante come la vostra... è un onore che per me vale molto più di qualsiasi ricompensa in oro.",
             "pensiero_mercante_piumato": "(Per poco non ho commesso lo stesso errore. Con cinque tessuti la trappola è doppia: non basta più incrociare due indizi, bisogna verificarli tutti insieme prima di muovere un solo dito.)",
             "tradimento": "Tu chi sei e che ci fai abbracciato al mio futuro sposo. Via di qui, tutti e due!",
             "errore_ordine": "Per poco non ho commesso lo stesso errore... devo riprovare."
@@ -52,7 +57,8 @@
         "Jack": {
             "pensiero_sfida": "(Diamine ho solo una spada mal messa per combattere... O la va o la spacca, ne va della mia vita. Arrivato fin qui non posso tirarmi indietro)",
             "pensiero_spada": "(Un secondo... ma la mia spada ora è carica, come sarà successo. Speriamo che questo 100% mi porti alla vittoria)",
-            "vittoria": "(Ecco perché Clock era fissato col tempo, potevo arrivarci da solo) E' la mia occasione allora bene, fatti avanti. Potere a me!"
+            "pensiero_vittoria": "(Ecco perché Clock era fissato col tempo, potevo arrivarci da solo)",
+            "parlato_vittoria": "E' la mia occasione allora bene, fatti avanti. Potere a me!"
         }    
     },
     
@@ -102,12 +108,13 @@
         "Fox": {
             "incontro": "Andrò io al palazzo reale spacciandomi per te e andrò direttamente IO dalla principessa. Addio babbeo!",
             "ricatto": "Se proprio ci tieni a riprendere il tuo tessuto vieni a prenderlo... Anzi, lavora per me, come lavori per tutti.",
-            "richiesta_pianta": "Splendido... Vedi, facendo questo LAVORO, sono molto malato e ho bisogno di una pianta medica presente nei meandri di questo bosco.\nSe la trovi il resto è tutto tuo. Ma tanto nessuno sa dove sia o come sia fatta.",
+            "parlato_richiesta_pianta": "Splendido... Vedi, facendo questo LAVORO, sono molto malato e ho bisogno di una pianta medica presente nei meandri di questo bosco.\nSe la trovi il resto è tutto tuo. Ma tanto nessuno sa dove sia o come sia fatta.",
+            "pensiero_richiesta_pianta": "(Lui non sa che tanto non gli darò nulla e cercherà a vuoto)",
             "reazione_pianta_errata": "Ah, fammi vedere... Sì, sembra proprio lei! Grazie del disturbo, babbeo!\nOra, come promesso... col cavolo che ti ridò il tessuto! Ciao!",
             "reazione_pianta_corretta_1": "Davvero? Ottimo! Dammela subito!",
             "reazione_pianta_corretta_2": "Ahah! Funziona, sento già gli effetti! E ora, come ti dicevo prima... il tessuto me lo tengo io, fesso! Non ti ridò un bel nient...\nAspetta... perché... mi sento le palpebre... così pesanti...?",
-            "incontro_iniziale": "Ehi tu! Dammi quel tessuto! Adesso lavorerai per me! Portami la pianta rara!",
-            "addormentato": "Zzz... mi sono addormentato...",
+            "addormentato": "Zzz... che sonno ...",
+            "sbrigati": "Allora, hai trovato la pianta che mi serve o no? Muoviti!",
             "guarigione": "Ah! Sento di essermi guarito! Non ti darò mai il tessuto, fesso!"
         },
         "Saggio_Clock": {
