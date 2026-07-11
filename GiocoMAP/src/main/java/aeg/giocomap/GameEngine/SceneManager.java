@@ -112,6 +112,7 @@ public class SceneManager {
             frame.mostraPannello(scenario_precedente);
             scenaCorrente = scenaPrecedente;
             mapOpen=false;
+            aggiornaVisibilitaFrecce(scenaCorrente);
             System.out.println("DEBUG: Chisura Mappa");
         }
     }
@@ -153,6 +154,7 @@ public class SceneManager {
             ToolTipManager.sharedInstance().setEnabled(false);
             ToolTipManager.sharedInstance().setEnabled(true);
             
+            aggiornaVisibilitaFrecce(scenaCorrente);
             System.out.println("DEBUG: Chisura inventario");
         }
     }

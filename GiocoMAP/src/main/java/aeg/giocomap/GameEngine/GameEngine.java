@@ -12,8 +12,6 @@ import aeg.giocomap.View.ChatPanel;
 
 import aeg.giocomap.Network.GameServer;
 import aeg.giocomap.Network.GameClient;
-import aeg.giocomap.Network.Message;
-import aeg.giocomap.Network.TipoMessaggio;
 
 import aeg.giocomap.Model.Storage.*;
 import aeg.giocomap.Model.Oggetti.Oggetto;
@@ -23,8 +21,11 @@ import aeg.giocomap.Model.Giocatore.Giocatore;
 import aeg.giocomap.Model.Enigmi.Enigma;
 
 import aeg.giocomap.Util.JsonLoader;
+import aeg.giocomap.Util.Parser;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
@@ -83,6 +84,12 @@ public class GameEngine {
 
     // Registro dei personaggi attivi nella partita (ogni NPC usa setDialoghi/parla)
     private final Map<String, Personaggio> registroNPC = new HashMap<>();
+
+    // Stato logico della fase "Città con il porto"
+    private final int[] statoCity = {0};
+    
+    // Azione interattiva di Mr. Cooper per attivazione automatica
+    private Runnable mrCooperInteraction;
 
     public GameEngine(MainFrame frame) {
         this.dbWallOfText = JsonLoader.caricaJson("/dialoghi/walloftext.json");
@@ -163,9 +170,13 @@ public class GameEngine {
         String testoLocali = dbStoria.getAsJsonObject("Eryndor").getAsJsonObject("inizio").get("locali_chiusi").getAsString();
         Fantoccio fantoccioOvest = registraFantoccio("Fantoccio_Ovest", Arrays.asList(testoLocali));
         
+        // Rimosso collegamento errato a NORD
         registraCollegamento("PIAZZA_CENTRALE", "OVEST", () -> {
             if (giocatore.isPossiedeMappa()) { // Dopo aver parlato con David ottiene la mappa
                 sceneManager.mostraScena("STALLA");
+                if ((statoCity[0] == 0 || statoCity[0] == 4) && mrCooperInteraction != null) {
+                    mrCooperInteraction.run();
+                }
             } else {
                 GameScreen piazza = (GameScreen) sceneManager.getScena("PIAZZA_CENTRALE");
                 mostraDialogoNPC(piazza, "PIAZZA_CENTRALE", fantoccioOvest, null);
@@ -177,9 +188,7 @@ public class GameEngine {
         Personaggio guardiano = registraNPC("Guardiano", Arrays.asList(testoBlocco));
         
         registraCollegamento("PIAZZA_CENTRALE", "EST", () -> {
-            // Controlla se il giocatore ha completato l'enigma della stalla
-            // (TODO: Cambiare 'false' con il check reale quando verrà implementato l'enigma)
-            if (false) {
+            if (statoCity[0] == 5) {
                 sceneManager.mostraScena("BOSCO");
             } else {
                 GameScreen piazza = (GameScreen) sceneManager.getScena("PIAZZA_CENTRALE");
@@ -337,12 +346,92 @@ public class GameEngine {
         Personaggio ab2 = registraNPC("Abitante 2", Arrays.asList(hints.get(1)));
         Personaggio ab3 = registraNPC("Abitante 3", Arrays.asList(hints.get(2)));
 
+        JsonObject mrCooperDb = dbStoria.getAsJsonObject("Dialoghi_NPC").getAsJsonObject("MrCooper");
+        JsonObject contadinoDb = dbStoria.getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Contadino_Green");
+        JsonObject pescivendoloDb = dbStoria.getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Pescivendolo");
+
+        Personaggio mrCooper = registraNPC("Mr. Cooper", Arrays.asList(
+            mrCooperDb.get("saluto").getAsString() + "\n" +
+            mrCooperDb.get("prezzo").getAsString() + "\n" +
+            mrCooperDb.get("proposta").getAsString()
+        ));
+        
+        Personaggio contadino = registraNPC("Contadino Green", Arrays.asList(
+            contadinoDb.get("saluto").getAsString() + "\n" +
+            contadinoDb.get("richiesta").getAsString()
+        ));
+        
+        Personaggio pescivendolo = registraNPC("Pescivendolo", Arrays.asList(
+            pescivendoloDb.get("saluto").getAsString() + "\n" +
+            pescivendoloDb.get("richiesta").getAsString()
+        ));
+
+        ImageIcon spriteMrCooper = new ImageIcon(getClass().getResource("/sprites/Personaggi/MrCooper.png"));
+        ImageIcon spriteGreen = new ImageIcon(getClass().getResource("/sprites/Personaggi/Green.png"));
+
         // Circa posizione NPC1
         zonePiazza.put(new double[]{0.3090, 0.6083, 0.08, 0.25}, () -> mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab1, null));
         // Circa posizione NPC2
         zonePiazza.put(new double[]{0.5349, 0.4436, 0.08, 0.25}, () -> mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab2, null));
         // Circa posizione NPC3
         zonePiazza.put(new double[]{0.6228, 0.6285, 0.08, 0.25}, () -> mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab3, null));
+
+        // hitbox contadino (coordinate simili a quelle di David)
+        zonePiazza.put(new double[]{0.7187, 0.3525, 0.1289, 0.3745}, () -> {
+            if (statoCity[0] == 1) { 
+                contadino.setDialoghi(Arrays.asList(contadinoDb.get("saluto").getAsString()));
+                Runnable loopContadino = new Runnable() {
+                    @Override
+                    public void run() {
+                        String input = JOptionPane.showInputDialog(frame, "Cosa chiedi al Contadino Green?");
+                        if (input == null) return;
+                        if (Parser.contieneParolaChiave(input, "carote")) {
+                            contadino.setDialoghi(Arrays.asList(contadinoDb.get("richiesta").getAsString()));
+                            mostraDialogoNPCCallback(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen, () -> {
+                                Runnable loopConfermaContadino = new Runnable() {
+                                    int countRifiuti = 0;
+                                    JsonArray rifiutiJson = dbHint.getAsJsonObject("Loop_Rifiuti_Quest").getAsJsonArray("Contadino_Green");
+                                    
+                                    @Override
+                                    public void run() {
+                                        int scelta = JOptionPane.showConfirmDialog(frame, "Accetti la proposta del Contadino?", "Scelta", JOptionPane.YES_NO_OPTION);
+                                        if (scelta == JOptionPane.YES_OPTION) {
+                                            contadino.setDialoghi(Arrays.asList(contadinoDb.get("ringraziamento").getAsString()));
+                                            mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen);
+                                            statoCity[0] = 2; 
+                                        } else {
+                                            String frase = rifiutiJson.get(Math.min(countRifiuti, rifiutiJson.size() - 1)).getAsString();
+                                            countRifiuti++;
+                                            contadino.setDialoghi(Arrays.asList(frase));
+                                            mostraDialogoNPCCallback(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen, this);
+                                        }
+                                    }
+                                };
+                                loopConfermaContadino.run();
+                            });
+                        } else {
+                            contadino.setDialoghi(Arrays.asList("Non ho capito cosa cerchi. Riprova."));
+                            mostraDialogoNPCCallback(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen, this);
+                        }
+                    }
+                };
+                mostraDialogoNPCCallback(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen, loopContadino);
+            } else if (statoCity[0] == 3) { 
+                contadino.setDialoghi(Arrays.asList(contadinoDb.get("consegna").getAsString()));
+                mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen);
+                // Rimuovi Cena di pesce, Aggiungi Carote
+                Oggetto cena = giocatore.getInventario().cercaOggetto("Cena di pesce");
+                if (cena != null) giocatore.getInventario().rimuoviOggetto(cena);
+                giocatore.getInventario().aggiungiOggetto(new Oggetto(2, "Carote", "Carote fresche coltivate dal Contadino Green."));
+                statoCity[0] = 4; 
+            } else if (statoCity[0] >= 4) {
+                contadino.setDialoghi(Arrays.asList("Buona fortuna con la tua avventura!"));
+                mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen);
+            } else {
+                contadino.setDialoghi(Arrays.asList("Non ho tempo da perdere, devo badare alle mie galline."));
+                mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen);
+            }
+        });
 
         BufferedImage sfondoPiazza = null;
         try {
@@ -367,10 +456,83 @@ public class GameEngine {
         ImageIcon spriteDavid = new ImageIcon(getClass().getResource("/sprites/Personaggi/David.png"));
 
         // coordinate david (testa a 0.3525, piedi a 0.7270, da x=0.7187 a 0.8476)
-        zonePorto.put(new double[]{0.7187, 0.3525, 0.1289, 0.3745}, () -> {
+        double[] davidHitbox = new double[]{0.7187, 0.3525, 0.1289, 0.3745};
+        zonePorto.put(davidHitbox, () -> {
             mostraDialogoNPC(portoScreenArr[0], "PORTO", david, spriteDavid);
             // Sblocca la mappa post interazione David
-            giocatore.setPossiedeMappa(true);
+            if (!giocatore.isPossiedeMappa()) {
+                giocatore.setPossiedeMappa(true);
+                zonePorto.remove(davidHitbox);
+                david.setDialoghi(new ArrayList<>());
+                ab1.setDialoghi(new ArrayList<>());
+                ab3.setDialoghi(new ArrayList<>());
+                ab2.setDialoghi(Arrays.asList("La prossima tappa è il bosco! Per arrivare nel bosco ti serve una carrozza, vai alla stalla."));
+            }
+        });
+
+        // hitbox pescivendolo
+        zonePorto.put(new double[]{0.1, 0.5, 0.2, 0.2}, () -> {
+            if (statoCity[0] == 2) {
+                pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("saluto").getAsString()));
+                Runnable loopPescivendolo = new Runnable() {
+                    @Override
+                    public void run() {
+                        String input = JOptionPane.showInputDialog(frame, "Cosa chiedi al Pescivendolo?");
+                        if (input == null) return;
+                        if (Parser.contieneParolaChiave(input, "cena")) {
+                            String EryndorText = dbStoria.getAsJsonObject("Eryndor").getAsJsonObject("Pescivendolo").get("cena_green").getAsString();
+                            mostraDialogoCallback(portoScreenArr[0], "PORTO", giocatore.getNomePlayer().isEmpty() ? "Eryndor" : giocatore.getNomePlayer(), EryndorText, null, () -> {
+                                pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("richiesta").getAsString()));
+                                mostraDialogoNPCCallback(portoScreenArr[0], "PORTO", pescivendolo, null, () -> {
+                                    iniziaEnigma();
+                                    
+                                    // AGGIORNAMENTO HINT ABITANTI
+                                    List<String> hints2 = JsonLoader.estraiLista(dbHint.getAsJsonObject("Aiuti_Enigmi"), "Enigma_2_Germi");
+                                    ab1.setDialoghi(Arrays.asList(hints2.get(0)));
+                                    ab2.setDialoghi(Arrays.asList(hints2.get(1)));
+                                    ab3.setDialoghi(Arrays.asList(hints2.get(2)));
+                                    
+                                    // MOSTRIAMO IL TESTO DELL'ENIGMA 2
+                                    String testoEnigma2 = dbWallOfText.getAsJsonObject("Schermo").get("Enigma_2_Germi").getAsString();
+                                    
+                                    Runnable loopEnigma = new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            String risposta = JOptionPane.showInputDialog(frame, "Risposta (Scrivi il numero):");
+                                            if (risposta == null) return;
+                                            if (Parser.contieneParolaChiave(risposta, "59")) {
+                                                enigmaRisolto(new Enigma("Enigma2", "", null, null) {
+                                                    @Override
+                                                    public boolean verifica(String r) { return true; }
+                                                });
+                                                pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("risolto").getAsString()));
+                                                mostraDialogoNPC(portoScreenArr[0], "PORTO", pescivendolo, null);
+                                                // Aggiungi Cena di pesce all'inventario
+                                                giocatore.getInventario().aggiungiOggetto(new Oggetto(1, "Cena di pesce", "Una deliziosa cena preparata dal Pescivendolo."));
+                                                statoCity[0] = 3;
+                                            } else {
+                                                pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("risposta_errata").getAsString()));
+                                                mostraDialogoNPCCallback(portoScreenArr[0], "PORTO", pescivendolo, null, this);
+                                            }
+                                        }
+                                    };
+                                    mostraDialogoCallback(portoScreenArr[0], "PORTO", "Fantoccio", testoEnigma2, null, loopEnigma);
+                                });
+                            });
+                        } else {
+                            pescivendolo.setDialoghi(Arrays.asList("Cosa? Parla chiaro."));
+                            mostraDialogoNPCCallback(portoScreenArr[0], "PORTO", pescivendolo, null, this);
+                        }
+                    }
+                };
+                mostraDialogoNPCCallback(portoScreenArr[0], "PORTO", pescivendolo, null, loopPescivendolo);
+            } else if (statoCity[0] >= 3) {
+                pescivendolo.setDialoghi(Arrays.asList("Grazie ancora per il tuo aiuto!"));
+                mostraDialogoNPC(portoScreenArr[0], "PORTO", pescivendolo, null);
+            } else {
+                pescivendolo.setDialoghi(Arrays.asList("Sono chiuso, ripassa più tardi."));
+                mostraDialogoNPC(portoScreenArr[0], "PORTO", pescivendolo, null);
+            }
         });
 
         BufferedImage sfondoPorto = null;
@@ -392,7 +554,72 @@ public class GameEngine {
         // ---------------------------------------------------------------------------------
         
         // Prima macro-zona (Piazza -> Stalla / Bosco)
-        sceneManager.registraScena("STALLA", sceneManager.creaScenaBase("Stalla.png", null));
+        Map<double[], Runnable> zoneStalla = new HashMap<>();
+        final GameScreen[] stallaScreenArr = new GameScreen[1];
+        mrCooperInteraction = () -> {
+            if (statoCity[0] == 0) {
+                mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("saluto").getAsString()));
+                Runnable loopCooper = new Runnable() {
+                    @Override
+                    public void run() {
+                        String input = JOptionPane.showInputDialog(frame, "Cosa chiedi a Mr.Cooper?");
+                        if (input == null) return;
+                        if (Parser.contieneParolaChiave(input, "carrozza")) {
+                            mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("prezzo").getAsString()));
+                            mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, () -> {
+                                String EryndorText = dbStoria.getAsJsonObject("Eryndor").getAsJsonObject("MrCooper").get("no_soldi").getAsString();
+                                mostraDialogoCallback(stallaScreenArr[0], "STALLA", giocatore.getNomePlayer().isEmpty() ? "Eryndor" : giocatore.getNomePlayer(), EryndorText, null, () -> {
+                                    mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("proposta").getAsString()));
+                                    mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, () -> {
+                                        Runnable loopConfermaCooper = new Runnable() {
+                                            int countRifiuti = 0;
+                                            JsonArray rifiutiJson = dbHint.getAsJsonObject("Loop_Rifiuti_Quest").getAsJsonArray("MrCooper");
+                                            
+                                            @Override
+                                            public void run() {
+                                                int scelta = JOptionPane.showConfirmDialog(frame, "Accetti la proposta di Mr.Cooper?", "Scelta", JOptionPane.YES_NO_OPTION);
+                                                if (scelta == JOptionPane.YES_OPTION) {
+                                                    mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("missione").getAsString()));
+                                                    mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
+                                                    statoCity[0] = 1;
+                                                } else {
+                                                    String frase = rifiutiJson.get(Math.min(countRifiuti, rifiutiJson.size() - 1)).getAsString();
+                                                    countRifiuti++;
+                                                    mrCooper.setDialoghi(Arrays.asList(frase));
+                                                    mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, this);
+                                                }
+                                            }
+                                        };
+                                        loopConfermaCooper.run();
+                                    });
+                                });
+                            });
+                        } else {
+                            mrCooper.setDialoghi(Arrays.asList("Non capisco cosa tu intenda, giovanotto. Riprova."));
+                            mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, this);
+                        }
+                    }
+                };
+                mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, loopCooper);
+            } else if (statoCity[0] == 4) {
+                mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("ringraziamento").getAsString()));
+                mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
+                // Rimuovi Carote
+                Oggetto carote = giocatore.getInventario().cercaOggetto("Carote");
+                if (carote != null) giocatore.getInventario().rimuoviOggetto(carote);
+                statoCity[0] = 5;
+            } else if (statoCity[0] == 5) {
+                mrCooper.setDialoghi(Arrays.asList("La carrozza è tua, vai al bosco."));
+                mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
+            } else {
+                mrCooper.setDialoghi(Arrays.asList("Hai portato le carote?"));
+                mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
+            }
+        };
+        zoneStalla.put(new double[]{0.3, 0.3, 0.4, 0.5}, mrCooperInteraction);
+        GameScreen stallaScreen = sceneManager.creaScenaBase("Stalla.png", zoneStalla);
+        stallaScreenArr[0] = stallaScreen;
+        sceneManager.registraScena("STALLA", stallaScreen);
         // Il Bosco principale usa BoscoLosco.png
         sceneManager.registraScena("BOSCO", sceneManager.creaScenaBase("BoscoLosco.png", null));
         // Il Bosco Deep (raggiungibile ad Ovest) usa BoscoINN.png
@@ -686,6 +913,33 @@ public class GameEngine {
         }
         if (battuta != null) {
             mostraDialogo(scenaSfondo, idScenaSfondo, pg.getNome(), battuta, sprite);
+        }
+    }
+
+    private void mostraDialogoCallback(GameScreen scenaSfondo, String idScenaSfondo, String nome, String battuta, ImageIcon sprite, Runnable callback) {
+        if (isDialogoActive) return;
+        setDialogueActive(true);
+        DialogueScreen ds = new DialogueScreen(scenaSfondo, () -> {
+            setDialogueActive(false);
+            sceneManager.mostraScena(idScenaSfondo);
+            if (callback != null) callback.run();
+        });
+        ds.aggiornaSchermata(nome, battuta, sprite);
+        sceneManager.registraScena("DIALOGO_CORRENTE", ds);
+        sceneManager.mostraScena("DIALOGO_CORRENTE");
+    }
+
+    private void mostraDialogoNPCCallback(GameScreen scenaSfondo, String idScenaSfondo,
+                                   Personaggio pg, ImageIcon sprite, Runnable callback) {
+        String battuta = pg.parla();
+        if (battuta == null) {
+            pg.resetDialogo();
+            battuta = pg.parla();
+        }
+        if (battuta != null) {
+            mostraDialogoCallback(scenaSfondo, idScenaSfondo, pg.getNome(), battuta, sprite, callback);
+        } else {
+            if (callback != null) callback.run();
         }
     }
 
