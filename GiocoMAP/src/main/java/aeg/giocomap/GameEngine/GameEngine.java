@@ -627,8 +627,10 @@ public class GameEngine {
             ? giocatore.getNomePlayer() : "");
         music_player.stopMusic();
         if (fineGioco) music_player.playMusic(MusicPlayer.END_TITLE_MUSIC);
-        TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome_passato);
-        
+        // dal menu (fineGioco=false) mostro solo la Hall of Fame;
+        // a fine partita (fineGioco=true) i titoli di coda completi
+        TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome_passato, !fineGioco);
+
 
         titoli.addIndietroListener(e -> {
             music_player.stopMusic();
@@ -737,6 +739,7 @@ public class GameEngine {
     // cosi digitare "c" in un messaggio non la richiude accidentalmente
     private void apriChatDaTastiera() {
         if (sceneManager.isChatOpen()) return;
+        if (chatNonApribileQui()) return;
         if (isDialogoActive) {
             System.out.println("DEBUG: Testo in corso, chat non apribile");
             return;
@@ -750,6 +753,7 @@ public class GameEngine {
     // la chat (un click non ha conflitti con la digitazione dei messaggi)
     private void chatButtonClick() {
         if (!sceneManager.isChatOpen()) {
+            if (chatNonApribileQui()) return;
             if (isDialogoActive) {
                 System.out.println("DEBUG: Testo in corso, chat non apribile");
                 return;
@@ -758,6 +762,11 @@ public class GameEngine {
             if (sceneManager.isOpenInventario()) sceneManager.ChiudiInventario();
         }
         toggleChat();
+    }
+
+    // la chat non si apre nei titoli di coda / statistiche
+    private boolean chatNonApribileQui() {
+        return "TITOLI_CODA".equals(sceneManager.getScenaCorrente());
     }
 
     private void impostaKeyBindingInventario() {
