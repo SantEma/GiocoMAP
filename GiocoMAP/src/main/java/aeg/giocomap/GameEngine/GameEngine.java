@@ -15,7 +15,6 @@ import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.Model.Giocatore.Giocatore;
 
 import aeg.giocomap.Util.JsonLoader;
-import aeg.giocomap.Util.Parser;
 import com.google.gson.JsonObject;
 import java.awt.*;
 import java.awt.event.*;
@@ -116,6 +115,10 @@ public class GameEngine {
     
     public JsonObject getDbHint() { 
         return dbHint; 
+    }
+    
+    public ModelTXTOggetti getTxt() {
+        return txt;
     }
     
     public SceneManager getSceneManager() { 

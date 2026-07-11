@@ -24,8 +24,28 @@ public class IstanzaEnigma {
         JsonObject root = JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
         if (root == null) return Collections.emptyList();
         JsonObject aiuti = root.getAsJsonObject("Aiuti_Enigmi");
-        if (aiuti == null) return Collections.emptyList();
-        return JsonLoader.estraiLista(aiuti, enigmaId);
+        if (aiuti == null || !aiuti.has(enigmaId)) return Collections.emptyList();
+        
+        com.google.gson.JsonArray arr = aiuti.getAsJsonArray(enigmaId);
+        String[] ops = new String[arr.size()];
+        for(int i=0; i<arr.size(); i++){
+            ops[i] = arr.get(i).getAsString();
+        }
+        return Arrays.asList(ops);
+    }
+
+    private static List<String> caricaOpzioni(String enigmaId) {
+        JsonObject root = JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
+        if (root == null) return Collections.emptyList();
+        JsonObject opzioni = root.getAsJsonObject("Opzioni_Enigmi");
+        if (opzioni == null || !opzioni.has(enigmaId)) return Collections.emptyList();
+        
+        com.google.gson.JsonArray arr = opzioni.getAsJsonArray(enigmaId);
+        String[] ops = new String[arr.size()];
+        for(int i=0; i<arr.size(); i++){
+            ops[i] = arr.get(i).getAsString();
+        }
+        return Arrays.asList(ops);
     }
 
     // Metodo privato per caricare il testo dal file walloftext
@@ -58,11 +78,7 @@ public class IstanzaEnigma {
     }
 
     public static EnigmaSceltaMultipla creaEnigma3(Oggetto reward) {
-        List<String> opzioni = Arrays.asList(
-            "Consegna l'Erba Rossa",
-            "Consegna l'Erba Blu",
-            "Consegna l'Erba Viola"
-        );
+        List<String> opzioni = caricaOpzioni("Enigma_3_Fiori");
         return new EnigmaSceltaMultipla(
             "Enigma_3_Fiori",
             caricaTesto("Cartello_Esploratori"),
@@ -84,11 +100,7 @@ public class IstanzaEnigma {
     }
 
     public static EnigmaSceltaMultipla creaEnigma5(Oggetto reward) {
-        List<String> opzioni = Arrays.asList(
-            "Uno",
-            "Tre",
-            "Cinque"
-        );
+        List<String> opzioni = caricaOpzioni("Enigma_5_Vincolo");
         return new EnigmaSceltaMultipla(
             "Enigma_5_Vincolo",
             caricaTesto("Enigma_5_Vincolo"),
@@ -100,12 +112,7 @@ public class IstanzaEnigma {
     }
 
     public static EnigmaSceltaMultipla creaEnigma7(Oggetto reward) {
-        List<String> opzioni = Arrays.asList(
-            "1.Velluto 2.Seta 3.Damasco 4.Lino 5.Broccato",
-            "1.Velluto 2.Broccato 3.Lino 4.Damasco 5.Seta",
-            "1.Damasco 2.Seta 3.Lino 4.Velluto 5.Broccato",
-            "1.Velluto 2.Seta 3.Lino 4.Damasco 5.Broccato"
-        );
+        List<String> opzioni = caricaOpzioni("Enigma_7_Principessa");
         return new EnigmaSceltaMultipla(
             "Enigma_7_Principessa",
             caricaTesto("Enigma_7_Principessa"),
