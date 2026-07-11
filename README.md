@@ -28,8 +28,8 @@ Su questa parte sarà presente la riflessione finale, attuando una **critica al 
 
 ## Comandi
 I comandi di gioco sono molto semplici e variano a seconda della situazione presente nel gioco, tra cui:
-- **click del mouse**, la maggior parte delle situazioni presenti nel gioco, come i dialoghi, scovare oggetti e il movimento stesso del protagonista avvengono tramite click del mouse sugli scenari e sull'ambiente circostante
-- **comandi da tastiera**, i quali possono essere input di parole tramite **Parser** o premere dei veri e propri **caratteri da tastiera**; di questi ultimi si ha:
+- **Click del mouse**, la maggior parte delle situazioni presenti nel gioco, come i dialoghi, scovare oggetti e il movimento stesso del protagonista avvengono tramite click del mouse sugli scenari e sull'ambiente circostante
+- **Comandi da tastiera**, i quali possono essere input di parole tramite **Parser** o premere dei veri e propri **caratteri da tastiera**; di questi ultimi si ha:
     - *M* per l'apertura della mappa (una volta ottenuta)
     - *I* per l'apertura dell'inventario
     - *C* per avviare la chat di gioco e vedere il proprio **indirizzo IP** per far collegare gli altri giocatori nella chat
