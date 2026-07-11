@@ -1,4 +1,22 @@
 {
+  "Opzioni_Enigmi": {
+    "Enigma_3_Fiori": [
+      "Consegna l'Erba Rossa",
+      "Consegna l'Erba Blu",
+      "Consegna l'Erba Viola"
+    ],
+    "Enigma_5_Vincolo": [
+      "Uno",
+      "Tre",
+      "Cinque"
+    ],
+    "Enigma_7_Principessa": [
+      "1.Velluto 2.Seta 3.Damasco 4.Lino 5.Broccato",
+      "1.Velluto 2.Broccato 3.Lino 4.Damasco 5.Seta",
+      "1.Damasco 2.Seta 3.Lino 4.Velluto 5.Broccato",
+      "1.Velluto 2.Seta 3.Lino 4.Damasco 5.Broccato"
+    ]
+  },
   "Aiuti_Enigmi": {
     "Enigma_1_Porto": [
       "Hai provato a seguire il suono della grande campana di bronzo? Si dice che guidi sempre i viandanti verso l'acqua.",

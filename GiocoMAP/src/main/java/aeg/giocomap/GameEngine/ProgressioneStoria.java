@@ -41,6 +41,7 @@ public class ProgressioneStoria {
     
     // Azione interattiva di Mr. Cooper
     private Runnable mrCooperInteraction;
+    private Runnable foxInteraction;
 
     public ProgressioneStoria(GameEngine engine) {
         this.engine = engine;
@@ -92,6 +93,9 @@ public class ProgressioneStoria {
         
         registraCollegamento("PIAZZA_CENTRALE", "EST", () -> {
             if (statoCity[0] == 5) {
+                engine.getSceneManager().mostraScena("BOSCO");
+                if (foxInteraction != null) foxInteraction.run();
+            } else if (statoCity[0] > 5) {
                 engine.getSceneManager().mostraScena("BOSCO");
             } else {
                 GameScreen piazza = (GameScreen) engine.getSceneManager().getScena("PIAZZA_CENTRALE");
@@ -162,6 +166,7 @@ public class ProgressioneStoria {
         JsonObject mrCooperDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("MrCooper");
         JsonObject contadinoDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Contadino_Green");
         JsonObject pescivendoloDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Pescivendolo");
+        JsonObject davidDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("David");
 
         Personaggio mrCooper = registraNPC("Mr. Cooper", Arrays.asList(
             mrCooperDb.get("saluto").getAsString() + "\n" +
@@ -190,9 +195,10 @@ public class ProgressioneStoria {
             zonePiazza.put(hitboxAb1, () -> engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab1, null));
             zonePiazza.put(hitboxAb3, () -> engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab3, null));
         } else {
-            ab2.setDialoghi(Arrays.asList("Buona fortuna con la tua avventura, straniero!"));
+            ab2.setDialoghi(Arrays.asList(davidDb.get("saluto_generico").getAsString()));
         }
         zonePiazza.put(hitboxAb2, () -> engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab2, null));
+
         zonePiazza.put(new double[]{0.7187, 0.3525, 0.1289, 0.3745}, () -> {
             if (statoCity[0] == 1) { 
                 contadino.setDialoghi(Arrays.asList(contadinoDb.get("saluto").getAsString()));
@@ -226,7 +232,7 @@ public class ProgressioneStoria {
                                 loopConfermaContadino.run();
                             });
                         } else {
-                            contadino.setDialoghi(Arrays.asList("Non ho capito cosa cerchi. Riprova."));
+                            contadino.setDialoghi(Arrays.asList(contadinoDb.get("incomprensione").getAsString()));
                             engine.mostraDialogoNPCCallback(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen, this);
                         }
                     }
@@ -237,13 +243,14 @@ public class ProgressioneStoria {
                 engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen);
                 Oggetto cena = engine.getGiocatore().getInventario().cercaOggetto("Cena di pesce");
                 if (cena != null) engine.getGiocatore().getInventario().rimuoviOggetto(cena);
-                engine.getGiocatore().getInventario().aggiungiOggetto(new Oggetto(2, "Carote", "Carote fresche coltivate dal Contadino Green."));
-                statoCity[0] = 4; 
+                engine.getGiocatore().getInventario().aggiungiOggetto(engine.getTxt().getOggettoDaCatalogo(3));
+                statoCity[0] = 4;
+                contadino.setDialoghi(Arrays.asList(contadinoDb.get("augurio").getAsString()));
             } else if (statoCity[0] >= 4) {
-                contadino.setDialoghi(Arrays.asList("Buona fortuna con la tua avventura!"));
+                contadino.setDialoghi(Arrays.asList(contadinoDb.get("fretta").getAsString()));
                 engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen);
             } else {
-                contadino.setDialoghi(Arrays.asList("Non ho tempo da perdere, devo badare alle mie galline."));
+                contadino.setDialoghi(Arrays.asList(contadinoDb.get("fretta").getAsString()));
                 engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen);
             }
         });
@@ -277,9 +284,15 @@ public class ProgressioneStoria {
                 engine.getGiocatore().setPossiedeMappa(true);
                 zonePorto.remove(davidHitbox);
                 david.setDialoghi(new ArrayList<>());
+                // Svuoto i dialoghi e rimuovo le hitbox dalla mappa della zona
+                // così il MouseListener in CursorUtil non fa apparire l'icona della mano
                 ab1.setDialoghi(new ArrayList<>());
+                zonePiazza.remove(hitboxAb1);
+                
                 ab3.setDialoghi(new ArrayList<>());
-                ab2.setDialoghi(Arrays.asList("La prossima tappa è il bosco! Per arrivare nel bosco ti serve una carrozza, vai alla stalla."));
+                zonePiazza.remove(hitboxAb3);
+                
+                ab2.setDialoghi(Arrays.asList(davidDb.get("consiglio_stalla").getAsString()));
             }
         });
 
@@ -287,11 +300,17 @@ public class ProgressioneStoria {
         zonePorto.put(new double[]{0.1, 0.5, 0.2, 0.2}, () -> {
             if (statoCity[0] == 2) {
                 Runnable startEnigma = () -> {
-                    Enigma enigma2 = IstanzaEnigma.creaEnigma2(new Oggetto(1, "Cena di pesce", "Una deliziosa cena preparata dal Pescivendolo."));
+                    Enigma enigma2 = IstanzaEnigma.creaEnigma2(engine.getTxt().getOggettoDaCatalogo(4));
                     engine.getStatistics().iniziaEnigma();
+                    // Quando ricominciano a parlare (per gli aiuti dell'Enigma 2),
+                    // assegno i nuovi testi presi dal JSON e riaggiungo le hitbox così tornano cliccabili (icona mano)
                     ab1.setDialoghi(Arrays.asList(enigma2.getAiuti().get(0)));
+                    zonePiazza.put(hitboxAb1, () -> engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab1, null));
+                    
                     ab2.setDialoghi(Arrays.asList(enigma2.getAiuti().get(1)));
+                    
                     ab3.setDialoghi(Arrays.asList(enigma2.getAiuti().get(2)));
+                    zonePiazza.put(hitboxAb3, () -> engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab3, null));
                     Runnable loopEnigma = new Runnable() {
                         @Override
                         public void run() {
@@ -304,7 +323,7 @@ public class ProgressioneStoria {
                                 statoCity[0] = 3;
                                 zonePiazza.remove(hitboxAb1);
                                 zonePiazza.remove(hitboxAb3);
-                                ab2.setDialoghi(Arrays.asList("Buona fortuna con la tua avventura, straniero!"));
+                                ab2.setDialoghi(Arrays.asList(davidDb.get("saluto_generico").getAsString()));
                             } else {
                                 pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("risposta_errata").getAsString()));
                                 engine.mostraDialogoNPCCallback(portoScreenArr[0], "PORTO", pescivendolo, null, this);
@@ -333,7 +352,7 @@ public class ProgressioneStoria {
                                     });
                                 });
                             } else {
-                                pescivendolo.setDialoghi(Arrays.asList("Cosa? Parla chiaro."));
+                                pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("incomprensione").getAsString()));
                                 engine.mostraDialogoNPCCallback(portoScreenArr[0], "PORTO", pescivendolo, null, this);
                             }
                         }
@@ -341,10 +360,10 @@ public class ProgressioneStoria {
                     engine.mostraDialogoNPCCallback(portoScreenArr[0], "PORTO", pescivendolo, null, loopPescivendolo);
                 }
             } else if (statoCity[0] >= 3) {
-                pescivendolo.setDialoghi(Arrays.asList("Grazie ancora per il tuo aiuto!"));
+                pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("ringraziamento_finale").getAsString()));
                 engine.mostraDialogoNPC(portoScreenArr[0], "PORTO", pescivendolo, null);
             } else {
-                pescivendolo.setDialoghi(Arrays.asList("Sono chiuso, ripassa più tardi."));
+                pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("chiuso").getAsString()));
                 engine.mostraDialogoNPC(portoScreenArr[0], "PORTO", pescivendolo, null);
             }
         });
@@ -404,7 +423,7 @@ public class ProgressioneStoria {
                                     });
                                 });
                             } else {
-                                mrCooper.setDialoghi(Arrays.asList("Non capisco cosa tu intenda, giovanotto. Riprova."));
+                                mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("non_capisco").getAsString()));
                                 engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, this);
                             }
                         }
@@ -418,11 +437,11 @@ public class ProgressioneStoria {
                     statoCity[0] = 5;
                     break;
                 case 5:
-                    mrCooper.setDialoghi(Arrays.asList("La carrozza è tua, vai al bosco."));
+                    mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("vai_al_bosco").getAsString()));
                     engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
                     break;
                 default:
-                    mrCooper.setDialoghi(Arrays.asList("Hai portato le carote?"));
+                    mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("hai_carote").getAsString()));
                     engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
                     break;
             }
@@ -433,30 +452,37 @@ public class ProgressioneStoria {
         engine.getSceneManager().registraScena("STALLA", stallaScreen);
         Map<double[], Runnable> zoneBosco = new HashMap<>();
         final GameScreen[] boscoScreenArr = new GameScreen[1];
-        Personaggio ladroFox = registraNPC("Fox", Arrays.asList("Ehi tu! Dammi quel tessuto!", "Adesso lavorerai per me! Portami la pianta rara!"));
-        zoneBosco.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
-            EnigmaSceltaMultipla enigma3 = IstanzaEnigma.creaEnigma3(new Oggetto(4, "Tessuto Reale", "Il tessuto rubato recuperato."));
-            engine.getStatistics().iniziaEnigma();
-            Runnable loopEnigma = new Runnable() {
-                @Override
-                public void run() {
-                    String[] opzioni = enigma3.getOpzioni().toArray(new String[0]);
-                    int scelta = JOptionPane.showOptionDialog(engine.getFrame(), "Scegli l'erba da consegnare a Fox:", "Scegli erba", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opzioni, opzioni[0]);
-                    if (scelta < 0) return;
-                    if (enigma3.verifica(String.valueOf(scelta))) {
-                        engine.getStatistics().enigmaRisolto(enigma3);
-                        ladroFox.setDialoghi(Arrays.asList("Zzz... mi sono addormentato..."));
-                        engine.mostraDialogoNPC(boscoScreenArr[0], "BOSCO", ladroFox, null);
-                        engine.getGiocatore().getInventario().aggiungiOggetto(new Oggetto(5, "Chiave di Fox", "Una strana chiave rubata a Fox."));
-                    } else {
-                        ladroFox.setDialoghi(Arrays.asList("Ah! Sento di essermi guarito! Non ti darò mai il tessuto, fesso!"));
-                        engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, null, () -> {
-                            engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", "Maledizione! Fox si è curato e mi attacca! Devo riprovare l'enigma...", null, this);
+        JsonObject foxDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Fox");
+        JsonObject eryndorFoxDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Fox");
+        Personaggio ladroFox = registraNPC("Fox", new ArrayList<>());
+        ImageIcon spriteFox = new ImageIcon(getClass().getResource("/sprites/Personaggi/Fox.png"));
+        
+        foxInteraction = () -> {
+            ladroFox.setDialoghi(Arrays.asList(foxDb.get("incontro_iniziale").getAsString()));
+            engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
+                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("reazione_furto").getAsString(), null, () -> {
+                    ladroFox.setDialoghi(Arrays.asList(foxDb.get("ricatto").getAsString()));
+                    engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
+                        engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("reazione_inseguimento").getAsString(), null, () -> {
+                            ladroFox.setDialoghi(Arrays.asList(foxDb.get("richiesta_pianta").getAsString()));
+                            engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
+                                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("accordo").getAsString(), null, () -> {
+                                    Oggetto tessuto = engine.getGiocatore().getInventario().cercaOggetto("Tessuto");
+                                    if (tessuto != null) {
+                                        engine.getGiocatore().getInventario().rimuoviOggetto(tessuto);
+                                    }
+                                    statoCity[0] = 6;
+                                    ladroFox.setDialoghi(new ArrayList<>());
+                                });
+                            });
                         });
-                    }
-                }
-            };
-            engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Cartello degli Esploratori", enigma3.getTesto(), null, loopEnigma);
+                    });
+                });
+            });
+        };
+
+        zoneBosco.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
+            System.out.println("Click su Fox/Cartello, da implementare in seguito.");
         });
         GameScreen boscoScreen = engine.getSceneManager().creaScenaBase("BoscoLosco.png", zoneBosco);
         boscoScreenArr[0] = boscoScreen;
@@ -472,7 +498,7 @@ public class ProgressioneStoria {
         Map<double[], Runnable> zoneGrotta = new HashMap<>();
         final GameScreen[] grottaScreenArr = new GameScreen[1];
         zoneGrotta.put(new double[]{0.3, 0.3, 0.4, 0.4}, () -> {
-            Enigma enigma4 = IstanzaEnigma.creaEnigma4(new aeg.giocomap.Model.Oggetti.Spada(6, "Spada Sincro", "Un'antica spada magica."));
+            Enigma enigma4 = IstanzaEnigma.creaEnigma4((aeg.giocomap.Model.Oggetti.Spada) engine.getTxt().getOggettoDaCatalogo(10));
             engine.getStatistics().iniziaEnigma();
             Runnable loopEnigma = new Runnable() {
                 @Override
@@ -481,9 +507,9 @@ public class ProgressioneStoria {
                     if (risposta == null) return;
                     if (enigma4.verifica(risposta)) {
                         engine.getStatistics().enigmaRisolto(enigma4);
-                        engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", "Incredibile! L'incudine si è aperta e ho estratto la Spada Sincro!", null, null);
+                        engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("successo_spada").getAsString(), null, null);
                     } else {
-                        engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", "L'incudine non si muove. La risposta deve essere sbagliata.", null, this);
+                        engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("fallimento_spada").getAsString(), null, this);
                     }
                 }
             };
@@ -498,9 +524,10 @@ public class ProgressioneStoria {
         
         Map<double[], Runnable> zoneCripta = new HashMap<>();
         final GameScreen[] criptaScreenArr = new GameScreen[1];
-        Personaggio eripeta = registraNPC("Eripeta", Arrays.asList("Non sei degno di proseguire. Risolvi prima il mio enigma."));
+        JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
+        Personaggio eripeta = registraNPC("Eripeta", Arrays.asList(eripetaDb.get("rifiuto").getAsString()));
         zoneCripta.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
-            EnigmaSceltaMultipla enigma5 = IstanzaEnigma.creaEnigma5(new Oggetto(7, "Ampolla d'oro", "Le lacrime di Eripeta."));
+            EnigmaSceltaMultipla enigma5 = IstanzaEnigma.creaEnigma5(engine.getTxt().getOggettoDaCatalogo(9));
             engine.getStatistics().iniziaEnigma();
             Runnable loopEnigma = new Runnable() {
                 @Override
@@ -510,10 +537,10 @@ public class ProgressioneStoria {
                     if (scelta < 0) return;
                     if (enigma5.verifica(String.valueOf(scelta))) {
                         engine.getStatistics().enigmaRisolto(enigma5);
-                        eripeta.setDialoghi(Arrays.asList("Hai dimostrato il tuo valore. Puoi procedere."));
+                        eripeta.setDialoghi(Arrays.asList(eripetaDb.get("consenso").getAsString()));
                         engine.mostraDialogoNPC(criptaScreenArr[0], "CRIPTA_ERIPETA", eripeta, null);
                     } else {
-                        eripeta.setDialoghi(Arrays.asList("La tua risposta è errata. Torna quando sarai più saggio."));
+                        eripeta.setDialoghi(Arrays.asList(eripetaDb.get("errore").getAsString()));
                         engine.mostraDialogoNPCCallback(criptaScreenArr[0], "CRIPTA_ERIPETA", eripeta, null, this);
                     }
                 }
@@ -526,7 +553,8 @@ public class ProgressioneStoria {
         
         Map<double[], Runnable> zonePalazzo = new HashMap<>();
         final GameScreen[] palazzoScreenArr = new GameScreen[1];
-        Personaggio marien = registraNPC("Principessa Marien", Arrays.asList("Risolvi il mio enigma per vincere."));
+        JsonObject marienDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Marien");
+        Personaggio marien = registraNPC("Principessa Marien", Arrays.asList(marienDb.get("sfida").getAsString()));
         zonePalazzo.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
             EnigmaSceltaMultipla enigma7 = IstanzaEnigma.creaEnigma7(new Oggetto(8, "Titolo Nobile", "Hai vinto il cuore della principessa e il titolo."));
             engine.getStatistics().iniziaEnigma();
@@ -538,11 +566,11 @@ public class ProgressioneStoria {
                     if (scelta < 0) return;
                     if (enigma7.verifica(String.valueOf(scelta))) {
                         engine.getStatistics().enigmaRisolto(enigma7);
-                        marien.setDialoghi(Arrays.asList("Non ho mai assistito a così tanta astuzia... Sei il prescelto! Sarai il mio sposo!"));
+                        marien.setDialoghi(Arrays.asList(marienDb.get("vittoria_finale").getAsString()));
                         engine.mostraDialogoNPC(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", marien, null);
                     } else {
-                        engine.mostraDialogoCallback(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", "Principessa Marien", "Fermo! Avete spezzato l'ordine matematico. Guardie, fuori di qui!", null, () -> {
-                            engine.mostraDialogoCallback(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", "Eryndor", "Per poco non ho commesso lo stesso errore... devo riprovare.", null, this);
+                        engine.mostraDialogoCallback(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", "Principessa Marien", marienDb.get("errore_cacciata").getAsString(), null, () -> {
+                            engine.mostraDialogoCallback(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Marien").get("errore_ordine").getAsString(), null, this);
                         });
                     }
                 }

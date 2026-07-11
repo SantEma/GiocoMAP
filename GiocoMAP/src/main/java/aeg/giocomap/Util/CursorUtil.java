@@ -14,6 +14,8 @@ import java.awt.event.MouseMotionAdapter;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 public class CursorUtil {
 
@@ -84,6 +86,7 @@ public class CursorUtil {
                 int w = panel.getWidth();
                 int h = panel.getHeight();
 
+                List<Runnable> actionsToRun = new ArrayList<>();
                 for (Map.Entry<double[], Runnable> entry : zone.entrySet()) {
                     double[] perc = entry.getKey();
                     int rx = (int)(w * perc[0]);
@@ -92,8 +95,12 @@ public class CursorUtil {
                     int rh = (int)(h * perc[3]);
 
                     if (new Rectangle(rx, ry, rw, rh).contains(e.getPoint())) {
-                        entry.getValue().run();
+                        actionsToRun.add(entry.getValue());
                     }
+                }
+                
+                for (Runnable action : actionsToRun) {
+                    action.run();
                 }
             }
         });

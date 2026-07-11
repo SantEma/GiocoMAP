@@ -6,18 +6,18 @@ package aeg.giocomap.View;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+
 /**
  *
  * @author Andrea
  */
 public class DialogueScreen extends JLayeredPane {
-    private GameScreen scena_stanza;
-    private JPanel panelSpritePG;
+    private final GameScreen scena_stanza;
+    private final JPanel panelSpritePG;
     private Image imageSprite;
-    private JPanel boxDialogo;
-    private JTextArea area_text;
-    private JButton btnAvanti;
+    private final JPanel boxDialogo;
+    private final JTextArea area_text;
+    private final JButton btnAvanti;
     
     public DialogueScreen(GameScreen scena_stanza,Runnable azioneAvanti){
         this.scena_stanza=scena_stanza;
