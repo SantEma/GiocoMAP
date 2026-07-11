@@ -1,4 +1,3 @@
-Licenza aggiunta, per poter garantire le tutele MIT e poter riprendere il progetto in futuro per ampliarlo a nostro piacere o metterlo nel nostro CV
 # Indice
 
 1. [Spiegazione gioco](#giocomap)
