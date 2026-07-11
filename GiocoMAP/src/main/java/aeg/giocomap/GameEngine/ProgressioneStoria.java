@@ -46,6 +46,15 @@ public class ProgressioneStoria {
         this.engine = engine;
     }
 
+    // stato di avanzamento della fase città (per salvataggio/caricamento)
+    public int getStatoCity() {
+        return statoCity[0];
+    }
+
+    public void setStatoCity(int valore) {
+        statoCity[0] = valore;
+    }
+
     public void impostaFrecceLogica() {
         inizializzaRoot();
         
@@ -288,7 +297,7 @@ public class ProgressioneStoria {
             if (statoCity[0] == 2) {
                 Runnable startEnigma = () -> {
                     Enigma enigma2 = IstanzaEnigma.creaEnigma2(new Oggetto(1, "Cena di pesce", "Una deliziosa cena preparata dal Pescivendolo."));
-                    engine.getStatistics().iniziaEnigma();
+                    engine.getStatistics().iniziaEnigma(enigma2);
                     ab1.setDialoghi(Arrays.asList(enigma2.getAiuti().get(0)));
                     ab2.setDialoghi(Arrays.asList(enigma2.getAiuti().get(1)));
                     ab3.setDialoghi(Arrays.asList(enigma2.getAiuti().get(2)));
@@ -435,8 +444,13 @@ public class ProgressioneStoria {
         final GameScreen[] boscoScreenArr = new GameScreen[1];
         Personaggio ladroFox = registraNPC("Fox", Arrays.asList("Ehi tu! Dammi quel tessuto!", "Adesso lavorerai per me! Portami la pianta rara!"));
         zoneBosco.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
+            if (engine.getGiocatore().isEnigmaRisolto("Enigma_3_Fiori")) {
+                ladroFox.setDialoghi(Arrays.asList("Zzz... continuo a dormire..."));
+                engine.mostraDialogoNPC(boscoScreenArr[0], "BOSCO", ladroFox, null);
+                return;
+            }
             EnigmaSceltaMultipla enigma3 = IstanzaEnigma.creaEnigma3(new Oggetto(4, "Tessuto Reale", "Il tessuto rubato recuperato."));
-            engine.getStatistics().iniziaEnigma();
+            engine.getStatistics().iniziaEnigma(enigma3);
             Runnable loopEnigma = new Runnable() {
                 @Override
                 public void run() {
@@ -472,8 +486,13 @@ public class ProgressioneStoria {
         Map<double[], Runnable> zoneGrotta = new HashMap<>();
         final GameScreen[] grottaScreenArr = new GameScreen[1];
         zoneGrotta.put(new double[]{0.3, 0.3, 0.4, 0.4}, () -> {
+            if (engine.getGiocatore().isEnigmaRisolto("Enigma_4_Orologio")) {
+                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor",
+                    "Ho già estratto la Spada Sincro da questa incudine.", null, null);
+                return;
+            }
             Enigma enigma4 = IstanzaEnigma.creaEnigma4(new aeg.giocomap.Model.Oggetti.Spada(6, "Spada Sincro", "Un'antica spada magica."));
-            engine.getStatistics().iniziaEnigma();
+            engine.getStatistics().iniziaEnigma(enigma4);
             Runnable loopEnigma = new Runnable() {
                 @Override
                 public void run() {
@@ -500,8 +519,13 @@ public class ProgressioneStoria {
         final GameScreen[] criptaScreenArr = new GameScreen[1];
         Personaggio eripeta = registraNPC("Eripeta", Arrays.asList("Non sei degno di proseguire. Risolvi prima il mio enigma."));
         zoneCripta.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
+            if (engine.getGiocatore().isEnigmaRisolto("Enigma_5_Vincolo")) {
+                eripeta.setDialoghi(Arrays.asList("Hai già dimostrato il tuo valore. Puoi procedere."));
+                engine.mostraDialogoNPC(criptaScreenArr[0], "CRIPTA_ERIPETA", eripeta, null);
+                return;
+            }
             EnigmaSceltaMultipla enigma5 = IstanzaEnigma.creaEnigma5(new Oggetto(7, "Ampolla d'oro", "Le lacrime di Eripeta."));
-            engine.getStatistics().iniziaEnigma();
+            engine.getStatistics().iniziaEnigma(enigma5);
             Runnable loopEnigma = new Runnable() {
                 @Override
                 public void run() {
@@ -528,8 +552,13 @@ public class ProgressioneStoria {
         final GameScreen[] palazzoScreenArr = new GameScreen[1];
         Personaggio marien = registraNPC("Principessa Marien", Arrays.asList("Risolvi il mio enigma per vincere."));
         zonePalazzo.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
+            if (engine.getGiocatore().isEnigmaRisolto("Enigma_7_Principessa")) {
+                marien.setDialoghi(Arrays.asList("Sei già il mio sposo! Il regno è salvo."));
+                engine.mostraDialogoNPC(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", marien, null);
+                return;
+            }
             EnigmaSceltaMultipla enigma7 = IstanzaEnigma.creaEnigma7(new Oggetto(8, "Titolo Nobile", "Hai vinto il cuore della principessa e il titolo."));
-            engine.getStatistics().iniziaEnigma();
+            engine.getStatistics().iniziaEnigma(enigma7);
             Runnable loopEnigma = new Runnable() {
                 @Override
                 public void run() {

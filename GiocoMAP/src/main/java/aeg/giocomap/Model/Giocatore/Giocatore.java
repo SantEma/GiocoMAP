@@ -7,6 +7,9 @@ package aeg.giocomap.Model.Giocatore;
 import aeg.giocomap.Model.Oggetti.Oggetto;
 import aeg.giocomap.Model.Stanza;
 import aeg.giocomap.Model.Enigmi.Enigma;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Collection;
 
 /**
  *
@@ -20,12 +23,34 @@ public class Giocatore {
     private boolean possiedeInventario;
     private boolean possiedeMappa;
     private Enigma enigma_corrente;
-    
+
+    // id degli enigmi gia' risolti (per non rifarli al ricaricamento)
+    private final Set<String> enigmiRisolti = new HashSet<>();
+
     public Giocatore(String nome){
         this.nome_lore=nome;
         this.nome_player="";// Inizialmente vuoto poi il player lo inserirà come sta in "Statistiche"
         this.possiedeInventario=false; // Non ancora ottenuto quando lo si crea
         this.possiedeMappa=false; // Non ha ancora la mappa all'inizio
+    }
+
+    // ---- gestione enigmi risolti ----
+    public void aggiungiEnigmaRisolto(String idEnigma){
+        if (idEnigma != null) enigmiRisolti.add(idEnigma);
+    }
+
+    public boolean isEnigmaRisolto(String idEnigma){
+        return enigmiRisolti.contains(idEnigma);
+    }
+
+    public Set<String> getEnigmiRisolti(){
+        return enigmiRisolti;
+    }
+
+    // ripristina l'insieme degli enigmi risolti (usato in caricamento)
+    public void setEnigmiRisolti(Collection<String> ids){
+        enigmiRisolti.clear();
+        if (ids != null) enigmiRisolti.addAll(ids);
     }
     
     public Inventario<Oggetto> getInventario(){
