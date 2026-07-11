@@ -24,6 +24,13 @@ public class ThreadRicezione implements Runnable {
         this.socket = socket;
         this.messaggiRicevuti = new ArrayList<>();
     }
+    
+    
+    public List<String> getMessaggiRicevuti() {
+        synchronized (messaggiRicevuti) {
+            return new ArrayList<>(messaggiRicevuti);
+        }
+    }
 
     public void setOnMessaggio(Runnable callback) {
         this.onMessaggio = callback;
@@ -83,9 +90,4 @@ public class ThreadRicezione implements Runnable {
         }
     }
 
-    public List<String> getMessaggiRicevuti() {
-        synchronized (messaggiRicevuti) {
-            return new ArrayList<>(messaggiRicevuti);
-        }
-    }
 }

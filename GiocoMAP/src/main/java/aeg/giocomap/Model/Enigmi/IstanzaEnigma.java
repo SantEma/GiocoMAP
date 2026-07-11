@@ -23,7 +23,9 @@ public class IstanzaEnigma {
     private static List<String> caricaAiuti(String enigmaId) {
         JsonObject root = JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
         if (root == null) return Collections.emptyList();
-        return JsonLoader.estraiLista(root, enigmaId);
+        JsonObject aiuti = root.getAsJsonObject("Aiuti_Enigmi");
+        if (aiuti == null) return Collections.emptyList();
+        return JsonLoader.estraiLista(aiuti, enigmaId);
     }
 
     // Metodo privato per caricare il testo dal file walloftext

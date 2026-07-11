@@ -116,10 +116,9 @@ public class GameScreen extends JPanel {
         }
     }
     
-    /**
-     * Metodo di debug richiamabile per farsi stampare a schermo
-     * le coordinate e le percentuali del click del mouse sulla scena.
-     * Molto utile per creare le hit-box dei personaggi.
+    /*
+    Questo metodo permette di trovare le coordinate nell'immagine, visto che
+    allochiamo staticamente le posizioni degli NPC
      */
     public void abilitaDebugCoordinate() {
         this.addMouseListener(new MouseAdapter() {
