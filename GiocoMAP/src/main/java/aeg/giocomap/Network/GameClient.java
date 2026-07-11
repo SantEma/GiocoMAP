@@ -23,6 +23,18 @@ public class GameClient {
         this.nomeGiocatore = nomeGiocatore;
         this.connesso = false;
     }
+    
+    public boolean isConnesso() { 
+        return connesso; 
+    }
+    
+    public ThreadRicezione getThreadRicezione() { 
+        return threadRicezione; 
+    }
+    
+    public String getNomeGiocatore() { 
+        return nomeGiocatore; 
+    }
 
     public boolean connetti(String host) {
         try {
@@ -61,7 +73,5 @@ public class GameClient {
         }
     }
 
-    public boolean isConnesso() { return connesso; }
-    public ThreadRicezione getThreadRicezione() { return threadRicezione; }
-    public String getNomeGiocatore() { return nomeGiocatore; }
+
 }

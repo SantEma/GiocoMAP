@@ -38,7 +38,7 @@ public class TitleScreen extends JPanel {
 
         // estetica
         Font fontBottoni = new Font("Arial", Font.BOLD, 18);
-        Dimension dimB = new Dimension(200, 40);
+        Dimension dimB = new Dimension(250, 40);
 
         JButton[] bottoni = {btn_nuova_partita, btn_carica_partita, btn_record, btn_connetti};
         for (JButton btn : bottoni) {

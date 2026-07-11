@@ -45,6 +45,10 @@ public abstract class Enigma {
         return reward; 
     }
     
+    public List<String> getAiuti() {
+        return aiuti;
+    }
+
     public abstract boolean verifica(String risposta);
 
     // Restituisce il prossimo aiuto disponibile
