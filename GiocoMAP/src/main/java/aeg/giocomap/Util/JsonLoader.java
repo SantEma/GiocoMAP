@@ -17,7 +17,7 @@ public class JsonLoader {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             return JsonParser.parseReader(reader).getAsJsonObject();
         }
-        catch(Exception e){
+        catch(JsonIOException | JsonSyntaxException | UnsupportedEncodingException e){
             System.err.println("Errore lettura JSON " + percorso + ": " + e.getMessage());
             return null;
         }

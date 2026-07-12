@@ -8,9 +8,9 @@ import java.util.*;
 
 public class Stanza {
     
-    private String nomeStanza;
+    private final String nomeStanza;
     private boolean primaEntrata; // Controllo sulla prima volta in una stanza, utile per i dialoghi
-    private Map<String, Stanza> uscite;
+    private final Map<String, Stanza> uscite;
     
     public Stanza(String nome) {
         this.nomeStanza=nome;

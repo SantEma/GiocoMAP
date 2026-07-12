@@ -87,7 +87,7 @@ Alla risoluzione del terzo enigma e all'ottenimento del tessuto, sussegue il seg
 ---
 #### Karundis
 Risolte queste avversità il protagonista potrà uscire finalmente dal bosco arrivando a Karundis la periferia a valle situata poco lontana dal palazzo reale.
-Interagendo con ciò che è presente nella città, come due / tre NPC [da implementare], si intravede il sentiero che porta sopra alla montagna al castello e in lontananza c'è una piccola fucina in una grotta.
+Interagendo con ciò che è presente nella città, come due / tre NPC, si intravede il sentiero che porta sopra alla montagna al castello e in lontananza c'è una piccola fucina in una grotta.
 Andando verso la grotta il protagonista incontra un potente mago che si manifesta a lui.
 
 *   **Saggio Clock**: *"Benvenuto, Eryndor. So chi sei. So tutto di tutti nel regno io. Lascia che mi presenti, sono il Saggio Clock, antico mago temporale e aiutante del Re prima del mio ritiro. Sai sono io che ho dato vita al costrutto del Re che ti ha dato la Mappa."*

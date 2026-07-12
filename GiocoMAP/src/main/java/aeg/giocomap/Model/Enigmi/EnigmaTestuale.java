@@ -6,7 +6,6 @@ package aeg.giocomap.Model.Enigmi;
 
 import aeg.giocomap.Model.Oggetti.Oggetto;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  *

@@ -22,6 +22,9 @@ public class TitoliDiCoda extends JPanel {
     private PannelloScorrimento scroll;    // presente solo nei titoli di coda
 
     /**
+     * @param records
+     * @param punteggioAttuale
+     * @param nomeGiocatore
      * @param soloHallOfFame true = mostra solo la Hall of Fame statica con il
      *                       bottone indietro (schermata Statistiche dal menu);
      *                       false = titoli di coda che scorrono, senza bottone,

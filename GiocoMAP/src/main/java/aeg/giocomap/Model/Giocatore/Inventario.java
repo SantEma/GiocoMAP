@@ -16,7 +16,7 @@ import java.util.List;
 // Classe con lista già tipizzata (Generics), come descritto nelle idee implementative
 public class Inventario<T extends Oggetto> {
     
-    private List<T> listaOggetti;
+    private final List<T> listaOggetti; // La lista non cambia, cambiano i contenuti all'interno
 
     public Inventario() {
         this.listaOggetti = new ArrayList<>();

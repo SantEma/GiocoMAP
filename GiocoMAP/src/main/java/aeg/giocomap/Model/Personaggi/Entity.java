@@ -9,7 +9,7 @@ package aeg.giocomap.Model.Personaggi;
  * @author emanuele
  */
 public abstract class Entity {
-    private String nome;
+    private final String nome;
 
     public Entity(String nome){
         this.nome = nome;

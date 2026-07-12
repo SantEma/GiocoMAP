@@ -25,6 +25,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.imageio.ImageIO;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 public class ProgressioneStoria {
 
@@ -139,7 +140,18 @@ public class ProgressioneStoria {
         });
         
         registraCollegamentoSemplice("KARUNDIS", "OVEST", "BOSCO");
-        registraCollegamentoSemplice("KARUNDIS", "NORD", "INGRESSO_PALAZZO");
+        
+        String testoBloccoKarundis = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Bloccatore").get("stop_palazzo").getAsString();
+        Fantoccio fantoccioNord = registraFantoccio("Fantoccio_Nord_Karundis", Arrays.asList(testoBloccoKarundis));
+        
+        registraCollegamento("KARUNDIS", "NORD", () -> {
+            if (engine.getGiocatore().getInventario().cercaOggetto("Spada") != null) {
+                engine.getSceneManager().mostraScena("INGRESSO_PALAZZO");
+            } else {
+                GameScreen karundis = (GameScreen) engine.getSceneManager().getScena("KARUNDIS");
+                engine.mostraDialogoNPC(karundis, "KARUNDIS", fantoccioNord, null);
+            }
+        });
         
         registraCollegamentoSemplice("GROTTA", "SUD", "KARUNDIS");
         
@@ -589,7 +601,7 @@ public class ProgressioneStoria {
         };
 
 
-        java.util.function.Consumer<Integer> raccogliFiore = (idFiore) -> {
+        Consumer<Integer> raccogliFiore = (idFiore) -> {
             if (statoCity[0] != 6) return;
             
             Oggetto fR = engine.getGiocatore().getInventario().cercaOggetto("Fiore Rosso");
@@ -667,38 +679,130 @@ public class ProgressioneStoria {
         boscoDeepScreenArr[0] = boscoDeepScreen;
         engine.getSceneManager().registraScena("BOSCO_DEEP", boscoDeepScreen);
         
+        // Karundis
         Map<double[], Runnable> zoneKarundis = new HashMap<>();
-        zoneKarundis.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> engine.getSceneManager().mostraScena("GROTTA"));
-        GameScreen karundisScreen = engine.getSceneManager().creaScenaBase("Karundis.png", zoneKarundis);
-        engine.getSceneManager().registraScena("KARUNDIS", karundisScreen);
+        final GameScreen[] karundisScreenArr = new GameScreen[1];
+        final GameScreen[] grottaScreenArr = new GameScreen[1]; // Dichiarato qui per poterlo usare nel callback
+        
+        List<String> idleDialogs = JsonLoader.estraiLista(engine.getDbHint(), "Dialoghi_Generici_Idle");
+        Personaggio npcKarundis1 = registraNPC("Abitante 1", Arrays.asList(idleDialogs.get(0)));
+        Personaggio npcKarundis2 = registraNPC("Abitante 2", Arrays.asList(idleDialogs.get(1)));
+        
+        zoneKarundis.put(new double[]{0.36, 0.57, 0.08, 0.2}, () -> {
+            engine.mostraDialogoNPC(karundisScreenArr[0], "KARUNDIS", npcKarundis1, null);
+        });
+        zoneKarundis.put(new double[]{0.56, 0.57, 0.08, 0.2}, () -> {
+            engine.mostraDialogoNPC(karundisScreenArr[0], "KARUNDIS", npcKarundis2, null);
+        });
 
+        zoneKarundis.put(new double[]{0.12, 0.57, 0.10, 0.2}, () -> {
+            engine.getSceneManager().mostraScena("GROTTA");
+            if (statoCity[0] == 7) {
+                JsonObject clockDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Saggio_Clock");
+                JsonObject eryndorDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Saggio_Clock");
+                
+                String clock1 = clockDb.get("presentazione").getAsString();
+                String ery1 = eryndorDb.get("stupore").getAsString();
+                String clock2 = clockDb.get("intenzioni").getAsString();
+                String ery2 = eryndorDb.get("ammissione").getAsString();
+                String clock3 = clockDb.get("missione").getAsString();
+                
+                Runnable step5 = () -> {
+                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Saggio Clock", clock3, new ImageIcon(getClass().getResource("/sprites/Personaggi/Clock.png")), () -> {
+                        setStatoCity(8);
+                    });
+                };
+                Runnable step4 = () -> {
+                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", ery2, null, step5);
+                };
+                Runnable step3 = () -> {
+                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Saggio Clock", clock2, new ImageIcon(getClass().getResource("/sprites/Personaggi/Clock.png")), step4);
+                };
+                Runnable step2 = () -> {
+                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", ery1, null, step3);
+                };
+                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Saggio Clock", clock1, new ImageIcon(getClass().getResource("/sprites/Personaggi/Clock.png")), step2);
+            }
+        });
+        
+        GameScreen karundisScreen = engine.getSceneManager().creaScenaBase("Karundis.png", zoneKarundis);
+        karundisScreenArr[0] = karundisScreen;
+        engine.getSceneManager().registraScena("KARUNDIS", karundisScreen);
+        
+        // Grotta
         Map<double[], Runnable> zoneGrotta = new HashMap<>();
-        final GameScreen[] grottaScreenArr = new GameScreen[1];
-        zoneGrotta.put(new double[]{0.3, 0.3, 0.4, 0.4}, () -> {
+        final boolean[] enigma4Attivo = {false};
+        List<String> hintsEnigma4 = JsonLoader.estraiLista(engine.getDbHint(), "Enigma_4_Orologio_Fucina");
+
+        zoneGrotta.put(new double[]{0.51, 0.19, 0.10, 0.10}, () -> { // Orologio
+            if (enigma4Attivo[0]) {
+                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Orologio", hintsEnigma4.get(0), null, null);
+            }
+        });
+        
+        zoneGrotta.put(new double[]{0.82, 0.56, 0.10, 0.12}, () -> { // Calderone
+            if (enigma4Attivo[0]) {
+                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Calderone", hintsEnigma4.get(1), null, null);
+            }
+        });
+
+        zoneGrotta.put(new double[]{0.45, 0.45, 0.15, 0.20}, () -> { // Incudine
+            if (engine.getGiocatore().getInventario().cercaOggetto("Spada Sincro") != null || engine.getGiocatore().getInventario().cercaOggetto("Spada") != null) {
+                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", "L'incudine è vuota. Ho già preso la Spada.", null, null);
+                return;
+            }
+
             Enigma enigma4 = IstanzaEnigma.creaEnigma4((aeg.giocomap.Model.Oggetti.Spada) engine.getTxt().getOggettoDaCatalogo(10));
-            engine.getStatistics().iniziaEnigma(enigma4);
+            
             Runnable loopEnigma = new Runnable() {
                 @Override
                 public void run() {
                     String risposta = JOptionPane.showInputDialog(engine.getFrame(), "Risposta:");
                     if (risposta == null) return;
                     if (enigma4.verifica(risposta)) {
+                        enigma4Attivo[0] = false;
                         engine.getStatistics().enigmaRisolto(enigma4);
-                        engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("successo_spada").getAsString(), null, null);
+                        engine.getGiocatore().getInventario().aggiungiOggetto(engine.getTxt().getOggettoDaCatalogo(10));
+                        String txtSblocco = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Spada_sbloccata").getAsString();
+                        String txtSuccesso = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("successo_spada").getAsString();
+                        engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Narrazione", txtSblocco, null, () -> {
+                            engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", txtSuccesso, null, null);
+                        });
                     } else {
                         engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("fallimento_spada").getAsString(), null, this);
                     }
                 }
             };
-            engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Incudine", enigma4.getTesto(), null, loopEnigma);
+
+            if (!enigma4Attivo[0]) {
+                enigma4Attivo[0] = true;
+                engine.getStatistics().iniziaEnigma(enigma4);
+                
+                String cartelloTesto = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Cartello_Spada_Fucina").getAsString();
+                String narrazioneTesto = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Narrazione_Spada_Fucina").getAsString();
+
+                Runnable apriInput = () -> {
+                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Incudine", enigma4.getTesto(), null, loopEnigma);
+                };
+
+                Runnable step2 = () -> {
+                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Narrazione", narrazioneTesto, null, apriInput);
+                };
+
+                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Cartello", cartelloTesto, null, step2);
+            } else {
+                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Incudine", enigma4.getTesto(), null, loopEnigma);
+            }
         });
         GameScreen grottaScreen = engine.getSceneManager().creaScenaBase("GrottaDellaFucina.png", zoneGrotta);
         grottaScreenArr[0] = grottaScreen;
         engine.getSceneManager().registraScena("GROTTA", grottaScreen);
         
+        // cancello e scale
         engine.getSceneManager().registraScena("INGRESSO_PALAZZO", engine.getSceneManager().creaScenaBase("CancelloCastello.png", null));
         engine.getSceneManager().registraScena("SCALE", engine.getSceneManager().creaScenaBase("ScalePalazzo.png", null));
         
+        // Cripta Eripeta
         Map<double[], Runnable> zoneCripta = new HashMap<>();
         final GameScreen[] criptaScreenArr = new GameScreen[1];
         JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
@@ -728,6 +832,7 @@ public class ProgressioneStoria {
         criptaScreenArr[0] = criptaScreen;
         engine.getSceneManager().registraScena("CRIPTA_ERIPETA", criptaScreen);
         
+        // palazzo reale principessa
         Map<double[], Runnable> zonePalazzo = new HashMap<>();
         final GameScreen[] palazzoScreenArr = new GameScreen[1];
         JsonObject marienDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Marien");

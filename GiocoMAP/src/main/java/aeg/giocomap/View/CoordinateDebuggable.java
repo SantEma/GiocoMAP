@@ -14,6 +14,7 @@ public interface CoordinateDebuggable {
      * Riferimento al pannello su cui abilitare il listener del mouse.
      * Le classi che implementano questa interfaccia (es. GameScreen, MappaPanel) 
      * restituiranno 'this'.
+     * @return 
      */
     JPanel getPanel();
 
@@ -21,6 +22,9 @@ public interface CoordinateDebuggable {
      * Calcola l'area effettiva in cui è disegnata l'immagine.
      * Di default è l'intero pannello, ma può essere sovrascritto se l'immagine
      * ha un offset (es. per mantenere l'aspect ratio con bande nere).
+     * @param panelWidth
+     * @param panelHeight
+     * @return 
      */
     default Rectangle getAreaImmagine(int panelWidth, int panelHeight) {
         return new Rectangle(0, 0, panelWidth, panelHeight);

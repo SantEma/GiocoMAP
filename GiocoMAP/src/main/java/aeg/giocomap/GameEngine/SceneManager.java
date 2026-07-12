@@ -23,7 +23,7 @@ public class SceneManager {
     private final MainFrame frame;
     private final Map<String, JComponent> sceneCache = new HashMap<>();
     
-// nome della scena mostrata al momento (serve per il salvataggio)
+    // nome della scena mostrata al momento (serve per il salvataggio)
     private String scenaCorrente = "MENU_PRINCIPALE";;
     
     // nome della scena "vera" sotto un overlay (mappa/inventario), per poterlo
@@ -38,9 +38,8 @@ public class SceneManager {
     // variabili inventario
     private boolean inventarioOpen = false;
     
-// variabili chat
+    // variabili chat
     private boolean chatOpen = false;
-    private JComponent chatPanel;
 
     public SceneManager(MainFrame frame){
         this.frame = frame;
@@ -139,8 +138,7 @@ public class SceneManager {
             JComponent invP = sceneCache.get("INVENTARIO");
             
             // Casting dell'oggetto prima di mostrarlo ed eliminazione dei duplicati
-            if(invP instanceof aeg.giocomap.View.InventarioPanel) {
-                aeg.giocomap.View.InventarioPanel inventarioPanel = (aeg.giocomap.View.InventarioPanel) invP;
+            if(invP instanceof aeg.giocomap.View.InventarioPanel inventarioPanel) {
                 inventarioPanel.aggiornaVista();
             }
            

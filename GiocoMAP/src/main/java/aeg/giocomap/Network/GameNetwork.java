@@ -15,7 +15,6 @@ public class GameNetwork {
     private GameServer gameServer;
     private GameClient gameClient;
     private ChatPanel chatPanel;
-    private boolean serverAvviato = false;
 
     private final MainFrame frame;
     private final SceneManager sceneManager;
@@ -25,11 +24,14 @@ public class GameNetwork {
         this.sceneManager = sceneManager;
     }
 
+    public boolean isServerAvviato() {
+        return gameServer != null;
+    }
+
     public void toggleChat() {
         if (gameClient == null) {
             gameServer = new GameServer();
             gameServer.avvia();
-            serverAvviato = true;
 
             gameClient = new GameClient("Eryndor");
             chatPanel = new ChatPanel();

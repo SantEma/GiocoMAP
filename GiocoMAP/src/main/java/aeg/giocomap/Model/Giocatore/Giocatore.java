@@ -16,7 +16,7 @@ import java.util.Collection;
  * @author emanuele
  */
 public class Giocatore {
-    private String nome_lore;
+    private final String nome_lore;
     private String nome_player;
     private Stanza stanza_corrente;
     private Inventario<Oggetto> inventario;

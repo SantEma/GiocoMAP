@@ -23,7 +23,6 @@ import javax.swing.*;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
@@ -49,12 +48,6 @@ public class GameEngine {
     private final GameStatistics statistics;
     private final GameNetwork network;
     private final ProgressioneStoria progression;
-
-    // Stato logico della fase "Città con il porto"
-    private final int[] statoCity = {0};
-    
-    // Azione interattiva di Mr. Cooper per attivazione automatica
-    private Runnable mrCooperInteraction;
 
     public GameEngine(MainFrame frame) {
         this.dbWallOfText = JsonLoader.caricaJson("/dialoghi/walloftext.json");
