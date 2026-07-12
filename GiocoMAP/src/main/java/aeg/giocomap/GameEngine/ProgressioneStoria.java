@@ -50,6 +50,10 @@ public class ProgressioneStoria {
     private Runnable mrCooperInteraction;
     private Runnable foxInteraction;
 
+    // Riferimenti agli NPC di Karundis per poter aggiornare i loro dialoghi
+    private Personaggio npcKarundis1;
+    private Personaggio npcKarundis2;
+
     public ProgressioneStoria(GameEngine engine) {
         this.engine = engine;
     }
@@ -170,15 +174,28 @@ public class ProgressioneStoria {
             if (engine.getGiocatore().getInventario().cercaOggetto("Spada Sincro") != null) {
                 if (primoAccessoPalazzo) {
                     primoAccessoPalazzo = false;
-                    String testoPassaggio = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("inizio").get("passaggio_cavaglieri").getAsString();
-                    GameScreen karundis = (GameScreen) engine.getSceneManager().getScena("KARUNDIS");
-                    engine.mostraDialogoCallback(karundis, "KARUNDIS", "Eryndor", testoPassaggio, null, () -> {
+                    
+                    // Al primo ingresso al cancello, attiviamo gli indizi per la chiave negli abitanti di Karundis
+                    if (npcKarundis1 != null && npcKarundis2 != null) {
+                        List<String> hints = JsonLoader.estraiLista(engine.getDbHint(), "Ricerca_Chiave_Castello");
+                        npcKarundis1.setDialoghi(Arrays.asList(hints.get(0)));
+                        npcKarundis2.setDialoghi(Arrays.asList(hints.get(1)));
+                    }
+                    
+                    if (engine.getGiocatore().isEnigmaRisolto("EVENT_BLOCCO_KARUNDIS")) {
+                        String testoPassaggio = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("inizio").get("passaggio_cavaglieri").getAsString();
+                        GameScreen karundis = (GameScreen) engine.getSceneManager().getScena("KARUNDIS");
+                        engine.mostraDialogoCallback(karundis, "KARUNDIS", "Eryndor", testoPassaggio, null, () -> {
+                            engine.getSceneManager().mostraScena("INGRESSO_PALAZZO");
+                        });
+                    } else {
                         engine.getSceneManager().mostraScena("INGRESSO_PALAZZO");
-                    });
+                    }
                 } else {
                     engine.getSceneManager().mostraScena("INGRESSO_PALAZZO");
                 }
             } else {
+                engine.getGiocatore().aggiungiEnigmaRisolto("EVENT_BLOCCO_KARUNDIS");
                 GameScreen karundis = (GameScreen) engine.getSceneManager().getScena("KARUNDIS");
                 engine.mostraDialogoNPC(karundis, "KARUNDIS", fantoccioNord, null);
             }
@@ -727,13 +744,21 @@ public class ProgressioneStoria {
         final GameScreen[] grottaScreenArr = new GameScreen[1]; // Dichiarato qui per poterlo usare nel callback
         
         List<String> idleDialogs = JsonLoader.estraiLista(engine.getDbHint(), "Dialoghi_Generici_Idle");
-        Personaggio npcKarundis1 = registraNPC("Abitante 1", Arrays.asList(idleDialogs.get(0)));
-        Personaggio npcKarundis2 = registraNPC("Abitante 2", Arrays.asList(idleDialogs.get(1)));
+        this.npcKarundis1 = registraNPC("Abitante 1", Arrays.asList(idleDialogs.get(0)));
+        this.npcKarundis2 = registraNPC("Abitante 2", Arrays.asList(idleDialogs.get(1)));
         
         List<String> hintChiave = JsonLoader.estraiLista(engine.getDbHint(), "Ricerca_Chiave_Castello");
         if (statoCity[0] >= 8 && statoCity[0] < 9) {
-            npcKarundis1.setDialoghi(Arrays.asList(hintChiave.get(0)));
-            npcKarundis2.setDialoghi(Arrays.asList(hintChiave.get(1)));
+            if (!primoAccessoPalazzo) {
+                npcKarundis1.setDialoghi(Arrays.asList(hintChiave.get(0)));
+                npcKarundis2.setDialoghi(Arrays.asList(hintChiave.get(1)));
+            } else {
+                npcKarundis1.setDialoghi(Arrays.asList(idleDialogs.get(0)));
+                npcKarundis2.setDialoghi(Arrays.asList(idleDialogs.get(1)));
+            }
+        } else if (statoCity[0] >= 9) {
+            npcKarundis1.setDialoghi(Arrays.asList(idleDialogs.get(2)));
+            npcKarundis2.setDialoghi(Arrays.asList(idleDialogs.get(3)));
         }
         
         zoneKarundis.put(new double[]{0.36, 0.57, 0.08, 0.2}, () -> {
@@ -758,8 +783,6 @@ public class ProgressioneStoria {
                 Runnable step5 = () -> {
                     engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Saggio Clock", clock3, new ImageIcon(getClass().getResource("/sprites/Personaggi/Clock.png")), () -> {
                         setStatoCity(8);
-                        npcKarundis1.setDialoghi(Arrays.asList(hintChiave.get(0)));
-                        npcKarundis2.setDialoghi(Arrays.asList(hintChiave.get(1)));
                     });
                 };
                 Runnable step4 = () -> {
@@ -873,26 +896,29 @@ public class ProgressioneStoria {
                 } else {
                     Oggetto chiave = engine.getGiocatore().getInventario().cercaOggetto("Chiave Fox");
                     if (chiave != null) {
-                        int scelta = JOptionPane.showConfirmDialog(
-                            engine.getFrame(),
-                            "Vuoi mostrare la chiave alla guardia?",
-                            "Consegna Oggetto",
-                            JOptionPane.YES_NO_OPTION,
-                            JOptionPane.QUESTION_MESSAGE
-                        );
-                        if (scelta == JOptionPane.YES_OPTION) {
-                            guardiaReale.setDialoghi(Arrays.asList(guardiaDb.get("accettazione").getAsString()));
-                            engine.mostraDialogoNPCCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", guardiaReale, null, () -> {
-                                engine.getGiocatore().getInventario().rimuoviOggetto(chiave);
-                                statoCity[0] = 9;
-                                zoneIngresso.remove(guardiaHitbox);
-                                // Ripristino dialoghi generici NPC Karundis
-                                npcKarundis1.setDialoghi(Arrays.asList(idleDialogs.get(2)));
-                                npcKarundis2.setDialoghi(Arrays.asList(idleDialogs.get(3)));
-                                // Pensiero di Eryndor sulla chiave rubata da Fox
-                                engine.mostraDialogoCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", "Eryndor", eryndorGuardiaDb.get("pensiero_chiave").getAsString(), null, null);
-                            });
-                        }
+                        guardiaReale.setDialoghi(Arrays.asList(guardiaDb.get("domanda_chiave").getAsString()));
+                        engine.mostraDialogoNPCCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", guardiaReale, null, () -> {
+                            int scelta = JOptionPane.showConfirmDialog(
+                                engine.getFrame(),
+                                "Sicuro che hai la chiave?",
+                                "Consegna Oggetto",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.QUESTION_MESSAGE
+                            );
+                            if (scelta == JOptionPane.YES_OPTION) {
+                                guardiaReale.setDialoghi(Arrays.asList(guardiaDb.get("accettazione").getAsString()));
+                                engine.mostraDialogoNPCCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", guardiaReale, null, () -> {
+                                    engine.getGiocatore().getInventario().rimuoviOggetto(chiave);
+                                    statoCity[0] = 9;
+                                    zoneIngresso.remove(guardiaHitbox);
+                                    // Ripristino dialoghi generici NPC Karundis
+                                    npcKarundis1.setDialoghi(Arrays.asList(idleDialogs.get(2)));
+                                    npcKarundis2.setDialoghi(Arrays.asList(idleDialogs.get(3)));
+                                    // Pensiero di Eryndor sulla chiave rubata da Fox
+                                    engine.mostraDialogoCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", "Eryndor", eryndorGuardiaDb.get("pensiero_chiave").getAsString(), null, null);
+                                });
+                            }
+                        });
                     } else {
                         guardiaReale.setDialoghi(Arrays.asList(guardiaDb.get("richiesta_chiave").getAsString()));
                         engine.mostraDialogoNPC(ingressoScreenArr[0], "INGRESSO_PALAZZO", guardiaReale, null);

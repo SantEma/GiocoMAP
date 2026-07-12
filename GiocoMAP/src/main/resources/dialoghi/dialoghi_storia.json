@@ -71,6 +71,7 @@
             "stop_palazzo": "Mi dispiace non puoi passare di qui. A breve passerà la scuderia del Re.\nPassa più tardi",
             "stop_chiave": "Alt! Ordini del Re. Senza il permesso con la chiave nessuno deve oltrepassare, mi spiace.",
             "richiesta_chiave": "Viandante, per ordine del Re solo chi possiede la chiave reale può oltrepassare questo cancello. Se ce l'hai mostrala.",
+            "domanda_chiave": "Hai con te la chiave quindi?",
             "accettazione": "La chiave è autentica. Procedi pure, viaggiatore. Il castello ti attende."
         },
         "David": {
