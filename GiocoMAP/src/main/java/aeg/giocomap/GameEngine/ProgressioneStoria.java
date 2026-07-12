@@ -732,19 +732,17 @@ public class ProgressioneStoria {
         // Grotta
         Map<double[], Runnable> zoneGrotta = new HashMap<>();
         final boolean[] enigma4Attivo = {false};
-        List<String> hintsEnigma4 = JsonLoader.estraiLista(engine.getDbHint(), "Enigma_4_Orologio_Fucina");
+        List<String> hintsEnigma4 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_4_Orologio_Fucina");
 
-        zoneGrotta.put(new double[]{0.51, 0.19, 0.10, 0.10}, () -> { // Orologio
-            if (enigma4Attivo[0]) {
-                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Orologio", hintsEnigma4.get(0), null, null);
-            }
-        });
-        
-        zoneGrotta.put(new double[]{0.82, 0.56, 0.10, 0.12}, () -> { // Calderone
-            if (enigma4Attivo[0]) {
-                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Calderone", hintsEnigma4.get(1), null, null);
-            }
-        });
+        double[] orologioHitbox = new double[]{0.51, 0.19, 0.10, 0.10};
+        double[] calderoneHitbox = new double[]{0.82, 0.56, 0.10, 0.12};
+
+        Runnable actOrologio = () -> {
+            engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Orologio", hintsEnigma4.get(0), null, null);
+        };
+        Runnable actCalderone = () -> {
+            engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Calderone", hintsEnigma4.get(1), null, null);
+        };
 
         zoneGrotta.put(new double[]{0.45, 0.45, 0.15, 0.20}, () -> { // Incudine
             if (engine.getGiocatore().getInventario().cercaOggetto("Spada Sincro") != null || engine.getGiocatore().getInventario().cercaOggetto("Spada") != null) {
@@ -761,11 +759,14 @@ public class ProgressioneStoria {
                     if (risposta == null) return;
                     if (enigma4.verifica(risposta)) {
                         enigma4Attivo[0] = false;
+                        zoneGrotta.remove(orologioHitbox);
+                        zoneGrotta.remove(calderoneHitbox);
+
                         engine.getStatistics().enigmaRisolto(enigma4);
                         engine.getGiocatore().getInventario().aggiungiOggetto(engine.getTxt().getOggettoDaCatalogo(10));
                         String txtSblocco = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Spada_sbloccata").getAsString();
                         String txtSuccesso = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("successo_spada").getAsString();
-                        engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Narrazione", txtSblocco, null, () -> {
+                        engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Fantoccio", txtSblocco, null, () -> {
                             engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", txtSuccesso, null, null);
                         });
                     } else {
@@ -776,22 +777,25 @@ public class ProgressioneStoria {
 
             if (!enigma4Attivo[0]) {
                 enigma4Attivo[0] = true;
+                zoneGrotta.put(orologioHitbox, actOrologio);
+                zoneGrotta.put(calderoneHitbox, actCalderone);
+                
                 engine.getStatistics().iniziaEnigma(enigma4);
                 
                 String cartelloTesto = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Cartello_Spada_Fucina").getAsString();
                 String narrazioneTesto = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Narrazione_Spada_Fucina").getAsString();
 
                 Runnable apriInput = () -> {
-                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Incudine", enigma4.getTesto(), null, loopEnigma);
+                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Fantoccio", enigma4.getTesto(), null, loopEnigma);
                 };
 
                 Runnable step2 = () -> {
-                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Narrazione", narrazioneTesto, null, apriInput);
+                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Fantoccio", narrazioneTesto, null, apriInput);
                 };
 
-                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Cartello", cartelloTesto, null, step2);
+                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Fantoccio", cartelloTesto, null, step2);
             } else {
-                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Incudine", enigma4.getTesto(), null, loopEnigma);
+                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Fantoccio", enigma4.getTesto(), null, loopEnigma);
             }
         });
         GameScreen grottaScreen = engine.getSceneManager().creaScenaBase("GrottaDellaFucina.png", zoneGrotta);
