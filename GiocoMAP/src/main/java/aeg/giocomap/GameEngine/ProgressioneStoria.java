@@ -70,6 +70,19 @@ public class ProgressioneStoria {
     private GameScreen portoScreen;
     private GameScreen piazzaCentrale;
 
+    // Variabili condivise tra i metodi costruisciPiazzaCentrale / costruisciPorto / costruisciStalla / ecc.
+    private Map<double[], Runnable> zonePiazza;
+    private double[] hitboxAb1;
+    private double[] hitboxAb3;
+    private Runnable interazioneAb1;
+    private Runnable interazioneAb3;
+    private JsonObject davidDb;
+    private JsonObject mrCooperDb;
+    private JsonObject pescivendoloDb;
+    private ImageIcon spriteMrCooper;
+    private List<String> hints;
+    private List<String> idleDialogs;
+
     // Stato logico del primo accesso al palazzo per mostrare solo una volta la frase
     private boolean primoAccessoPalazzo = true;
 
@@ -320,24 +333,24 @@ public class ProgressioneStoria {
     }
 
     private void inizializzaPersonaggiPrincipali() {
-        
-        
-        
-        
-        
 
-        List<String> hints = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
+        hints = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
 
-        } private void costruisciPiazzaCentrale() { Map<double[], Runnable> zonePiazza = new HashMap<>();
+        mrCooperDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("MrCooper");
+        pescivendoloDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Pescivendolo");
+        davidDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("David");
+        spriteMrCooper = new ImageIcon(getClass().getResource("/sprites/Personaggi/MrCooper.png"));
+        idleDialogs = JsonLoader.estraiLista(engine.getDbHint(), "Dialoghi_Generici_Idle");
+    }
+
+    private void costruisciPiazzaCentrale() {
+        zonePiazza = new HashMap<>();
 
         ab1 = registraNPC("Abitante 1", Arrays.asList(hints.get(0)));
         ab2 = registraNPC("Abitante 2", Arrays.asList(hints.get(1)));
         ab3 = registraNPC("Abitante 3", Arrays.asList(hints.get(2)));
 
-        JsonObject mrCooperDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("MrCooper");
         JsonObject contadinoDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Contadino_Green");
-        JsonObject pescivendoloDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Pescivendolo");
-        JsonObject davidDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("David");
 
         mrCooper = registraNPC("Mr. Cooper", Arrays.asList(
             mrCooperDb.get("saluto").getAsString() + "\n" +
@@ -355,16 +368,16 @@ public class ProgressioneStoria {
             pescivendoloDb.get("richiesta").getAsString()
         ));
 
-        ImageIcon spriteMrCooper = new ImageIcon(getClass().getResource("/sprites/Personaggi/MrCooper.png"));
+        // spriteMrCooper è già un campo di istanza, inizializzato in inizializzaPersonaggiPrincipali()
         ImageIcon spriteGreen = new ImageIcon(getClass().getResource("/sprites/Personaggi/Green.png"));
 
-        double[] hitboxAb1 = CostantiHitbox.PIAZZA_ABITANTE_1;
+        hitboxAb1 = CostantiHitbox.PIAZZA_ABITANTE_1;
         double[] hitboxAb2 = CostantiHitbox.PIAZZA_ABITANTE_2;
-        double[] hitboxAb3 = CostantiHitbox.PIAZZA_ABITANTE_3;
+        hitboxAb3 = CostantiHitbox.PIAZZA_ABITANTE_3;
 
         // Interazione abitante 1: hint Enigma 1 (prima della mappa) o hint Enigma 5 (ritorno da Eripeta).
         // Estratta in variabile per poterla ri-registrare quando la storia riabilita gli aiuti.
-        Runnable interazioneAb1 = () -> {
+        interazioneAb1 = () -> {
             if (!engine.getGiocatore().isPossiedeMappa()) {
                 List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
                 Personaggio tempAb1 = new Personaggio("Abitante 1");
@@ -393,7 +406,7 @@ public class ProgressioneStoria {
         });
 
         // Interazione abitante 3: hint Enigma 1 (prima della mappa) o hint Enigma 5 (ritorno da Eripeta).
-        Runnable interazioneAb3 = () -> {
+        interazioneAb3 = () -> {
             if (!engine.getGiocatore().isPossiedeMappa()) {
                 List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
                 Personaggio tempAb3 = new Personaggio("Abitante 3");
@@ -418,7 +431,7 @@ public class ProgressioneStoria {
                         if (input == null) return;
                         if (Parser.contieneRadiceParola(input, "carot*")) {
                             contadino.setDialoghi(Arrays.asList(contadinoDb.get("richiesta").getAsString()));
-                            engine.mostraDialogoNPCCallback(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, () -> {
+                            engine.mostraDialogoNPCCallback(ProgressioneStoria.this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, () -> {
                                 Runnable loopConfermaContadino = new Runnable() {
                                     int countRifiuti = 0;
                                     JsonArray rifiutiJson = engine.getDbHint().getAsJsonObject("Loop_Rifiuti_Quest").getAsJsonArray("Contadino_Green");
@@ -428,13 +441,13 @@ public class ProgressioneStoria {
                                         int scelta = JOptionPane.showConfirmDialog(engine.getFrame(), "Accetti la proposta del Contadino?", "Scelta", JOptionPane.YES_NO_OPTION);
                                         if (scelta == JOptionPane.YES_OPTION) {
                                             contadino.setDialoghi(Arrays.asList(contadinoDb.get("ringraziamento").getAsString()));
-                                            engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen);
+                                            engine.mostraDialogoNPC(ProgressioneStoria.this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen);
                                             setStatoCity(2); 
                                         } else {
                                             String frase = rifiutiJson.get(Math.min(countRifiuti, rifiutiJson.size() - 1)).getAsString();
                                             countRifiuti++;
                                             contadino.setDialoghi(Arrays.asList(frase));
-                                            engine.mostraDialogoNPCCallback(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, this);
+                                            engine.mostraDialogoNPCCallback(ProgressioneStoria.this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, this);
                                         }
                                     }
                                 };
@@ -442,7 +455,7 @@ public class ProgressioneStoria {
                             });
                         } else {
                             contadino.setDialoghi(Arrays.asList(contadinoDb.get("incomprensione").getAsString()));
-                            engine.mostraDialogoNPCCallback(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, this);
+                            engine.mostraDialogoNPCCallback(ProgressioneStoria.this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, this);
                         }
                     }
                 };
@@ -475,9 +488,10 @@ public class ProgressioneStoria {
         
         this.piazzaCentrale = piazzaCentrale;
         engine.getSceneManager().registraScena(CostantiMappa.PIAZZA_CENTRALE, piazzaCentrale);
-        
+    }
 
-        } private void costruisciPorto() { Map<double[], Runnable> zonePorto = new HashMap<>();
+    private void costruisciPorto() {
+        Map<double[], Runnable> zonePorto = new HashMap<>();
 
         String dialogoDavid = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("David").get("incontro_1").getAsString();
         david = registraNPC("David", Arrays.asList(dialogoDavid));
@@ -556,14 +570,14 @@ public class ProgressioneStoria {
                             if (enigma2.verifica(risposta)) {
                                 engine.getStatistics().enigmaRisolto(enigma2);
                                 pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("risolto").getAsString()));
-                                engine.mostraDialogoNPC(this.portoScreen, CostantiMappa.PORTO, pescivendolo, null);
+                                engine.mostraDialogoNPC(ProgressioneStoria.this.portoScreen, CostantiMappa.PORTO, pescivendolo, null);
                                 setStatoCity(3);
                                 zonePiazza.remove(hitboxAb1);
                                 zonePiazza.remove(hitboxAb3);
                                 ab2.setDialoghi(Arrays.asList(davidDb.get("saluto_generico").getAsString()));
                             } else {
                                 pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("risposta_errata").getAsString()));
-                                engine.mostraDialogoNPCCallback(this.portoScreen, CostantiMappa.PORTO, pescivendolo, null, this);
+                                engine.mostraDialogoNPCCallback(ProgressioneStoria.this.portoScreen, CostantiMappa.PORTO, pescivendolo, null, this);
                             }
                         }
                     };
@@ -581,16 +595,16 @@ public class ProgressioneStoria {
                             if (input == null) return;
                             if (Parser.contieneRadiceParola(input, "cen*")) {
                                 String EryndorText = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Pescivendolo").get("cena_green").getAsString();
-                                engine.mostraDialogoCallback(this.portoScreen, CostantiMappa.PORTO, engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer(), EryndorText, null, () -> {
+                                engine.mostraDialogoCallback(ProgressioneStoria.this.portoScreen, CostantiMappa.PORTO, engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer(), EryndorText, null, () -> {
                                     pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("richiesta").getAsString()));
-                                    engine.mostraDialogoNPCCallback(this.portoScreen, CostantiMappa.PORTO, pescivendolo, null, () -> {
+                                    engine.mostraDialogoNPCCallback(ProgressioneStoria.this.portoScreen, CostantiMappa.PORTO, pescivendolo, null, () -> {
                                         pescivendoloPreambleShown[0] = true;
                                         startEnigma.run();
                                     });
                                 });
                             } else {
                                 pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("incomprensione").getAsString()));
-                                engine.mostraDialogoNPCCallback(this.portoScreen, CostantiMappa.PORTO, pescivendolo, null, this);
+                                engine.mostraDialogoNPCCallback(ProgressioneStoria.this.portoScreen, CostantiMappa.PORTO, pescivendolo, null, this);
                             }
                         }
                     };
@@ -617,8 +631,10 @@ public class ProgressioneStoria {
         
         
         engine.getSceneManager().registraScena(CostantiMappa.PORTO, portoScreen);
-        
-        } private void costruisciStalla() { Map<double[], Runnable> zoneStalla = new HashMap<>();
+    }
+
+    private void costruisciStalla() {
+        Map<double[], Runnable> zoneStalla = new HashMap<>();
         mrCooperInteraction = () -> {
             if (statoAttuale.getValore() >= 5) {
                 mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("vai_al_bosco").getAsString()));
@@ -634,11 +650,11 @@ public class ProgressioneStoria {
                                 if (input == null) return;
                                 if (Parser.contieneRadiceParola(input, "carroz*")) {
                                     mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("prezzo").getAsString()));
-                                    engine.mostraDialogoNPCCallback(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, () -> {
+                                    engine.mostraDialogoNPCCallback(ProgressioneStoria.this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, () -> {
                                         String EryndorText = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("MrCooper").get("no_soldi").getAsString();
-                                        engine.mostraDialogoCallback(this.stallaScreen, CostantiMappa.STALLA, engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer(), EryndorText, null, () -> {
+                                        engine.mostraDialogoCallback(ProgressioneStoria.this.stallaScreen, CostantiMappa.STALLA, engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer(), EryndorText, null, () -> {
                                             mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("proposta").getAsString()));
-                                            engine.mostraDialogoNPCCallback(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, () -> {
+                                            engine.mostraDialogoNPCCallback(ProgressioneStoria.this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, () -> {
                                                 Runnable loopConfermaCooper = new Runnable() {
                                                     int countRifiuti = 0;
                                                     JsonArray rifiutiJson = engine.getDbHint().getAsJsonObject("Loop_Rifiuti_Quest").getAsJsonArray("MrCooper");
@@ -648,13 +664,13 @@ public class ProgressioneStoria {
                                                         int scelta = JOptionPane.showConfirmDialog(engine.getFrame(), "Accetti la proposta di Mr.Cooper?", "Scelta", JOptionPane.YES_NO_OPTION);
                                                         if (scelta == JOptionPane.YES_OPTION) {
                                                             mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("missione").getAsString()));
-                                                            engine.mostraDialogoNPC(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper);
+                                                            engine.mostraDialogoNPC(ProgressioneStoria.this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper);
                                                             setStatoCity(1);
                                                         } else {
                                                             String frase = rifiutiJson.get(Math.min(countRifiuti, rifiutiJson.size() - 1)).getAsString();
                                                             countRifiuti++;
                                                             mrCooper.setDialoghi(Arrays.asList(frase));
-                                                            engine.mostraDialogoNPCCallback(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, this);
+                                                            engine.mostraDialogoNPCCallback(ProgressioneStoria.this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, this);
                                                         }
                                                     }
                                                 };
@@ -664,7 +680,7 @@ public class ProgressioneStoria {
                                     });
                                 } else {
                                     mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("non_capisco").getAsString()));
-                                    engine.mostraDialogoNPCCallback(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, this);
+                                    engine.mostraDialogoNPCCallback(ProgressioneStoria.this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, this);
                                 }
                             }
                         };  engine.mostraDialogoNPCCallback(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, loopCooper);
@@ -687,7 +703,10 @@ public class ProgressioneStoria {
         GameScreen stallaScreen = engine.getSceneManager().creaScenaBase("Stalla.png", zoneStalla);
         this.stallaScreen = stallaScreen;
         engine.getSceneManager().registraScena(CostantiMappa.STALLA, stallaScreen);
-        } private void costruisciBosco() { Map<double[], Runnable> zoneBosco = new HashMap<>();
+    }
+
+    private void costruisciBosco() {
+        Map<double[], Runnable> zoneBosco = new HashMap<>();
         JsonObject foxDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Fox");
         JsonObject eryndorFoxDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Fox");
         ladroFox = registraNPC("Fox", new ArrayList<>());
@@ -876,9 +895,12 @@ public class ProgressioneStoria {
         engine.getSceneManager().registraScena(CostantiMappa.BOSCO_DEEP, boscoDeepScreen);
         
         // Karundis
-        } private void costruisciKarundis() { Map<double[], Runnable> zoneKarundis = new HashMap<>(); // Dichiarato qui per poterlo usare nel callback
+    }
+
+    private void costruisciKarundis() {
+        Map<double[], Runnable> zoneKarundis = new HashMap<>(); // Dichiarato qui per poterlo usare nel callback
         
-        List<String> idleDialogs = JsonLoader.estraiLista(engine.getDbHint(), "Dialoghi_Generici_Idle");
+        // idleDialogs è già un campo di istanza, inizializzato in inizializzaPersonaggiPrincipali()
         this.npcKarundis1 = registraNPC("Abitante 1", Arrays.asList(idleDialogs.get(0)));
         this.npcKarundis2 = registraNPC("Abitante 2", Arrays.asList(idleDialogs.get(1)));
         
@@ -938,7 +960,10 @@ public class ProgressioneStoria {
         engine.getSceneManager().registraScena(CostantiMappa.KARUNDIS, karundisScreen);
         
         // Grotta
-        } private void costruisciGrotta() { Map<double[], Runnable> zoneGrotta = new HashMap<>();
+    }
+
+    private void costruisciGrotta() {
+        Map<double[], Runnable> zoneGrotta = new HashMap<>();
         final boolean[] enigma4Attivo = {false};
         List<String> hintsEnigma4 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_4_Orologio_Fucina");
 
@@ -979,11 +1004,11 @@ public class ProgressioneStoria {
                         engine.getGiocatore().ricaricaSpadaSincro();
                         String txtSblocco = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Spada_sbloccata").getAsString();
                         String txtSuccesso = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("successo_spada").getAsString();
-                        engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Fantoccio", txtSblocco, null, () -> {
-                            engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Eryndor", txtSuccesso, null, null);
+                        engine.mostraDialogoCallback(ProgressioneStoria.this.grottaScreen, CostantiMappa.GROTTA, "Fantoccio", txtSblocco, null, () -> {
+                            engine.mostraDialogoCallback(ProgressioneStoria.this.grottaScreen, CostantiMappa.GROTTA, "Eryndor", txtSuccesso, null, null);
                         });
                     } else {
-                        engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("fallimento_spada").getAsString(), null, this);
+                        engine.mostraDialogoCallback(ProgressioneStoria.this.grottaScreen, CostantiMappa.GROTTA, "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("fallimento_spada").getAsString(), null, this);
                     }
                 }
             };
@@ -1016,7 +1041,10 @@ public class ProgressioneStoria {
         engine.getSceneManager().registraScena(CostantiMappa.GROTTA, grottaScreen);
         
         // Cancello del Castello - Guardia Reale
-        } private void costruisciIngressoPalazzo() { Map<double[], Runnable> zoneIngresso = new HashMap<>();
+    }
+
+    private void costruisciIngressoPalazzo() {
+        Map<double[], Runnable> zoneIngresso = new HashMap<>();
         JsonObject guardiaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Guardiano");
         JsonObject eryndorGuardiaDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Guardiano");
         guardiaReale = registraNPC("Guardiano", Arrays.asList(guardiaDb.get("richiesta_chiave").getAsString()));
@@ -1070,7 +1098,10 @@ public class ProgressioneStoria {
         engine.getSceneManager().registraScena(CostantiMappa.SCALE, engine.getSceneManager().creaScenaBase("ScalePalazzo.png", null));
         
         // Cripta Eripeta
-        } private void costruisciCripta() { Map<double[], Runnable> zoneCripta = new HashMap<>();
+    }
+
+    private void costruisciCripta() {
+        Map<double[], Runnable> zoneCripta = new HashMap<>();
         JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
         eripeta = registraNPC("Eripeta", Arrays.asList(eripetaDb.get("rifiuto").getAsString()));
         zoneCripta.put(CostantiHitbox.CRIPTA_ERIPETA, () -> {
@@ -1081,7 +1112,10 @@ public class ProgressioneStoria {
         engine.getSceneManager().registraScena(CostantiMappa.CRIPTA_ERIPETA, criptaScreen);
         
         // palazzo reale principessa
-        } private void costruisciPalazzoPrincipessa() { Map<double[], Runnable> zonePalazzo = new HashMap<>();
+    }
+
+    private void costruisciPalazzoPrincipessa() {
+        Map<double[], Runnable> zonePalazzo = new HashMap<>();
         JsonObject marienDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Marien");
         marien = registraNPC("Principessa Marien", Arrays.asList(marienDb.get("sfida").getAsString()));
         zonePalazzo.put(CostantiHitbox.PALAZZO_MARIEN, () -> {
@@ -1103,10 +1137,10 @@ public class ProgressioneStoria {
                         // Enigma finale: ultima ricarica della Spada Sincro (99%)
                         engine.getGiocatore().ricaricaSpadaSincro();
                         marien.setDialoghi(Arrays.asList(marienDb.get("vittoria_finale").getAsString()));
-                        engine.mostraDialogoNPC(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, marien, null);
+                        engine.mostraDialogoNPC(ProgressioneStoria.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, marien, null);
                     } else {
-                        engine.mostraDialogoCallback(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienDb.get("errore_cacciata").getAsString(), null, () -> {
-                            engine.mostraDialogoCallback(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Marien").get("errore_ordine").getAsString(), null, this);
+                        engine.mostraDialogoCallback(ProgressioneStoria.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienDb.get("errore_cacciata").getAsString(), null, () -> {
+                            engine.mostraDialogoCallback(ProgressioneStoria.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Marien").get("errore_ordine").getAsString(), null, this);
                         });
                     }
                 }
@@ -1117,7 +1151,9 @@ public class ProgressioneStoria {
         this.palazzoScreen = palazzoScreen;
         engine.getSceneManager().registraScena(CostantiMappa.PALAZZO_PRINCIPESSA, palazzoScreen);
 
-        } private void costruisciLettere() {
+    }
+
+    private void costruisciLettere() {
         List<String> lettera=JsonLoader.estraiLista(engine.getDbWallOfText().getAsJsonObject("Lettera"),"lettera_iniziale");
         String enigmaText = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Enigma_1_Lettera").getAsString();
         List<String> letteraRetro = Arrays.asList(enigmaText);
