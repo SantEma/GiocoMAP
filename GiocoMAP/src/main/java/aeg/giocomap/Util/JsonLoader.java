@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.ArrayList;
 /**
  *
- * @author [da inserire, non mi ricordo chi l'ha fatto]
+ * @author Andrea
  */
 public class JsonLoader {
     
