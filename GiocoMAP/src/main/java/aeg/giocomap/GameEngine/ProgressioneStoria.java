@@ -1,16 +1,12 @@
 package aeg.giocomap.GameEngine;
 
 import aeg.giocomap.Model.Oggetti.Oggetto;
-import aeg.giocomap.Model.Oggetti.Spada;
 import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.Model.Personaggi.Fantoccio;
 import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.View.LetteraScreen;
 import aeg.giocomap.Util.JsonLoader;
 import aeg.giocomap.Util.Parser;
-import aeg.giocomap.GameEngine.CostantiMappa;
-import aeg.giocomap.GameEngine.CostantiHitbox;
-import aeg.giocomap.GameEngine.StatoStoria;
 
 import aeg.giocomap.Model.Enigmi.Enigma;
 import aeg.giocomap.Model.Enigmi.EnigmaSceltaMultipla;
@@ -58,6 +54,9 @@ public class ProgressioneStoria {
     private Personaggio guardiaReale;
     private Personaggio eripeta;
     private Personaggio marien;
+    
+    // Azione interattiva di Eripeta (rimpiazza il vecchio gestisciEripetaInCripta)
+    private Runnable interazioneEripeta;
 
     private GameScreen palazzoScreen;
     private GameScreen criptaScreen;
@@ -229,14 +228,12 @@ public class ProgressioneStoria {
             if (engine.getGiocatore().getInventario().cercaOggetto("Spada Sincro") != null) {
                 if (primoAccessoPalazzo) {
                     primoAccessoPalazzo = false;
-                    
                     // Al primo ingresso al cancello, attiviamo gli indizi per la chiave negli abitanti di Karundis
                     if (npcKarundis1 != null && npcKarundis2 != null) {
-                        List<String> hints = JsonLoader.estraiLista(engine.getDbHint(), "Ricerca_Chiave_Castello");
-                        npcKarundis1.setDialoghi(Arrays.asList(hints.get(0)));
-                        npcKarundis2.setDialoghi(Arrays.asList(hints.get(1)));
+                        List<String> hints1 = JsonLoader.estraiLista(engine.getDbHint(), "Ricerca_Chiave_Castello");
+                        npcKarundis1.setDialoghi(Arrays.asList(hints1.get(0)));
+                        npcKarundis2.setDialoghi(Arrays.asList(hints1.get(1)));
                     }
-                    
                     if (engine.getGiocatore().isEnigmaRisolto("EVENT_BLOCCO_KARUNDIS")) {
                         String testoPassaggio = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("inizio").get("passaggio_cavaglieri").getAsString();
                         GameScreen karundis = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.KARUNDIS);
@@ -288,9 +285,7 @@ public class ProgressioneStoria {
         registraCollegamento(CostantiMappa.SCALE, CostantiMappa.OVEST, () -> {
             engine.getSceneManager().mostraScena(CostantiMappa.CRIPTA_ERIPETA);
             if (statoAttuale.getValore() < 15) {
-                GameScreen cripta = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.CRIPTA_ERIPETA);
-                JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
-                gestisciEripetaInCripta(cripta, registroNPC.get("Eripeta"), eripetaDb);
+                if (interazioneEripeta != null) interazioneEripeta.run();
             }
         });
         
@@ -390,7 +385,9 @@ public class ProgressioneStoria {
                 engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, tempAb1, null);
             }
         };
-        zonePiazza.put(hitboxAb1, interazioneAb1);
+        if (!engine.getGiocatore().isPossiedeMappa() || statoAttuale == StatoStoria.ACCUSA_ERIPETA_SUPERATA || statoAttuale == StatoStoria.DAVID_INTERPELLATO) {
+            zonePiazza.put(hitboxAb1, interazioneAb1);
+        }
 
         zonePiazza.put(hitboxAb2, () -> {
             Personaggio tempAb2 = new Personaggio("Abitante 2");
@@ -419,7 +416,9 @@ public class ProgressioneStoria {
                 engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, tempAb3, null);
             }
         };
-        zonePiazza.put(hitboxAb3, interazioneAb3);
+        if (!engine.getGiocatore().isPossiedeMappa() || statoAttuale == StatoStoria.ACCUSA_ERIPETA_SUPERATA || statoAttuale == StatoStoria.DAVID_INTERPELLATO) {
+            zonePiazza.put(hitboxAb3, interazioneAb3);
+        }
 
         zonePiazza.put(CostantiHitbox.PIAZZA_CONTADINO, () -> {
             if (statoAttuale == StatoStoria.MISSIONE_COOPER_ACCETTATA) { 
@@ -559,6 +558,7 @@ public class ProgressioneStoria {
                     zonePiazza.put(hitboxAb1, () -> engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, ab1, null));
                     
                     ab2.setDialoghi(Arrays.asList(enigma2.getAiuti().get(1)));
+                    zonePiazza.put(CostantiHitbox.PIAZZA_ABITANTE_2, () -> engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, ab2, null));
                     
                     ab3.setDialoghi(Arrays.asList(enigma2.getAiuti().get(2)));
                     zonePiazza.put(hitboxAb3, () -> engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, ab3, null));
@@ -636,7 +636,10 @@ public class ProgressioneStoria {
     private void costruisciStalla() {
         Map<double[], Runnable> zoneStalla = new HashMap<>();
         mrCooperInteraction = () -> {
-            if (statoAttuale.getValore() >= 5) {
+            if (statoAttuale.getValore() >= 7) { // Da ENIGMA_FIORI_RISOLTO in poi (chiave ottenuta)
+                mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("buona_fortuna").getAsString()));
+                engine.mostraDialogoNPC(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper);
+            } else if (statoAttuale.getValore() >= 5) { // Da CAROTE_CONSEGNATE in poi
                 mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("vai_al_bosco").getAsString()));
                 engine.mostraDialogoNPC(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper);
             } else {
@@ -1000,8 +1003,7 @@ public class ProgressioneStoria {
 
                         engine.getStatistics().enigmaRisolto(enigma4);
                         engine.getGiocatore().getInventario().aggiungiOggetto(engine.getTxt().getOggettoDaCatalogo(10));
-                        // Ottenimento della Spada Sincro: prima ricarica (33%)
-                        engine.getGiocatore().ricaricaSpadaSincro();
+                        // Ottenimento della Spada Sincro: parte allo 0%
                         String txtSblocco = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Spada_sbloccata").getAsString();
                         String txtSuccesso = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("successo_spada").getAsString();
                         engine.mostraDialogoCallback(ProgressioneStoria.this.grottaScreen, CostantiMappa.GROTTA, "Fantoccio", txtSblocco, null, () -> {
@@ -1104,9 +1106,46 @@ public class ProgressioneStoria {
         Map<double[], Runnable> zoneCripta = new HashMap<>();
         JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
         eripeta = registraNPC("Eripeta", Arrays.asList(eripetaDb.get("rifiuto").getAsString()));
-        zoneCripta.put(CostantiHitbox.CRIPTA_ERIPETA, () -> {
-            gestisciEripetaInCripta(this.criptaScreen, eripeta, eripetaDb);
-        });
+        
+        interazioneEripeta = () -> {
+            JsonObject eryndorDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Eripeta");
+            String eryName = engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer();
+            ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
+
+            if (statoAttuale.getValore() < 13) {
+                String indizio2 = eripetaDb.get("indizio_2").getAsString();
+                engine.mostraDialogoCallback(this.criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", indizio2, spriteEripeta, null);
+            } else if (statoAttuale == StatoStoria.ENIGMA_VINCOLO_RISOLTO) {
+                String ringr1 = eripetaDb.get("ringraziamento_1").getAsString();
+                String ringr2 = eripetaDb.get("ringraziamento_2").getAsString();
+                String comprensione = eryndorDb.get("comprensione").getAsString();
+                String congedo = eripetaDb.get("congedo").getAsString();
+                
+                Runnable step4 = () -> {
+                    engine.mostraDialogoCallback(this.criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", congedo, spriteEripeta, () -> {
+                        Oggetto ampolla = engine.getGiocatore().getInventario().cercaOggetto("Ampolla d'oro");
+                        if (ampolla != null) {
+                            engine.getGiocatore().getInventario().rimuoviOggetto(ampolla);
+                            engine.getGiocatore().ricaricaSpadaSincro();
+                        }
+                        setStatoCity(15);
+                    });
+                };
+                Runnable step3 = () -> {
+                    engine.mostraDialogoCallback(this.criptaScreen, CostantiMappa.CRIPTA_ERIPETA, eryName, comprensione, null, step4);
+                };
+                Runnable step2 = () -> {
+                    engine.mostraDialogoCallback(this.criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", ringr2, spriteEripeta, step3);
+                };
+                
+                engine.mostraDialogoCallback(this.criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", ringr1, spriteEripeta, step2);
+            } else {
+                String congedo = eripetaDb.get("congedo").getAsString();
+                engine.mostraDialogoCallback(this.criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", congedo, spriteEripeta, null);
+            }
+        };
+
+        zoneCripta.put(CostantiHitbox.CRIPTA_ERIPETA, interazioneEripeta);
         GameScreen criptaScreen = engine.getSceneManager().creaScenaBase("Cripta.png", zoneCripta);
         this.criptaScreen = criptaScreen;
         engine.getSceneManager().registraScena(CostantiMappa.CRIPTA_ERIPETA, criptaScreen);
@@ -1339,6 +1378,8 @@ public class ProgressioneStoria {
                 if (enigma5.verifica(String.valueOf(scelta))) {
                     engine.getStatistics().enigmaRisolto(enigma5);
                     setStatoCity(13);
+                    // Prima ricarica della Spada Sincro (33%)
+                    engine.getGiocatore().ricaricaSpadaSincro();
                     // Enigma 5 risolto: gli aiuti degli abitanti 1 e 3 non servono più
                     if (disattivaAiutiEnigma5 != null) disattivaAiutiEnigma5.run();
 
@@ -1375,45 +1416,6 @@ public class ProgressioneStoria {
         String parte2 = davidDb.get("storia_eripeta_2").getAsString();
         engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", parte1, spriteDavid, () ->
             engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", parte2, spriteDavid, null));
-    }
-
-    private void gestisciEripetaInCripta(GameScreen criptaScreen, Personaggio eripeta, JsonObject eripetaDb) {
-        JsonObject eryndorDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Eripeta");
-        String eryName = engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer();
-        ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
-
-        if (statoAttuale.getValore() < 13) {
-            String indizio2 = eripetaDb.get("indizio_2").getAsString();
-            engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", indizio2, spriteEripeta, null);
-        } else if (statoAttuale == StatoStoria.ENIGMA_VINCOLO_RISOLTO) {
-            String ringr1 = eripetaDb.get("ringraziamento_1").getAsString();
-            String ringr2 = eripetaDb.get("ringraziamento_2").getAsString();
-            String comprensione = eryndorDb.get("comprensione").getAsString();
-            String congedo = eripetaDb.get("congedo").getAsString();
-            
-            Runnable step4 = () -> {
-                engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", congedo, spriteEripeta, () -> {
-                    Oggetto ampolla = engine.getGiocatore().getInventario().cercaOggetto("Ampolla d'oro");
-                    if (ampolla != null) {
-                        engine.getGiocatore().getInventario().rimuoviOggetto(ampolla);
-                        // Consegnando l'ampolla a Eripeta la Spada Sincro sale al 66%
-                        engine.getGiocatore().ricaricaSpadaSincro();
-                    }
-                    setStatoCity(15);
-                });
-            };
-            Runnable step3 = () -> {
-                engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, eryName, comprensione, null, step4);
-            };
-            Runnable step2 = () -> {
-                engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", ringr2, spriteEripeta, step3);
-            };
-            
-            engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", ringr1, spriteEripeta, step2);
-        } else {
-            String congedo = eripetaDb.get("congedo").getAsString();
-            engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", congedo, spriteEripeta, null);
-        }
     }
 
     private Personaggio registraNPC(String nome, List<String> dialoghi) {

@@ -1,5 +1,10 @@
 package aeg.giocomap.GameEngine;
 
+/**
+ *
+ * @author Andrea
+ */
+
 public final class CostantiMappa {
     private CostantiMappa() {} // Impedisce l'istanziazione
 
