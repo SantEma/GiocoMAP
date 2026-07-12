@@ -112,7 +112,7 @@ Risolto l'enigma la spada si sblocca e il giocatore ottiene la spada sincro, anc
 
 ---
 #### Castello ingresso
-Il protagonista scalando il sentiero della montagna arriva al cancello principale del castello ma una guardia reale gli blocca il passaggio spiegandoli che per accedere al portone gli serve una chiave. Il protagonista potrà parlare con gli NPC presenti nella mappa (o nell'online) per capire dove trovare questa chiave, mostrandogli volendo anche vari oggetti.
+Il protagonista scalando il sentiero della montagna arriva al cancello principale del castello ma una guardia reale gli blocca il passaggio spiegandoli che per accedere al portone gli serve una chiave. Il protagonista potrà parlare con gli NPC presenti nella mappa (o nell'online) per capire dove trovare questa chiave.
 
 >[!TODO] Thread and Socket
 >Da implementare che gli amici con l'online ti aiutano negli enigmi
