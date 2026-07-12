@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import aeg.giocomap.View.CoordinateDebuggable;
 /**
  *
- * @author [da inserire, non mi ricordo chi l'ha fatto]
+ * @author Andrea
  */
 public class CursorUtil {
 
