@@ -42,6 +42,10 @@
       "Ricordate la seconda legge! Seta e Broccato sono legati da tre posizioni di scarto. Se la Seta fosse al due, il Broccato andrebbe al cinque per forza!"
     ]
   },
+  "Titoli_Aiuti": {
+    "Titolo_Orologio_Fucina": "Indizio sull'orologio",
+    "Titolo_Calderone_Fucina": "Indizio sul calderone"
+  },
   "Ricerca_Chiave_Castello": [
     "Ho sentito che le guardie hanno perso una chiave molto importante mentre pattugliavano il Bosco Losco. Che sbadati!",
     "Senza la chiave non passerai mai il cancello. I ladri che si nascondono nei boschi spesso prendono di mira le guardie reali per rubare i loro lasciapassare."

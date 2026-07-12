@@ -117,7 +117,7 @@ public class InventarioPanel extends JPanel {
         // Controllo se sto analizzando la spada col cursore
         if(obj instanceof Spada){ //Casting
             Spada spada = (Spada) obj;
-            tooltip.append("<br><br><b style='color: #00FFFF;'>Carica Sincro: ")
+            tooltip.append("<br><br><b style='color: #FF3333;'>Carica Sincro: ")
                    .append(spada.getCaricaSincro())
                    .append("%</b>");
         }

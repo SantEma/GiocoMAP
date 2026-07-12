@@ -144,9 +144,19 @@ public class ProgressioneStoria {
         String testoBloccoKarundis = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Bloccatore").get("stop_palazzo").getAsString();
         Fantoccio fantoccioNord = registraFantoccio("Fantoccio_Nord_Karundis", Arrays.asList(testoBloccoKarundis));
         
+        final boolean[] primoAccessoPalazzo = {true};
         registraCollegamento("KARUNDIS", "NORD", () -> {
-            if (engine.getGiocatore().getInventario().cercaOggetto("Spada") != null) {
-                engine.getSceneManager().mostraScena("INGRESSO_PALAZZO");
+            if (engine.getGiocatore().getInventario().cercaOggetto("Spada Sincro") != null) {
+                if (primoAccessoPalazzo[0]) {
+                    primoAccessoPalazzo[0] = false;
+                    String testoPassaggio = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("inizio").get("passaggio_cavaglieri").getAsString();
+                    GameScreen karundis = (GameScreen) engine.getSceneManager().getScena("KARUNDIS");
+                    engine.mostraDialogoCallback(karundis, "KARUNDIS", "Eryndor", testoPassaggio, null, () -> {
+                        engine.getSceneManager().mostraScena("INGRESSO_PALAZZO");
+                    });
+                } else {
+                    engine.getSceneManager().mostraScena("INGRESSO_PALAZZO");
+                }
             } else {
                 GameScreen karundis = (GameScreen) engine.getSceneManager().getScena("KARUNDIS");
                 engine.mostraDialogoNPC(karundis, "KARUNDIS", fantoccioNord, null);
@@ -737,11 +747,14 @@ public class ProgressioneStoria {
         double[] orologioHitbox = new double[]{0.51, 0.19, 0.10, 0.10};
         double[] calderoneHitbox = new double[]{0.82, 0.56, 0.10, 0.12};
 
+        String titoloOrologio = engine.getDbHint().getAsJsonObject("Titoli_Aiuti").get("Titolo_Orologio_Fucina").getAsString();
+        String titoloCalderone = engine.getDbHint().getAsJsonObject("Titoli_Aiuti").get("Titolo_Calderone_Fucina").getAsString();
+
         Runnable actOrologio = () -> {
-            engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Orologio", hintsEnigma4.get(0), null, null);
+            engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", titoloOrologio, hintsEnigma4.get(0), null, null);
         };
         Runnable actCalderone = () -> {
-            engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Calderone", hintsEnigma4.get(1), null, null);
+            engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", titoloCalderone, hintsEnigma4.get(1), null, null);
         };
 
         zoneGrotta.put(new double[]{0.45, 0.45, 0.15, 0.20}, () -> { // Incudine
