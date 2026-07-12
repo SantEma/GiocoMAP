@@ -10,11 +10,11 @@
       "Tre",
       "Cinque"
     ],
-    "Enigma_7_Principessa": [
-      "1.Velluto 2.Seta 3.Damasco 4.Lino 5.Broccato",
-      "1.Velluto 2.Broccato 3.Lino 4.Damasco 5.Seta",
-      "1.Damasco 2.Seta 3.Lino 4.Velluto 5.Broccato",
-      "1.Velluto 2.Seta 3.Lino 4.Damasco 5.Broccato"
+    "Enigma_Finale_Principessa": [
+      "1. Velluto Cremisi, 2. Seta Celeste, 3. Damasco Verde Smeraldo, 4. Lino Candido, 5. Broccato Dorato",
+      "1. Velluto Cremisi, 2. Broccato Dorato, 3. Lino Candido, 4. Damasco Verde Smeraldo, 5. Seta Celeste",
+      "1. Damasco Verde Smeraldo, 2. Seta Celeste, 3. Lino Candido, 4. Velluto Cremisi, 5. Broccato Dorato",
+      "1. Velluto Cremisi, 2. Seta Celeste, 3. Lino Candido, 4. Damasco Verde Smeraldo, 5. Broccato Dorato"
     ]
   },
   "Aiuti_Enigmi": {
@@ -36,7 +36,7 @@
       "Non pensare di dover presentare un pezzo tagliato su misura per ogni nuovo giorno. Ricorda che il Custode può darti il resto. Se il primo giorno gli cedi un frammento singolo, il secondo giorno potresti cedergliene un frammento doppio, riprendendoti indietro quello singolo!",
       "Pensa alla matematica dei raddoppi. Se tu avessi a disposizione un frammento che vale 1, un frammento che vale 2 e un frammento che vale 4, potresti scambiarli per ottenere qualsiasi valore da 1 a 7."
     ],
-    "Enigma_7_Mercanti_Collaborano": [
+    "Enigma_Finale_Mercanti_Collaborano": [
       "Il primo manichino deve pesare più del tessuto del porto... il Velluto Cremisi è il più pesante in assoluto, non credi?",
       "Ascoltate me! Se il Lino Candido deve per forza occupare una posizione dispari, ma dopo il tessuto del porto... potrebbe essere la terza?",
       "Ricordate la seconda legge! Seta e Broccato sono legati da tre posizioni di scarto. Se la Seta fosse al due, il Broccato andrebbe al cinque per forza!"

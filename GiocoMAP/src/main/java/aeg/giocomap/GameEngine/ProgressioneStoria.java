@@ -855,21 +855,21 @@ public class ProgressioneStoria {
         JsonObject marienDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Marien");
         Personaggio marien = registraNPC("Principessa Marien", Arrays.asList(marienDb.get("sfida").getAsString()));
         zonePalazzo.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
-            if (engine.getGiocatore().isEnigmaRisolto("Enigma_7_Principessa")) {
+            if (engine.getGiocatore().isEnigmaRisolto("Enigma_Finale_Principessa")) {
                 marien.setDialoghi(Arrays.asList("Sei già il mio sposo! Il regno è salvo."));
                 engine.mostraDialogoNPC(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", marien, null);
                 return;
             }
-            EnigmaSceltaMultipla enigma7 = IstanzaEnigma.creaEnigma7(new Oggetto(8, "Titolo Nobile", "Hai vinto il cuore della principessa e il titolo."));
-            engine.getStatistics().iniziaEnigma(enigma7);
+            EnigmaSceltaMultipla enigmaFinale = IstanzaEnigma.creaEnigmaFinale(new Oggetto(8, "Titolo Nobile", "Hai vinto il cuore della principessa e il titolo."));
+            engine.getStatistics().iniziaEnigma(enigmaFinale);
             Runnable loopEnigma = new Runnable() {
                 @Override
                 public void run() {
-                    String[] opzioni = enigma7.getOpzioni().toArray(new String[0]);
+                    String[] opzioni = enigmaFinale.getOpzioni().toArray(new String[0]);
                     int scelta = JOptionPane.showOptionDialog(engine.getFrame(), "Scegli l'ordine:", "Enigma della Principessa", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opzioni, opzioni[0]);
                     if (scelta < 0) return;
-                    if (enigma7.verifica(String.valueOf(scelta))) {
-                        engine.getStatistics().enigmaRisolto(enigma7);
+                    if (enigmaFinale.verifica(String.valueOf(scelta))) {
+                        engine.getStatistics().enigmaRisolto(enigmaFinale);
                         marien.setDialoghi(Arrays.asList(marienDb.get("vittoria_finale").getAsString()));
                         engine.mostraDialogoNPC(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", marien, null);
                     } else {
@@ -879,7 +879,7 @@ public class ProgressioneStoria {
                     }
                 }
             };
-            engine.mostraDialogoCallback(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", "Principessa Marien", enigma7.getTesto(), null, loopEnigma);
+            engine.mostraDialogoCallback(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", "Principessa Marien", marienDb.get("enigma_leggi").getAsString(), null, loopEnigma);
         });
         GameScreen palazzoScreen = engine.getSceneManager().creaScenaBase("SalaDellaPrincipessa.png", zonePalazzo);
         palazzoScreenArr[0] = palazzoScreen;

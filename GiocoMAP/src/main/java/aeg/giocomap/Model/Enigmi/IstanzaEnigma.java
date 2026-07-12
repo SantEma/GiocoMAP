@@ -95,7 +95,7 @@ public class IstanzaEnigma {
             caricaTesto("Enigma_4_Orologio"),
             caricaAiuti("Enigma_4_Orologio_Fucina"),
             reward,
-            "10"
+            "11"
         );
     }
 
@@ -111,12 +111,12 @@ public class IstanzaEnigma {
         );
     }
 
-    public static EnigmaSceltaMultipla creaEnigma7(Oggetto reward) {
-        List<String> opzioni = caricaOpzioni("Enigma_7_Principessa");
+    public static EnigmaSceltaMultipla creaEnigmaFinale(Oggetto reward) {
+        List<String> opzioni = caricaOpzioni("Enigma_Finale_Principessa");
         return new EnigmaSceltaMultipla(
-            "Enigma_7_Principessa",
-            caricaTesto("Enigma_7_Principessa"),
-            caricaAiuti("Enigma_7_Mercanti_Collaborano"),
+            "Enigma_Finale_Principessa",
+            caricaTesto("Enigma_Finale_Principessa"),
+            caricaAiuti("Enigma_Finale_Mercanti_Collaborano"),
             reward,
             opzioni,
             3
