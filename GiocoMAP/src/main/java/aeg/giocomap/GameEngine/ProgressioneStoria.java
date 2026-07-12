@@ -55,6 +55,18 @@ public class ProgressioneStoria {
     private Runnable mrCooperInteraction;
     private Runnable foxInteraction;
 
+    // Azione che ri-registra la hitbox di David al Porto quando la storia lo rende
+    // di nuovo interpellabile (ritorno mandato da Eripeta, a statoCity >= 11)
+    private Runnable riattivaDavidDopoMappa;
+
+    // Azione che abilita le hitbox degli abitanti 1 e 3 in Piazza (aiuti Enigma 5).
+    // Va invocata solo quando David annuncia l'Enigma del Vincolo, non prima.
+    private Runnable attivaAiutiEnigma5;
+
+    // Azione che rimuove le hitbox degli abitanti 1 e 3 in Piazza una volta risolto
+    // l'Enigma 5 (i loro aiuti non servono più), simmetrica all'attivazione
+    private Runnable disattivaAiutiEnigma5;
+
     // Riferimenti agli NPC di Karundis per poter aggiornare i loro dialoghi
     private Personaggio npcKarundis1;
     private Personaggio npcKarundis2;
@@ -312,7 +324,9 @@ public class ProgressioneStoria {
         double[] hitboxAb2 = new double[]{0.5349, 0.4436, 0.08, 0.25};
         double[] hitboxAb3 = new double[]{0.6228, 0.6285, 0.08, 0.25};
 
-        zonePiazza.put(hitboxAb1, () -> {
+        // Interazione abitante 1: hint Enigma 1 (prima della mappa) o hint Enigma 5 (ritorno da Eripeta).
+        // Estratta in variabile per poterla ri-registrare quando la storia riabilita gli aiuti.
+        Runnable interazioneAb1 = () -> {
             if (!engine.getGiocatore().isPossiedeMappa()) {
                 List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
                 Personaggio tempAb1 = new Personaggio("Abitante 1");
@@ -324,7 +338,8 @@ public class ProgressioneStoria {
                 tempAb1.setDialoghi(Arrays.asList(hintsE5.get(0)));
                 engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb1, null);
             }
-        });
+        };
+        zonePiazza.put(hitboxAb1, interazioneAb1);
 
         zonePiazza.put(hitboxAb2, () -> {
             Personaggio tempAb2 = new Personaggio("Abitante 2");
@@ -339,7 +354,8 @@ public class ProgressioneStoria {
             engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb2, null);
         });
 
-        zonePiazza.put(hitboxAb3, () -> {
+        // Interazione abitante 3: hint Enigma 1 (prima della mappa) o hint Enigma 5 (ritorno da Eripeta).
+        Runnable interazioneAb3 = () -> {
             if (!engine.getGiocatore().isPossiedeMappa()) {
                 List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
                 Personaggio tempAb3 = new Personaggio("Abitante 3");
@@ -351,7 +367,8 @@ public class ProgressioneStoria {
                 tempAb3.setDialoghi(Arrays.asList(hintsE5.get(1)));
                 engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb3, null);
             }
-        });
+        };
+        zonePiazza.put(hitboxAb3, interazioneAb3);
 
         zonePiazza.put(new double[]{0.7187, 0.3525, 0.1289, 0.3745}, () -> {
             if (statoCity[0] == 1) { 
@@ -430,6 +447,32 @@ public class ProgressioneStoria {
         ImageIcon spriteDavid = new ImageIcon(getClass().getResource("/sprites/Personaggi/David.png"));
 
         double[] davidHitbox = new double[]{0.7187, 0.3525, 0.1289, 0.3745};
+
+        // Ripristina la hitbox di David con il comportamento "dopo la mappa".
+        // Viene invocata sia al caricamento di un salvataggio avanzato, sia live
+        // quando l'accusa di Eripeta porta a statoCity 11 (vedi avviaAccusaEripeta).
+        attivaAiutiEnigma5 = () -> {
+            zonePiazza.put(hitboxAb1, interazioneAb1);
+            zonePiazza.put(hitboxAb3, interazioneAb3);
+        };
+
+        riattivaDavidDopoMappa = () -> {
+            zonePorto.put(davidHitbox, () ->
+                    gestisciDavidDopoMappa(portoScreenArr[0], david, spriteDavid, davidDb));
+            // Gli aiuti degli abitanti 1 e 3 si abilitano solo dopo che David annuncia
+            // l'Enigma del Vincolo (statoCity 12). A statoCity 11 (appena tornato da
+            // Eripeta) l'enigma non è ancora stato dettato, quindi niente aiuti.
+            // Qui copro il caso del salvataggio ricaricato con enigma già in corso.
+            if (statoCity[0] == 12) {
+                attivaAiutiEnigma5.run();
+            }
+        };
+
+        disattivaAiutiEnigma5 = () -> {
+            zonePiazza.remove(hitboxAb1);
+            zonePiazza.remove(hitboxAb3);
+        };
+
         if (!engine.getGiocatore().isPossiedeMappa()) {
             zonePorto.put(davidHitbox, () -> {
                 engine.mostraDialogoNPC(portoScreenArr[0], "PORTO", david, spriteDavid);
@@ -449,9 +492,8 @@ public class ProgressioneStoria {
                 zonePorto.remove(davidHitbox);
             });
         } else if (statoCity[0] >= 11) {
-            zonePorto.put(davidHitbox, () -> {
-                gestisciDavidDopoMappa(portoScreenArr[0], david, spriteDavid, davidDb);
-            });
+            // Salvataggio ricaricato in fase avanzata: la hitbox va ripristinata subito
+            riattivaDavidDopoMappa.run();
         }
 
         final boolean[] pescivendoloPreambleShown = {false};
@@ -901,6 +943,8 @@ public class ProgressioneStoria {
 
                         engine.getStatistics().enigmaRisolto(enigma4);
                         engine.getGiocatore().getInventario().aggiungiOggetto(engine.getTxt().getOggettoDaCatalogo(10));
+                        // Ottenimento della Spada Sincro: prima ricarica (33%)
+                        engine.getGiocatore().ricaricaSpadaSincro();
                         String txtSblocco = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Spada_sbloccata").getAsString();
                         String txtSuccesso = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("successo_spada").getAsString();
                         engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Fantoccio", txtSblocco, null, () -> {
@@ -1027,6 +1071,8 @@ public class ProgressioneStoria {
                     if (scelta < 0) return;
                     if (enigmaFinale.verifica(String.valueOf(scelta))) {
                         engine.getStatistics().enigmaRisolto(enigmaFinale);
+                        // Enigma finale: ultima ricarica della Spada Sincro (99%)
+                        engine.getGiocatore().ricaricaSpadaSincro();
                         marien.setDialoghi(Arrays.asList(marienDb.get("vittoria_finale").getAsString()));
                         engine.mostraDialogoNPC(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", marien, null);
                     } else {
@@ -1130,6 +1176,8 @@ public class ProgressioneStoria {
         Runnable step9 = () -> {
             engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt5_3, spriteEripeta, () -> {
                 setStatoCity(11);
+                // David torna interpellabile al Porto (mandato da Eripeta): ne riattivo la hitbox
+                if (riattivaDavidDopoMappa != null) riattivaDavidDopoMappa.run();
                 engine.getSceneManager().mostraScena("SCALE");
             });
         };
@@ -1184,8 +1232,7 @@ public class ProgressioneStoria {
         } else if (statoCity[0] == 12) {
             lanciaEnigma5(portoScreen, david, spriteDavid, davidDb);
         } else if (statoCity[0] == 13) {
-            String storiaEripeta = davidDb.get("storia_eripeta").getAsString();
-            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", storiaEripeta, spriteDavid, null);
+            mostraStoriaEripeta(portoScreen, spriteDavid, davidDb);
         } else {
             String salutoGenerico = davidDb.get("saluto_generico").getAsString();
             engine.mostraDialogoCallback(portoScreen, "PORTO", "David", salutoGenerico, spriteDavid, null);
@@ -1196,6 +1243,10 @@ public class ProgressioneStoria {
         Oggetto reward = engine.getTxt().getOggettoDaCatalogo(9);
         EnigmaSceltaMultipla enigma5 = IstanzaEnigma.creaEnigma5(reward);
         engine.getStatistics().iniziaEnigma(enigma5);
+
+        // David sta annunciando l'Enigma del Vincolo: da ora gli abitanti 1 e 3 in
+        // Piazza possono dare i relativi aiuti (se esci dalla risposta per cercarli)
+        if (attivaAiutiEnigma5 != null) attivaAiutiEnigma5.run();
         
         String descrizione = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Enigma_5_Vincolo").getAsString();
         String domanda = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Enigma_5_Vincolo_domanda").getAsString();
@@ -1219,9 +1270,10 @@ public class ProgressioneStoria {
                 if (enigma5.verifica(String.valueOf(scelta))) {
                     engine.getStatistics().enigmaRisolto(enigma5);
                     setStatoCity(13);
-                    
-                    String storiaEripeta = davidDb.get("storia_eripeta").getAsString();
-                    engine.mostraDialogoCallback(portoScreen, "PORTO", "David", storiaEripeta, spriteDavid, null);
+                    // Enigma 5 risolto: gli aiuti degli abitanti 1 e 3 non servono più
+                    if (disattivaAiutiEnigma5 != null) disattivaAiutiEnigma5.run();
+
+                    mostraEsitoEnigma5(portoScreen, spriteDavid, davidDb);
                 } else {
                     String erroreMsg = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta").get("errore").getAsString();
                     engine.mostraDialogoCallback(portoScreen, "PORTO", "David", erroreMsg, spriteDavid, this);
@@ -1233,6 +1285,27 @@ public class ProgressioneStoria {
         engine.mostraDialogoCallback(portoScreen, "PORTO", "David", descrizione, spriteDavid, () -> {
             engine.mostraDialogoCallback(portoScreen, "PORTO", "David", domanda, spriteDavid, loopEnigma);
         });
+    }
+
+    // Esito della risoluzione dell'Enigma 5: David espone prima la soluzione del Vincolo
+    // (divisa in due pannelli perché lunga) e poi racconta la storia di Eripeta.
+    private void mostraEsitoEnigma5(GameScreen portoScreen, ImageIcon spriteDavid, JsonObject davidDb) {
+        String soluzione1 = davidDb.get("soluzione_enigma_1").getAsString();
+        String soluzione2 = davidDb.get("soluzione_enigma_2").getAsString();
+        String soluzione3 = davidDb.get("soluzione_enigma_3").getAsString();
+        engine.mostraDialogoCallback(portoScreen, "PORTO", "David", soluzione1, spriteDavid, () ->
+            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", soluzione2, spriteDavid, () ->
+                engine.mostraDialogoCallback(portoScreen, "PORTO", "David", soluzione3, spriteDavid, () ->
+                    mostraStoriaEripeta(portoScreen, spriteDavid, davidDb))));
+    }
+
+    // Il racconto di David sulla storia di Eripeta è lungo: lo mostro in due pannelli
+    // di dialogo consecutivi per non farlo apparire tagliato a schermo.
+    private void mostraStoriaEripeta(GameScreen portoScreen, ImageIcon spriteDavid, JsonObject davidDb) {
+        String parte1 = davidDb.get("storia_eripeta_1").getAsString();
+        String parte2 = davidDb.get("storia_eripeta_2").getAsString();
+        engine.mostraDialogoCallback(portoScreen, "PORTO", "David", parte1, spriteDavid, () ->
+            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", parte2, spriteDavid, null));
     }
 
     private void gestisciEripetaInCripta(GameScreen criptaScreen, Personaggio eripeta, JsonObject eripetaDb) {
@@ -1254,6 +1327,8 @@ public class ProgressioneStoria {
                     Oggetto ampolla = engine.getGiocatore().getInventario().cercaOggetto("Ampolla d'oro");
                     if (ampolla != null) {
                         engine.getGiocatore().getInventario().rimuoviOggetto(ampolla);
+                        // Consegnando l'ampolla a Eripeta la Spada Sincro sale al 66%
+                        engine.getGiocatore().ricaricaSpadaSincro();
                     }
                     setStatoCity(15);
                 });

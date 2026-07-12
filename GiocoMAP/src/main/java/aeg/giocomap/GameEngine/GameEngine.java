@@ -11,6 +11,7 @@ import aeg.giocomap.Network.GameNetwork;
 
 import aeg.giocomap.Model.Storage.*;
 import aeg.giocomap.Model.Oggetti.Oggetto;
+import aeg.giocomap.Model.Oggetti.Spada;
 import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.Model.Giocatore.Giocatore;
 
@@ -212,6 +213,20 @@ public class GameEngine {
                 }
             }
 
+            // Ripristino la carica della Spada Sincro, persistita a parte perché
+            // l'inventario salva solo gli ID e non lo stato interno degli oggetti
+            if (salvataggio.length > 6 && salvataggio[6] != null) {
+                try {
+                    int caricaSpada = Integer.parseInt(salvataggio[6].trim());
+                    Oggetto spadaObj = giocatore.getInventario().cercaOggetto("Spada Sincro");
+                    if (spadaObj instanceof Spada spada) {
+                        spada.setCaricaSincro(caricaSpada);
+                    }
+                } catch (NumberFormatException e) {
+                    System.err.println("Errore parsing carica spada salvata: " + salvataggio[6]);
+                }
+            }
+
             // Ripristino del flag primoAccessoPalazzo
             if (salvataggio.length > 5 && salvataggio[5] != null) {
                 boolean primoAccesso = Boolean.parseBoolean(salvataggio[5]);
@@ -234,6 +249,12 @@ public class GameEngine {
         giocatore.setPossiedeMappa(false);
         giocatore.setEnigmiRisolti(new ArrayList<>());
         giocatore.getInventario().getListaOggetti().clear();
+        // Azzero la carica della Spada Sincro nel catalogo (istanza condivisa): evita
+        // che una partita precedente nella stessa sessione lasci una carica residua
+        Oggetto spadaCatalogo = txt.getOggettoDaCatalogo(10);
+        if (spadaCatalogo instanceof Spada spada) {
+            spada.setCaricaSincro(0);
+        }
         Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
         if (tessutoIniziale_temp != null) {
             giocatore.getInventario().aggiungiOggetto(tessutoIniziale_temp);
@@ -519,13 +540,20 @@ public class GameEngine {
         String enigmi = String.join(",", giocatore.getEnigmiRisolti());
         
         ArrayList<String> invIds = new ArrayList<>();
+        int caricaSpada = 0;
         for (Oggetto o : giocatore.getInventario().getListaOggetti()) {
             invIds.add(String.valueOf(o.getIdOggetto()));
+            // Gli oggetti sono serializzati solo per ID: salvo a parte lo stato
+            // interno della Spada Sincro (la sua carica), altrimenti andrebbe perso
+            if (o instanceof Spada spada) {
+                caricaSpada = spada.getCaricaSincro();
+            }
         }
         String inventario = String.join(",", invIds);
-        
+
         db.salvaPartita(scenaDaSalvare, progression.getStatoCity(),
-                        giocatore.isPossiedeMappa(), enigmi, inventario, progression.isPrimoAccessoPalazzo());
+                        giocatore.isPossiedeMappa(), enigmi, inventario, progression.isPrimoAccessoPalazzo(),
+                        caricaSpada);
         ExitGame();
     }
 
