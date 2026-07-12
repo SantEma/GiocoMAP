@@ -1,6 +1,7 @@
 package aeg.giocomap.GameEngine;
 
 import aeg.giocomap.Model.Oggetti.Oggetto;
+import aeg.giocomap.Model.Oggetti.Spada;
 import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.Model.Personaggi.Fantoccio;
 import aeg.giocomap.View.GameScreen;
@@ -215,6 +216,9 @@ public class ProgressioneStoria {
         registraCollegamento("INGRESSO_PALAZZO", "NORD", () -> {
             if (statoCity[0] >= 9) {
                 engine.getSceneManager().mostraScena("SCALE");
+                if (statoCity[0] == 9) {
+                    avviaIntercettazioneEripeta();
+                }
             } else {
                 GameScreen ingresso = (GameScreen) engine.getSceneManager().getScena("INGRESSO_PALAZZO");
                 engine.mostraDialogoNPC(ingresso, "INGRESSO_PALAZZO", bloccoChiaveNord, null);
@@ -222,8 +226,23 @@ public class ProgressioneStoria {
         });
         
         registraCollegamentoSemplice("SCALE", "SUD", "INGRESSO_PALAZZO");
-        registraCollegamentoSemplice("SCALE", "NORD", "PALAZZO_PRINCIPESSA");
-        registraCollegamentoSemplice("SCALE", "OVEST", "CRIPTA_ERIPETA");
+        registraCollegamento("SCALE", "NORD", () -> {
+            if (statoCity[0] >= 15) {
+                engine.getSceneManager().mostraScena("PALAZZO_PRINCIPESSA");
+            } else {
+                GameScreen scale = (GameScreen) engine.getSceneManager().getScena("SCALE");
+                String rifiuto = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta").get("rifiuto").getAsString();
+                engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", rifiuto, new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png")), null);
+            }
+        });
+        registraCollegamento("SCALE", "OVEST", () -> {
+            engine.getSceneManager().mostraScena("CRIPTA_ERIPETA");
+            if (statoCity[0] < 15) {
+                GameScreen cripta = (GameScreen) engine.getSceneManager().getScena("CRIPTA_ERIPETA");
+                JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
+                gestisciEripetaInCripta(cripta, registroNPC.get("Eripeta"), eripetaDb);
+            }
+        });
         
         registraCollegamentoSemplice("PALAZZO_PRINCIPESSA", "SUD", "SCALE");
         registraCollegamentoSemplice("CRIPTA_ERIPETA", "EST", "SCALE");
@@ -379,15 +398,12 @@ public class ProgressioneStoria {
 
         double[] davidHitbox = new double[]{0.7187, 0.3525, 0.1289, 0.3745};
         zonePorto.put(davidHitbox, () -> {
-            engine.mostraDialogoNPC(portoScreenArr[0], "PORTO", david, spriteDavid);
             if (!engine.getGiocatore().isPossiedeMappa()) {
+                engine.mostraDialogoNPC(portoScreenArr[0], "PORTO", david, spriteDavid);
                 Enigma enigma1 = IstanzaEnigma.creaEnigma1(null);
                 engine.getStatistics().enigmaRisolto(enigma1);
                 engine.getGiocatore().setPossiedeMappa(true);
-                zonePorto.remove(davidHitbox);
-                david.setDialoghi(new ArrayList<>());
-                // Svuoto i dialoghi e rimuovo le hitbox dalla mappa della zona
-                // così il MouseListener in CursorUtil non fa apparire l'icona della mano
+                
                 ab1.setDialoghi(new ArrayList<>());
                 zonePiazza.remove(hitboxAb1);
                 
@@ -395,6 +411,8 @@ public class ProgressioneStoria {
                 zonePiazza.remove(hitboxAb3);
                 
                 ab2.setDialoghi(Arrays.asList(davidDb.get("consiglio_stalla").getAsString()));
+            } else {
+                gestisciDavidDopoMappa(portoScreenArr[0], david, spriteDavid, davidDb);
             }
         });
 
@@ -486,66 +504,67 @@ public class ProgressioneStoria {
         Map<double[], Runnable> zoneStalla = new HashMap<>();
         final GameScreen[] stallaScreenArr = new GameScreen[1];
         mrCooperInteraction = () -> {
-            switch (statoCity[0]) {
-                case 0:
-                    mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("saluto").getAsString()));
-                    Runnable loopCooper = new Runnable() {
-                        @Override
-                        public void run() {
-                            String input = JOptionPane.showInputDialog(engine.getFrame(), "Cosa chiedi a Mr.Cooper?");
-                            if (input == null) return;
-                            if (Parser.contieneRadiceParola(input, "carroz*")) {
-                                mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("prezzo").getAsString()));
-                                engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, () -> {
-                                    String EryndorText = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("MrCooper").get("no_soldi").getAsString();
-                                    engine.mostraDialogoCallback(stallaScreenArr[0], "STALLA", engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer(), EryndorText, null, () -> {
-                                        mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("proposta").getAsString()));
-                                        engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, () -> {
-                                            Runnable loopConfermaCooper = new Runnable() {
-                                                int countRifiuti = 0;
-                                                JsonArray rifiutiJson = engine.getDbHint().getAsJsonObject("Loop_Rifiuti_Quest").getAsJsonArray("MrCooper");
-                                                
-                                                @Override
-                                                public void run() {
-                                                    int scelta = JOptionPane.showConfirmDialog(engine.getFrame(), "Accetti la proposta di Mr.Cooper?", "Scelta", JOptionPane.YES_NO_OPTION);
-                                                    if (scelta == JOptionPane.YES_OPTION) {
-                                                        mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("missione").getAsString()));
-                                                        engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
-                                                        statoCity[0] = 1;
-                                                    } else {
-                                                        String frase = rifiutiJson.get(Math.min(countRifiuti, rifiutiJson.size() - 1)).getAsString();
-                                                        countRifiuti++;
-                                                        mrCooper.setDialoghi(Arrays.asList(frase));
-                                                        engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, this);
+            if (statoCity[0] >= 5) {
+                mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("vai_al_bosco").getAsString()));
+                engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
+            } else {
+                switch (statoCity[0]) {
+                    case 0:
+                        mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("saluto").getAsString()));
+                        Runnable loopCooper = new Runnable() {
+                            @Override
+                            public void run() {
+                                String input = JOptionPane.showInputDialog(engine.getFrame(), "Cosa chiedi a Mr.Cooper?");
+                                if (input == null) return;
+                                if (Parser.contieneRadiceParola(input, "carroz*")) {
+                                    mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("prezzo").getAsString()));
+                                    engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, () -> {
+                                        String EryndorText = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("MrCooper").get("no_soldi").getAsString();
+                                        engine.mostraDialogoCallback(stallaScreenArr[0], "STALLA", engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer(), EryndorText, null, () -> {
+                                            mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("proposta").getAsString()));
+                                            engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, () -> {
+                                                Runnable loopConfermaCooper = new Runnable() {
+                                                    int countRifiuti = 0;
+                                                    JsonArray rifiutiJson = engine.getDbHint().getAsJsonObject("Loop_Rifiuti_Quest").getAsJsonArray("MrCooper");
+                                                    
+                                                    @Override
+                                                    public void run() {
+                                                        int scelta = JOptionPane.showConfirmDialog(engine.getFrame(), "Accetti la proposta di Mr.Cooper?", "Scelta", JOptionPane.YES_NO_OPTION);
+                                                        if (scelta == JOptionPane.YES_OPTION) {
+                                                            mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("missione").getAsString()));
+                                                            engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
+                                                            statoCity[0] = 1;
+                                                        } else {
+                                                            String frase = rifiutiJson.get(Math.min(countRifiuti, rifiutiJson.size() - 1)).getAsString();
+                                                            countRifiuti++;
+                                                            mrCooper.setDialoghi(Arrays.asList(frase));
+                                                            engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, this);
+                                                        }
                                                     }
-                                                }
-                                            };
-                                            loopConfermaCooper.run();
+                                                };
+                                                loopConfermaCooper.run();
+                                            });
                                         });
                                     });
-                                });
-                            } else {
-                                mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("non_capisco").getAsString()));
-                                engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, this);
+                                } else {
+                                    mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("non_capisco").getAsString()));
+                                    engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, this);
+                                }
                             }
-                        }
-                    };  engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, loopCooper);
-                    break;
-                case 4:
-                    mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("ringraziamento").getAsString()));
-                    engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
-                    Oggetto carote = engine.getGiocatore().getInventario().cercaOggetto("Carote");
-                    if (carote != null) engine.getGiocatore().getInventario().rimuoviOggetto(carote);
-                    statoCity[0] = 5;
-                    break;
-                case 5:
-                    mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("vai_al_bosco").getAsString()));
-                    engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
-                    break;
-                default:
-                    mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("hai_carote").getAsString()));
-                    engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
-                    break;
+                        };  engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, loopCooper);
+                        break;
+                    case 4:
+                        mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("ringraziamento").getAsString()));
+                        engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
+                        Oggetto carote = engine.getGiocatore().getInventario().cercaOggetto("Carote");
+                        if (carote != null) engine.getGiocatore().getInventario().rimuoviOggetto(carote);
+                        statoCity[0] = 5;
+                        break;
+                    default:
+                        mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("hai_carote").getAsString()));
+                        engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
+                        break;
+                }
             }
         };
         zoneStalla.put(new double[]{0.3, 0.3, 0.4, 0.5}, mrCooperInteraction);
@@ -943,25 +962,7 @@ public class ProgressioneStoria {
         JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
         Personaggio eripeta = registraNPC("Eripeta", Arrays.asList(eripetaDb.get("rifiuto").getAsString()));
         zoneCripta.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
-            EnigmaSceltaMultipla enigma5 = IstanzaEnigma.creaEnigma5(engine.getTxt().getOggettoDaCatalogo(9));
-            engine.getStatistics().iniziaEnigma(enigma5);
-            Runnable loopEnigma = new Runnable() {
-                @Override
-                public void run() {
-                    String[] opzioni = enigma5.getOpzioni().toArray(new String[0]);
-                    int scelta = JOptionPane.showOptionDialog(engine.getFrame(), "Quante ferite?", "Enigma del Vincolo", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opzioni, opzioni[0]);
-                    if (scelta < 0) return;
-                    if (enigma5.verifica(String.valueOf(scelta))) {
-                        engine.getStatistics().enigmaRisolto(enigma5);
-                        eripeta.setDialoghi(Arrays.asList(eripetaDb.get("consenso").getAsString()));
-                        engine.mostraDialogoNPC(criptaScreenArr[0], "CRIPTA_ERIPETA", eripeta, null);
-                    } else {
-                        eripeta.setDialoghi(Arrays.asList(eripetaDb.get("errore").getAsString()));
-                        engine.mostraDialogoNPCCallback(criptaScreenArr[0], "CRIPTA_ERIPETA", eripeta, null, this);
-                    }
-                }
-            };
-            engine.mostraDialogoCallback(criptaScreenArr[0], "CRIPTA_ERIPETA", "Eripeta", enigma5.getTesto(), null, loopEnigma);
+            gestisciEripetaInCripta(criptaScreenArr[0], eripeta, eripetaDb);
         });
         GameScreen criptaScreen = engine.getSceneManager().creaScenaBase("Cripta.png", zoneCripta);
         criptaScreenArr[0] = criptaScreen;
@@ -1019,6 +1020,210 @@ public class ProgressioneStoria {
 
         });
         engine.getSceneManager().registraScena("LETTERA", schermata_lettera);
+    }
+
+    private void avviaIntercettazioneEripeta() {
+        GameScreen scale = (GameScreen) engine.getSceneManager().getScena("SCALE");
+        ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
+        
+        JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
+        JsonObject eryndorDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Eripeta");
+        
+        String eryName = engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer();
+        
+        String txt1 = eripetaDb.get("blocco").getAsString();
+        String txt2 = eryndorDb.get("domanda").getAsString();
+        String txt3_1 = eripetaDb.get("presentazione_1").getAsString();
+        String txt3_2 = eripetaDb.get("presentazione_2").getAsString();
+        String txt3_3 = eripetaDb.get("presentazione_3").getAsString();
+        String txt3_4 = eripetaDb.get("presentazione_4").getAsString();
+        String txt4 = eryndorDb.get("risposta").getAsString();
+        String txt5 = eripetaDb.get("invito").getAsString();
+        
+        Runnable step7 = () -> {
+            engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt5, spriteEripeta, () -> {
+                setStatoCity(10);
+                engine.getSceneManager().mostraScena("CRIPTA_ERIPETA");
+                avviaAccusaEripeta();
+            });
+        };
+        Runnable step6 = () -> {
+            engine.mostraDialogoCallback(scale, "SCALE", eryName, txt4, null, step7);
+        };
+        Runnable step5 = () -> {
+            engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt3_4, spriteEripeta, step6);
+        };
+        Runnable step4 = () -> {
+            engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt3_3, spriteEripeta, step5);
+        };
+        Runnable step3_2 = () -> {
+            engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt3_2, spriteEripeta, step4);
+        };
+        Runnable step3_1 = () -> {
+            engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt3_1, spriteEripeta, step3_2);
+        };
+        Runnable step2 = () -> {
+            engine.mostraDialogoCallback(scale, "SCALE", eryName, txt2, null, step3_1);
+        };
+        
+        engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt1, spriteEripeta, step2);
+    }
+
+    private void avviaAccusaEripeta() {
+        GameScreen cripta = (GameScreen) engine.getSceneManager().getScena("CRIPTA_ERIPETA");
+        ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
+        
+        JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
+        JsonObject eryndorDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Eripeta");
+        
+        String eryName = engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer();
+        
+        String txt1_1 = eripetaDb.get("visione_1").getAsString();
+        String txt1_2 = eripetaDb.get("visione_2").getAsString();
+        String txt2_pensiero = eryndorDb.get("pensiero_difesa").getAsString();
+        String txt2_parlato_1 = eryndorDb.get("parlato_difesa_1").getAsString();
+        String txt2_parlato_2 = eryndorDb.get("parlato_difesa_2").getAsString();
+        String txt3 = eripetaDb.get("sfida").getAsString();
+        String txt4 = eryndorDb.get("domanda_sfida").getAsString();
+        String txt5_1 = eripetaDb.get("indizio_1").getAsString();
+        String txt5_2 = eripetaDb.get("indizio_2").getAsString();
+        String txt5_3 = eripetaDb.get("indizio_3").getAsString();
+        
+        Runnable step9 = () -> {
+            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt5_3, spriteEripeta, () -> {
+                setStatoCity(11);
+                engine.getSceneManager().mostraScena("SCALE");
+            });
+        };
+        Runnable step8_2 = () -> {
+            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt5_2, spriteEripeta, step9);
+        };
+        Runnable step8_1 = () -> {
+            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt5_1, spriteEripeta, step8_2);
+        };
+        Runnable step7 = () -> {
+            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", eryName, txt4, null, step8_1);
+        };
+        Runnable step6 = () -> {
+            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt3, spriteEripeta, step7);
+        };
+        Runnable step5_2 = () -> {
+            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", eryName, txt2_parlato_2, null, step6);
+        };
+        Runnable step5_1 = () -> {
+            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", eryName, txt2_parlato_1, null, step5_2);
+        };
+        Runnable step4 = () -> {
+            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", eryName, txt2_pensiero, null, step5_1);
+        };
+        Runnable step3 = () -> {
+            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt1_2, spriteEripeta, step4);
+        };
+        
+        engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt1_1, spriteEripeta, step3);
+    }
+
+    private void gestisciDavidDopoMappa(GameScreen portoScreen, Personaggio david, ImageIcon spriteDavid, JsonObject davidDb) {
+        if (statoCity[0] == 11) {
+            String ritorno1 = davidDb.get("ritorno_1").getAsString();
+            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", ritorno1, spriteDavid, () -> {
+                String input = JOptionPane.showInputDialog(engine.getFrame(), "Cosa rispondi a David?");
+                if (input == null || input.trim().isEmpty()) return;
+                
+                // Usiamo contieneParolaChiave anziché contieneRadiceParola con wildcard
+                // perché "Eripeta" è un nome proprio e non necessita di declinazioni (es. singolare/plurale)
+                if (Parser.contieneParolaChiave(input, "Eripeta")) {
+                    String ritorno2 = davidDb.get("ritorno_2").getAsString();
+                    engine.mostraDialogoCallback(portoScreen, "PORTO", "David", ritorno2, spriteDavid, () -> {
+                        setStatoCity(12);
+                        lanciaEnigma5(portoScreen, david, spriteDavid, davidDb);
+                    });
+                } else {
+                    String incomprensione = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Contadino_Green").get("incomprensione").getAsString();
+                    engine.mostraDialogoCallback(portoScreen, "PORTO", "David", incomprensione, spriteDavid, null);
+                }
+            });
+        } else if (statoCity[0] == 12) {
+            lanciaEnigma5(portoScreen, david, spriteDavid, davidDb);
+        } else if (statoCity[0] == 13) {
+            String storiaEripeta = davidDb.get("storia_eripeta").getAsString();
+            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", storiaEripeta, spriteDavid, null);
+        } else {
+            String salutoGenerico = davidDb.get("saluto_generico").getAsString();
+            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", salutoGenerico, spriteDavid, null);
+        }
+    }
+
+    private void lanciaEnigma5(GameScreen portoScreen, Personaggio david, ImageIcon spriteDavid, JsonObject davidDb) {
+        Oggetto reward = engine.getTxt().getOggettoDaCatalogo(9);
+        EnigmaSceltaMultipla enigma5 = IstanzaEnigma.creaEnigma5(reward);
+        engine.getStatistics().iniziaEnigma(enigma5);
+        
+        Runnable loopEnigma = new Runnable() {
+            @Override
+            public void run() {
+                String[] opzioni = enigma5.getOpzioni().toArray(new String[0]);
+                int scelta = JOptionPane.showOptionDialog(
+                    engine.getFrame(),
+                    enigma5.getTesto(),
+                    "Enigma del Vincolo",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    opzioni,
+                    opzioni[0]
+                );
+                if (scelta < 0) return;
+                if (enigma5.verifica(String.valueOf(scelta))) {
+                    engine.getStatistics().enigmaRisolto(enigma5);
+                    setStatoCity(13);
+                    
+                    String storiaEripeta = davidDb.get("storia_eripeta").getAsString();
+                    engine.mostraDialogoCallback(portoScreen, "PORTO", "David", storiaEripeta, spriteDavid, null);
+                } else {
+                    String erroreMsg = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta").get("errore").getAsString();
+                    engine.mostraDialogoCallback(portoScreen, "PORTO", "David", erroreMsg, spriteDavid, this);
+                }
+            }
+        };
+        loopEnigma.run();
+    }
+
+    private void gestisciEripetaInCripta(GameScreen criptaScreen, Personaggio eripeta, JsonObject eripetaDb) {
+        JsonObject eryndorDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Eripeta");
+        String eryName = engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer();
+        ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
+
+        if (statoCity[0] < 13) {
+            String indizio2 = eripetaDb.get("indizio_2").getAsString();
+            engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", "Eripeta", indizio2, spriteEripeta, null);
+        } else if (statoCity[0] == 13) {
+            String ringr1 = eripetaDb.get("ringraziamento_1").getAsString();
+            String ringr2 = eripetaDb.get("ringraziamento_2").getAsString();
+            String comprensione = eryndorDb.get("comprensione").getAsString();
+            String congedo = eripetaDb.get("congedo").getAsString();
+            
+            Runnable step4 = () -> {
+                engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", "Eripeta", congedo, spriteEripeta, () -> {
+                    Oggetto ampolla = engine.getGiocatore().getInventario().cercaOggetto("Ampolla d'oro");
+                    if (ampolla != null) {
+                        engine.getGiocatore().getInventario().rimuoviOggetto(ampolla);
+                    }
+                    setStatoCity(15);
+                });
+            };
+            Runnable step3 = () -> {
+                engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", eryName, comprensione, null, step4);
+            };
+            Runnable step2 = () -> {
+                engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", "Eripeta", ringr2, spriteEripeta, step3);
+            };
+            
+            engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", "Eripeta", ringr1, spriteEripeta, step2);
+        } else {
+            String congedo = eripetaDb.get("congedo").getAsString();
+            engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", "Eripeta", congedo, spriteEripeta, null);
+        }
     }
 
     private Personaggio registraNPC(String nome, List<String> dialoghi) {

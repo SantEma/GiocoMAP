@@ -115,9 +115,12 @@ public class DialogueScreen extends JLayeredPane {
             area_text.setText(nome+ ":\n"+ battuta);
         else area_text.setText(battuta);
         
-        // Se l'intera battuta contiene una parentesi, assumiamo sia un pensiero (dato che li abbiamo separati tutti) e colorala di azzurro
+        // Se l'intera battuta contiene una parentesi, assumiamo sia un pensiero e colorala di azzurro.
+        // Se contiene l'indizio di eripeta, colorala di giallo.
         if (battuta.contains("(")) {
             area_text.setForeground(new Color(85, 170, 255));
+        } else if (battuta.contains("il mio nome e sarai ricompensato")) {
+            area_text.setForeground(Color.YELLOW);
         } else {
             area_text.setForeground(Color.WHITE); // Colore standard per il dialogo parlato
         }

@@ -1,6 +1,7 @@
 package aeg.giocomap.Model.Giocatore;
 
 import aeg.giocomap.Model.Oggetti.Oggetto;
+import aeg.giocomap.Model.Oggetti.Spada;
 import aeg.giocomap.Model.Stanza;
 import aeg.giocomap.Model.Enigmi.Enigma;
 import java.util.Set;
@@ -32,7 +33,15 @@ public class Giocatore {
 
     // ---- gestione enigmi risolti ----
     public void aggiungiEnigmaRisolto(String idEnigma){
-        if (idEnigma != null) enigmiRisolti.add(idEnigma);
+        if (idEnigma != null) {
+            enigmiRisolti.add(idEnigma);
+            
+            // Se la spada è nell'inventario, reagisce alla risoluzione dell'enigma
+            Oggetto spada = getInventario().cercaOggetto("Spada Sincro");
+            if (spada instanceof Spada spadas) {
+                spadas.reagisciRisoluzioneEnigma();
+            }
+        }
     }
 
     public boolean isEnigmaRisolto(String idEnigma){

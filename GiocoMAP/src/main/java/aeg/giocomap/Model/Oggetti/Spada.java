@@ -34,4 +34,8 @@ package aeg.giocomap.Model.Oggetti;
         public int getCaricaSincro() {
             return caricaSincro;
         }
+
+        public void setCaricaSincro(int caricaSincro) {
+            this.caricaSincro = caricaSincro;
+        }
 }

@@ -95,7 +95,7 @@ public class IstanzaEnigma {
             caricaTesto("Enigma_4_Orologio"),
             caricaAiuti("Enigma_4_Orologio_Fucina"),
             reward,
-            "11"
+            "10"
         );
     }
 

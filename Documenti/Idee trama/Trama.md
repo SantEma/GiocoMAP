@@ -121,7 +121,7 @@ Alla conclusione di ciò e dei dialoghi da implementare con gli NPC il giocatore
 
 ---
 #### Interno del castello
-Salendo le scale il protagonista viene fermato da una **Lamia Nobile**, di razza centaura, mezzo uomo mezzo cavallo.
+Salendo le scale il protagonista viene fermato da una **Lamia Nobile**, di razza centaura, mezzo umano e mezzo cavallo.
 
 **Eripeta**: *"Viaggiatore, sei diretto nel Palazzo della principessa situato in cima a queste scale per la riunione dei mercanti?"*
 **Eryndor**: *"Si e lei chi sarebbe?"*
