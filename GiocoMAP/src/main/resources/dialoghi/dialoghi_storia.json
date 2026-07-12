@@ -11,6 +11,9 @@
             "successo_spada": "Incredibile! L'incudine si è aperta e ho estratto la Spada Sincro!",
             "fallimento_spada": "L'incudine non si muove. La risposta deve essere sbagliata."
         },
+        "Guardiano": {
+            "pensiero_chiave": "(Un momento... questa chiave era nelle tasche di Fox. Quell'infame deve averla rubata a qualche guardia reale che passava prima di me. Per fortuna l'ho recuperata io!)"
+        },
         "MrCooper": {
             "no_soldi": "Non ho soldi con me purtroppo"
         },
@@ -63,10 +66,12 @@
     },
     
     "Dialoghi_NPC": {
-        "Bloccatore": {
+        "Guardiano": {
             "stop_carrozza": "Mi dispiace ma senza carrozza da qui non si passa, non è un sentiero da fare a piedi",
             "stop_palazzo": "Mi dispiace non puoi passare di qui. A breve passerà la scuderia del Re.\nPassa più tardi",
-            "stop_chiave": "Alt! Ordini del Re. Senza il permesso con la chiave nessuno deve oltrepassare, mi spiace."
+            "stop_chiave": "Alt! Ordini del Re. Senza il permesso con la chiave nessuno deve oltrepassare, mi spiace.",
+            "richiesta_chiave": "Viandante, per ordine del Re solo chi possiede la chiave reale può oltrepassare questo cancello. Se ce l'hai mostrala.",
+            "accettazione": "La chiave è autentica. Procedi pure, viaggiatore. Il castello ti attende."
         },
         "David": {
             "incontro_1": "Complimenti! Hai superato il primo ostacolo, ma il tuo cammino sarà ancora più tortuoso, sua maestà cerca solamente gente competente nel suo castello.\nPer ora ti sei meritato la mappa per andare verso il castello.\nPremi 'M' per aprire la mappa",

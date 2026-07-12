@@ -39,6 +39,12 @@ public class ProgressioneStoria {
 
     // Stato logico della fase "Città con il porto"
     private final int[] statoCity = {0};
+
+    // Stato logico del primo accesso al palazzo per mostrare solo una volta la frase
+    private boolean primoAccessoPalazzo = true;
+
+    // Indica se abbiamo già parlato alla guardia del cancello almeno una volta
+    private boolean parlatoConGuardia = false;
     
     // Azione interattiva di Mr. Cooper
     private Runnable mrCooperInteraction;
@@ -55,6 +61,22 @@ public class ProgressioneStoria {
 
     public void setStatoCity(int valore) {
         statoCity[0] = valore;
+    }
+
+    public boolean isPrimoAccessoPalazzo() {
+        return primoAccessoPalazzo;
+    }
+
+    public void setPrimoAccessoPalazzo(boolean valore) {
+        this.primoAccessoPalazzo = valore;
+    }
+
+    public boolean isParlatoConGuardia() {
+        return parlatoConGuardia;
+    }
+
+    public void setParlatoConGuardia(boolean valore) {
+        this.parlatoConGuardia = valore;
     }
 
     public void impostaFrecceLogica() {
@@ -98,7 +120,7 @@ public class ProgressioneStoria {
             }
         });
         
-        String testoBlocco = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Bloccatore").get("stop_carrozza").getAsString();
+        String testoBlocco = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Guardiano").get("stop_carrozza").getAsString();
         Personaggio guardiano = registraNPC("Guardiano", Arrays.asList(testoBlocco));
         
         registraCollegamento("PIAZZA_CENTRALE", "EST", () -> {
@@ -141,14 +163,13 @@ public class ProgressioneStoria {
         
         registraCollegamentoSemplice("KARUNDIS", "OVEST", "BOSCO");
         
-        String testoBloccoKarundis = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Bloccatore").get("stop_palazzo").getAsString();
-        Fantoccio fantoccioNord = registraFantoccio("Fantoccio_Nord_Karundis", Arrays.asList(testoBloccoKarundis));
+        String testoBloccoKarundis = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Guardiano").get("stop_palazzo").getAsString();
+        Personaggio fantoccioNord = registraNPC("Guardiano", Arrays.asList(testoBloccoKarundis));
         
-        final boolean[] primoAccessoPalazzo = {true};
         registraCollegamento("KARUNDIS", "NORD", () -> {
             if (engine.getGiocatore().getInventario().cercaOggetto("Spada Sincro") != null) {
-                if (primoAccessoPalazzo[0]) {
-                    primoAccessoPalazzo[0] = false;
+                if (primoAccessoPalazzo) {
+                    primoAccessoPalazzo = false;
                     String testoPassaggio = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("inizio").get("passaggio_cavaglieri").getAsString();
                     GameScreen karundis = (GameScreen) engine.getSceneManager().getScena("KARUNDIS");
                     engine.mostraDialogoCallback(karundis, "KARUNDIS", "Eryndor", testoPassaggio, null, () -> {
@@ -166,7 +187,18 @@ public class ProgressioneStoria {
         registraCollegamentoSemplice("GROTTA", "SUD", "KARUNDIS");
         
         registraCollegamentoSemplice("INGRESSO_PALAZZO", "SUD", "KARUNDIS");
-        registraCollegamentoSemplice("INGRESSO_PALAZZO", "NORD", "SCALE");
+        
+        String testoBloccoChiave = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Guardiano").get("stop_chiave").getAsString();
+        Fantoccio bloccoChiaveNord = registraFantoccio("Blocco_Chiave_Nord", Arrays.asList(testoBloccoChiave));
+        
+        registraCollegamento("INGRESSO_PALAZZO", "NORD", () -> {
+            if (statoCity[0] >= 9) {
+                engine.getSceneManager().mostraScena("SCALE");
+            } else {
+                GameScreen ingresso = (GameScreen) engine.getSceneManager().getScena("INGRESSO_PALAZZO");
+                engine.mostraDialogoNPC(ingresso, "INGRESSO_PALAZZO", bloccoChiaveNord, null);
+            }
+        });
         
         registraCollegamentoSemplice("SCALE", "SUD", "INGRESSO_PALAZZO");
         registraCollegamentoSemplice("SCALE", "NORD", "PALAZZO_PRINCIPESSA");
@@ -698,6 +730,12 @@ public class ProgressioneStoria {
         Personaggio npcKarundis1 = registraNPC("Abitante 1", Arrays.asList(idleDialogs.get(0)));
         Personaggio npcKarundis2 = registraNPC("Abitante 2", Arrays.asList(idleDialogs.get(1)));
         
+        List<String> hintChiave = JsonLoader.estraiLista(engine.getDbHint(), "Ricerca_Chiave_Castello");
+        if (statoCity[0] >= 8 && statoCity[0] < 9) {
+            npcKarundis1.setDialoghi(Arrays.asList(hintChiave.get(0)));
+            npcKarundis2.setDialoghi(Arrays.asList(hintChiave.get(1)));
+        }
+        
         zoneKarundis.put(new double[]{0.36, 0.57, 0.08, 0.2}, () -> {
             engine.mostraDialogoNPC(karundisScreenArr[0], "KARUNDIS", npcKarundis1, null);
         });
@@ -720,6 +758,8 @@ public class ProgressioneStoria {
                 Runnable step5 = () -> {
                     engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Saggio Clock", clock3, new ImageIcon(getClass().getResource("/sprites/Personaggi/Clock.png")), () -> {
                         setStatoCity(8);
+                        npcKarundis1.setDialoghi(Arrays.asList(hintChiave.get(0)));
+                        npcKarundis2.setDialoghi(Arrays.asList(hintChiave.get(1)));
                     });
                 };
                 Runnable step4 = () -> {
@@ -815,8 +855,56 @@ public class ProgressioneStoria {
         grottaScreenArr[0] = grottaScreen;
         engine.getSceneManager().registraScena("GROTTA", grottaScreen);
         
-        // cancello e scale
-        engine.getSceneManager().registraScena("INGRESSO_PALAZZO", engine.getSceneManager().creaScenaBase("CancelloCastello.png", null));
+        // Cancello del Castello - Guardia Reale
+        Map<double[], Runnable> zoneIngresso = new HashMap<>();
+        final GameScreen[] ingressoScreenArr = new GameScreen[1];
+        JsonObject guardiaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Guardiano");
+        JsonObject eryndorGuardiaDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Guardiano");
+        Personaggio guardiaReale = registraNPC("Guardiano", Arrays.asList(guardiaDb.get("richiesta_chiave").getAsString()));
+        
+        double[] guardiaHitbox = new double[]{0.35, 0.30, 0.28, 0.50};
+        if (statoCity[0] < 9) {
+            zoneIngresso.put(guardiaHitbox, () -> {
+                if (!parlatoConGuardia) {
+                    guardiaReale.setDialoghi(Arrays.asList(guardiaDb.get("richiesta_chiave").getAsString()));
+                    engine.mostraDialogoNPCCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", guardiaReale, null, () -> {
+                        parlatoConGuardia = true;
+                    });
+                } else {
+                    Oggetto chiave = engine.getGiocatore().getInventario().cercaOggetto("Chiave Fox");
+                    if (chiave != null) {
+                        int scelta = JOptionPane.showConfirmDialog(
+                            engine.getFrame(),
+                            "Vuoi mostrare la chiave alla guardia?",
+                            "Consegna Oggetto",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE
+                        );
+                        if (scelta == JOptionPane.YES_OPTION) {
+                            guardiaReale.setDialoghi(Arrays.asList(guardiaDb.get("accettazione").getAsString()));
+                            engine.mostraDialogoNPCCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", guardiaReale, null, () -> {
+                                engine.getGiocatore().getInventario().rimuoviOggetto(chiave);
+                                statoCity[0] = 9;
+                                zoneIngresso.remove(guardiaHitbox);
+                                // Ripristino dialoghi generici NPC Karundis
+                                npcKarundis1.setDialoghi(Arrays.asList(idleDialogs.get(2)));
+                                npcKarundis2.setDialoghi(Arrays.asList(idleDialogs.get(3)));
+                                // Pensiero di Eryndor sulla chiave rubata da Fox
+                                engine.mostraDialogoCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", "Eryndor", eryndorGuardiaDb.get("pensiero_chiave").getAsString(), null, null);
+                            });
+                        }
+                    } else {
+                        guardiaReale.setDialoghi(Arrays.asList(guardiaDb.get("richiesta_chiave").getAsString()));
+                        engine.mostraDialogoNPC(ingressoScreenArr[0], "INGRESSO_PALAZZO", guardiaReale, null);
+                    }
+                }
+            });
+        }
+        
+        GameScreen ingressoScreen = engine.getSceneManager().creaScenaBase("CancelloCastello.png", zoneIngresso);
+        ingressoScreen.abilitaDebugCoordinate();
+        ingressoScreenArr[0] = ingressoScreen;
+        engine.getSceneManager().registraScena("INGRESSO_PALAZZO", ingressoScreen);
         engine.getSceneManager().registraScena("SCALE", engine.getSceneManager().creaScenaBase("ScalePalazzo.png", null));
         
         // Cripta Eripeta

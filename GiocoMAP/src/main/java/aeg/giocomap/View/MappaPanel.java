@@ -156,6 +156,8 @@ public final class MappaPanel extends JPanel implements CoordinateDebuggable {
                             relX = 0.8216; relY = 0.5789;
                             break;
                         case "INGRESSO_PALAZZO":
+                            relX = 0.800; relY=0.4000; //inserire;
+                            break;
                         case "SCALE":
                         case "PALAZZO_PRINCIPESSA":
                         case "CRIPTA_ERIPETA":

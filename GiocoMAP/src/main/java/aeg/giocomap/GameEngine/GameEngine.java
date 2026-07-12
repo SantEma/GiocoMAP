@@ -212,9 +212,31 @@ public class GameEngine {
                 }
             }
 
+            // Ripristino del flag primoAccessoPalazzo
+            if (salvataggio.length > 5 && salvataggio[5] != null) {
+                boolean primoAccesso = Boolean.parseBoolean(salvataggio[5]);
+                progression.setPrimoAccessoPalazzo(primoAccesso);
+            } else {
+                progression.setPrimoAccessoPalazzo(true);
+            }
+            progression.setParlatoConGuardia(false);
+
             progression.costruisciScene();
             sceneManager.mostraScena(stanza);
             return;
+        }
+
+        // NUOVA PARTITA: Reset completo dello stato
+        progression.setStatoCity(0);
+        progression.setPrimoAccessoPalazzo(true);
+        progression.setParlatoConGuardia(false);
+        giocatore.setPossiedeInventario(false);
+        giocatore.setPossiedeMappa(false);
+        giocatore.setEnigmiRisolti(new ArrayList<>());
+        giocatore.getInventario().getListaOggetti().clear();
+        Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
+        if (tessutoIniziale_temp != null) {
+            giocatore.getInventario().aggiungiOggetto(tessutoIniziale_temp);
         }
 
         progression.costruisciScene();
@@ -503,7 +525,7 @@ public class GameEngine {
         String inventario = String.join(",", invIds);
         
         db.salvaPartita(scenaDaSalvare, progression.getStatoCity(),
-                        giocatore.isPossiedeMappa(), enigmi, inventario);
+                        giocatore.isPossiedeMappa(), enigmi, inventario, progression.isPrimoAccessoPalazzo());
         ExitGame();
     }
 

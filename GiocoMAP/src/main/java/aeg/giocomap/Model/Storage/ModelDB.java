@@ -47,6 +47,7 @@ public class ModelDB {
                 eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS possiede_mappa BOOLEAN DEFAULT FALSE");
                 eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS enigmi_risolti VARCHAR(1000)");
                 eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS inventario VARCHAR(1000)");
+                eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS primo_accesso_palazzo BOOLEAN DEFAULT TRUE");
             } catch (SQLException e) {
                 System.err.println("Errore aggiornamento colonne saves: " + e.getMessage());
             }
@@ -170,10 +171,11 @@ public class ModelDB {
     
     // Carica la partita. Restituisce:
     //   [0] = nome scena, [1] = statoCity, [2] = possiedeMappa,
-    //   [3] = enigmi risolti (id separati da virgola), [4] = inventario
+    //   [3] = enigmi risolti (id separati da virgola), [4] = inventario,
+    //   [5] = primoAccessoPalazzo
     public String[] LoadGame() {
         try {
-            String query = "SELECT stanza_attuale, stato_city, possiede_mappa, enigmi_risolti, inventario FROM saves WHERE id = 1";
+            String query = "SELECT stanza_attuale, stato_city, possiede_mappa, enigmi_risolti, inventario, primo_accesso_palazzo FROM saves WHERE id = 1";
             PreparedStatement pstm = conn.prepareStatement(query);
             ResultSet rs = pstm.executeQuery();
 
@@ -185,9 +187,10 @@ public class ModelDB {
                 if (enigmi == null) enigmi = "";
                 String inventario = rs.getString("inventario");
                 if (inventario == null) inventario = "";
+                String primoAccessoPalazzo = String.valueOf(rs.getBoolean("primo_accesso_palazzo"));
                 rs.close();
                 pstm.close();
-                return new String[]{stanza, statoCity, possiedeMappa, enigmi, inventario};
+                return new String[]{stanza, statoCity, possiedeMappa, enigmi, inventario, primoAccessoPalazzo};
             }
 
             rs.close();
@@ -203,22 +206,23 @@ public class ModelDB {
 
     // Salva (o aggiorna) la partita corrente nella riga id=1
     public void salvaPartita(String stanzaAttuale, int statoCity,
-                             boolean possiedeMappa, String enigmiRisolti, String inventario) {
+                             boolean possiedeMappa, String enigmiRisolti, String inventario, boolean primoAccessoPalazzo) {
         try {
             // MERGE = insert o update: funziona sia se il salvataggio esiste già
             // sia se è il primo, senza violare la primary key id=1
-            String query = "MERGE INTO saves (id, stanza_attuale, enigma_attuale, stato_city, possiede_mappa, enigmi_risolti, inventario) "
-                    + "KEY(id) VALUES (1, ?, 0, ?, ?, ?, ?)";
+            String query = "MERGE INTO saves (id, stanza_attuale, enigma_attuale, stato_city, possiede_mappa, enigmi_risolti, inventario, primo_accesso_palazzo) "
+                    + "KEY(id) VALUES (1, ?, 0, ?, ?, ?, ?, ?)";
             PreparedStatement pstm = conn.prepareStatement(query);
             pstm.setString(1, stanzaAttuale);
             pstm.setInt(2, statoCity);
             pstm.setBoolean(3, possiedeMappa);
             pstm.setString(4, enigmiRisolti);
             pstm.setString(5, inventario);
+            pstm.setBoolean(6, primoAccessoPalazzo);
             pstm.executeUpdate();
             pstm.close();
             System.out.println("TEST: Partita salvata → " + stanzaAttuale
-                    + " (statoCity=" + statoCity + ", enigmi=[" + enigmiRisolti + "], inventario=[" + inventario + "])");
+                    + " (statoCity=" + statoCity + ", enigmi=[" + enigmiRisolti + "], inventario=[" + inventario + "], primoAccessoPalazzo=" + primoAccessoPalazzo + ")");
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
