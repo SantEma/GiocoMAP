@@ -2,12 +2,17 @@ package aeg.giocomap.View;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.regex.Pattern;
 
 /**
  *
  * @author Andrea
  */
 public class DialogueScreen extends JLayeredPane {
+    // Regex: intercetta il simbolo di grado (es. negli elenchi "1° Giorno") per
+    // colorare la battuta di azzurro, come avviene per i pensieri tra parentesi
+    private static final Pattern PATTERN_GRADO = Pattern.compile("°");
+
     private final GameScreen scena_stanza;
     private final JPanel panelSpritePG;
     private Image imageSprite;
@@ -115,9 +120,10 @@ public class DialogueScreen extends JLayeredPane {
             area_text.setText(nome+ ":\n"+ battuta);
         else area_text.setText(battuta);
         
-        // Se l'intera battuta contiene una parentesi, assumiamo sia un pensiero e colorala di azzurro.
+        // Se l'intera battuta contiene una parentesi (pensiero) o il simbolo di grado °
+        // (elenchi tipo "1° Giorno"), colorala di azzurro.
         // Se contiene l'indizio di eripeta, colorala di giallo.
-        if (battuta.contains("(")) {
+        if (battuta.contains("(") || PATTERN_GRADO.matcher(battuta).find()) {
             area_text.setForeground(new Color(85, 170, 255));
         } else if (battuta.contains("il mio nome e sarai ricompensato")) {
             area_text.setForeground(Color.YELLOW);

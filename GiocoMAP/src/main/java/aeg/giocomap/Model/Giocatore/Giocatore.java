@@ -35,12 +35,17 @@ public class Giocatore {
     public void aggiungiEnigmaRisolto(String idEnigma){
         if (idEnigma != null) {
             enigmiRisolti.add(idEnigma);
-            
-            // Se la spada è nell'inventario, reagisce alla risoluzione dell'enigma
-            Oggetto spada = getInventario().cercaOggetto("Spada Sincro");
-            if (spada instanceof Spada spadas) {
-                spadas.reagisciRisoluzioneEnigma();
-            }
+        }
+    }
+
+    // Fa avanzare di uno step la sincronia della Spada Sincro, se posseduta.
+    // La ricarica è un evento narrativo esplicito (ottenimento della spada,
+    // consegna dell'ampolla a Eripeta, enigma finale), non un effetto automatico
+    // di ogni enigma risolto.
+    public void ricaricaSpadaSincro(){
+        Oggetto spada = getInventario().cercaOggetto("Spada Sincro");
+        if (spada instanceof Spada spadas) {
+            spadas.reagisciRisoluzioneEnigma();
         }
     }
 
