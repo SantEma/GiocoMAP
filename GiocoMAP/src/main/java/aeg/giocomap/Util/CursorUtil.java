@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 
 
 package aeg.giocomap.Util;
@@ -18,7 +14,10 @@ import java.util.List;
 import java.util.ArrayList;
 
 import aeg.giocomap.View.CoordinateDebuggable;
-
+/**
+ *
+ * @author [da inserire, non mi ricordo chi l'ha fatto]
+ */
 public class CursorUtil {
 
     // per i bottoni semplici

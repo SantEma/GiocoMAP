@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.Model.Enigmi;
 
 import aeg.giocomap.Model.Oggetti.Oggetto;
@@ -10,11 +6,6 @@ import java.util.List;
 /**
  *
  * @author murgo
- */
-/**
- * Enigma con risposta testuale libera.
- * L'input viene normalizzato con Regex prima del confronto
- * per ignorare maiuscole e spazi extra.
  */
 
 public class EnigmaTestuale extends Enigma {

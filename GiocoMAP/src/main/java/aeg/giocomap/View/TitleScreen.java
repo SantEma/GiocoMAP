@@ -1,9 +1,4 @@
 
-/**
- *
- * @author Andrea
- */
-
 package aeg.giocomap.View;
 
 import javax.swing.*;
@@ -14,6 +9,11 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.awt.Graphics;
 import aeg.giocomap.Util.CursorUtil;
+
+/**
+ *
+ * @author Andrea
+ */
 
 public class TitleScreen extends JPanel {
 

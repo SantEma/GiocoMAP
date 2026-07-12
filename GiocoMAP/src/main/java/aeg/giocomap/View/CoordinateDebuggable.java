@@ -6,7 +6,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 /**
- * Interfaccia per abilitare il debug delle coordinate percentuali su uno schermo di gioco.
+ *
+ * @author emanuele
  */
 public interface CoordinateDebuggable {
     

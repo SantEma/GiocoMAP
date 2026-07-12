@@ -27,6 +27,10 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.util.function.Consumer;
 
+/**
+ *
+ * @author emanuele
+ */
 public class ProgressioneStoria {
 
     private final GameEngine engine;
@@ -305,7 +309,7 @@ public class ProgressioneStoria {
                     public void run() {
                         String input = JOptionPane.showInputDialog(engine.getFrame(), "Cosa chiedi al Contadino Green?");
                         if (input == null) return;
-                        if (Parser.contieneParolaChiave(input, "carote")) {
+                        if (Parser.contieneRadiceParola(input, "carot*")) {
                             contadino.setDialoghi(Arrays.asList(contadinoDb.get("richiesta").getAsString()));
                             engine.mostraDialogoNPCCallback(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen, () -> {
                                 Runnable loopConfermaContadino = new Runnable() {
@@ -440,7 +444,7 @@ public class ProgressioneStoria {
                         public void run() {
                             String input = JOptionPane.showInputDialog(engine.getFrame(), "Cosa chiedi al Pescivendolo?");
                             if (input == null) return;
-                            if (Parser.contieneParolaChiave(input, "cena")) {
+                            if (Parser.contieneRadiceParola(input, "cen*")) {
                                 String EryndorText = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Pescivendolo").get("cena_green").getAsString();
                                 engine.mostraDialogoCallback(portoScreenArr[0], "PORTO", engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer(), EryndorText, null, () -> {
                                     pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("richiesta").getAsString()));
@@ -490,7 +494,7 @@ public class ProgressioneStoria {
                         public void run() {
                             String input = JOptionPane.showInputDialog(engine.getFrame(), "Cosa chiedi a Mr.Cooper?");
                             if (input == null) return;
-                            if (Parser.contieneParolaChiave(input, "car rozza")) {
+                            if (Parser.contieneRadiceParola(input, "carroz*")) {
                                 mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("prezzo").getAsString()));
                                 engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, () -> {
                                     String EryndorText = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("MrCooper").get("no_soldi").getAsString();

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package aeg.giocomap.View;
 
 import java.awt.BorderLayout;
@@ -25,7 +21,7 @@ import javax.swing.JLayeredPane;
 import javax.swing.UnsupportedLookAndFeelException;
 /**
  *
- * @author Utente
+ * @author Andrea
  */
 public class MainFrame extends javax.swing.JFrame {
 

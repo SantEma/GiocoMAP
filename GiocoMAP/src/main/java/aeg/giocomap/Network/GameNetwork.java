@@ -11,6 +11,10 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+/**
+ *
+ * @author emanuele
+ */
 public class GameNetwork {
     private GameServer gameServer;
     private GameClient gameClient;

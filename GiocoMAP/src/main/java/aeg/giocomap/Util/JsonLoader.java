@@ -1,10 +1,14 @@
+
 package aeg.giocomap.Util;
 
 import com.google.gson.*;
 import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
-
+/**
+ *
+ * @author [da inserire, non mi ricordo chi l'ha fatto]
+ */
 public class JsonLoader {
     
     public static JsonObject caricaJson(String percorso){

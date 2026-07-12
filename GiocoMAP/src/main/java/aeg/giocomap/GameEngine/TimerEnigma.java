@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.GameEngine;
 
 import javax.swing.Timer;
@@ -10,9 +6,6 @@ import javax.swing.Timer;
  *
  * @author murgo
  *
- * Il tempo trascorso viene calcolato dall'orologio di sistema (non da un
- * contatore incrementato in un thread): cosi getSecondi() e' sempre corretto,
- * anche mentre una finestra modale (JOptionPane) tiene occupato l'EDT.
  */
 public class TimerEnigma {
 
