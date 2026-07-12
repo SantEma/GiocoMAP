@@ -103,7 +103,7 @@ public class IstanzaEnigma {
         List<String> opzioni = caricaOpzioni("Enigma_5_Vincolo");
         return new EnigmaSceltaMultipla(
             "Enigma_5_Vincolo",
-            caricaTesto("Enigma_5_Vincolo"),
+            caricaTesto("Enigma_5_Vincolo") + "\n" + caricaTesto("Enigma_5_Vincolo_domanda"),
             caricaAiuti("Enigma_5_Vincolo"),
             reward,
             opzioni,

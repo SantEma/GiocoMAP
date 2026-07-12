@@ -312,13 +312,46 @@ public class ProgressioneStoria {
         double[] hitboxAb2 = new double[]{0.5349, 0.4436, 0.08, 0.25};
         double[] hitboxAb3 = new double[]{0.6228, 0.6285, 0.08, 0.25};
 
-        if (statoCity[0] < 3) {
-            zonePiazza.put(hitboxAb1, () -> engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab1, null));
-            zonePiazza.put(hitboxAb3, () -> engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab3, null));
-        } else {
-            ab2.setDialoghi(Arrays.asList(davidDb.get("saluto_generico").getAsString()));
-        }
-        zonePiazza.put(hitboxAb2, () -> engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab2, null));
+        zonePiazza.put(hitboxAb1, () -> {
+            if (!engine.getGiocatore().isPossiedeMappa()) {
+                List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
+                Personaggio tempAb1 = new Personaggio("Abitante 1");
+                tempAb1.setDialoghi(Arrays.asList(hintsE1.get(0)));
+                engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb1, null);
+            } else if (statoCity[0] == 11 || statoCity[0] == 12) {
+                List<String> hintsE5 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_5_Vincolo");
+                Personaggio tempAb1 = new Personaggio("Abitante 1");
+                tempAb1.setDialoghi(Arrays.asList(hintsE5.get(0)));
+                engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb1, null);
+            }
+        });
+
+        zonePiazza.put(hitboxAb2, () -> {
+            Personaggio tempAb2 = new Personaggio("Abitante 2");
+            if (!engine.getGiocatore().isPossiedeMappa()) {
+                List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
+                tempAb2.setDialoghi(Arrays.asList(hintsE1.get(1)));
+            } else if (statoCity[0] < 3) {
+                tempAb2.setDialoghi(Arrays.asList(davidDb.get("consiglio_stalla").getAsString()));
+            } else {
+                tempAb2.setDialoghi(Arrays.asList(davidDb.get("saluto_generico").getAsString()));
+            }
+            engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb2, null);
+        });
+
+        zonePiazza.put(hitboxAb3, () -> {
+            if (!engine.getGiocatore().isPossiedeMappa()) {
+                List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
+                Personaggio tempAb3 = new Personaggio("Abitante 3");
+                tempAb3.setDialoghi(Arrays.asList(hintsE1.get(2)));
+                engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb3, null);
+            } else if (statoCity[0] == 11 || statoCity[0] == 12) {
+                List<String> hintsE5 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_5_Vincolo");
+                Personaggio tempAb3 = new Personaggio("Abitante 3");
+                tempAb3.setDialoghi(Arrays.asList(hintsE5.get(1)));
+                engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb3, null);
+            }
+        });
 
         zonePiazza.put(new double[]{0.7187, 0.3525, 0.1289, 0.3745}, () -> {
             if (statoCity[0] == 1) { 
@@ -397,8 +430,8 @@ public class ProgressioneStoria {
         ImageIcon spriteDavid = new ImageIcon(getClass().getResource("/sprites/Personaggi/David.png"));
 
         double[] davidHitbox = new double[]{0.7187, 0.3525, 0.1289, 0.3745};
-        zonePorto.put(davidHitbox, () -> {
-            if (!engine.getGiocatore().isPossiedeMappa()) {
+        if (!engine.getGiocatore().isPossiedeMappa()) {
+            zonePorto.put(davidHitbox, () -> {
                 engine.mostraDialogoNPC(portoScreenArr[0], "PORTO", david, spriteDavid);
                 Enigma enigma1 = IstanzaEnigma.creaEnigma1(null);
                 engine.getStatistics().enigmaRisolto(enigma1);
@@ -411,10 +444,15 @@ public class ProgressioneStoria {
                 zonePiazza.remove(hitboxAb3);
                 
                 ab2.setDialoghi(Arrays.asList(davidDb.get("consiglio_stalla").getAsString()));
-            } else {
+                
+                // Rendi David non cliccabile per il resto della fase iniziale
+                zonePorto.remove(davidHitbox);
+            });
+        } else if (statoCity[0] >= 11) {
+            zonePorto.put(davidHitbox, () -> {
                 gestisciDavidDopoMappa(portoScreenArr[0], david, spriteDavid, davidDb);
-            }
-        });
+            });
+        }
 
         final boolean[] pescivendoloPreambleShown = {false};
         zonePorto.put(new double[]{0.1, 0.5, 0.2, 0.2}, () -> {
@@ -1133,9 +1171,9 @@ public class ProgressioneStoria {
                 // Usiamo contieneParolaChiave anziché contieneRadiceParola con wildcard
                 // perché "Eripeta" è un nome proprio e non necessita di declinazioni (es. singolare/plurale)
                 if (Parser.contieneParolaChiave(input, "Eripeta")) {
+                    setStatoCity(12);
                     String ritorno2 = davidDb.get("ritorno_2").getAsString();
                     engine.mostraDialogoCallback(portoScreen, "PORTO", "David", ritorno2, spriteDavid, () -> {
-                        setStatoCity(12);
                         lanciaEnigma5(portoScreen, david, spriteDavid, davidDb);
                     });
                 } else {
@@ -1159,13 +1197,16 @@ public class ProgressioneStoria {
         EnigmaSceltaMultipla enigma5 = IstanzaEnigma.creaEnigma5(reward);
         engine.getStatistics().iniziaEnigma(enigma5);
         
+        String descrizione = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Enigma_5_Vincolo").getAsString();
+        String domanda = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Enigma_5_Vincolo_domanda").getAsString();
+        
         Runnable loopEnigma = new Runnable() {
             @Override
             public void run() {
                 String[] opzioni = enigma5.getOpzioni().toArray(new String[0]);
                 int scelta = JOptionPane.showOptionDialog(
                     engine.getFrame(),
-                    enigma5.getTesto(),
+                    "Seleziona la risposta all'enigma (oppure chiudi per cercare indizi):",
                     "Enigma del Vincolo",
                     JOptionPane.DEFAULT_OPTION,
                     JOptionPane.QUESTION_MESSAGE,
@@ -1174,6 +1215,7 @@ public class ProgressioneStoria {
                     opzioni[0]
                 );
                 if (scelta < 0) return;
+                
                 if (enigma5.verifica(String.valueOf(scelta))) {
                     engine.getStatistics().enigmaRisolto(enigma5);
                     setStatoCity(13);
@@ -1186,7 +1228,11 @@ public class ProgressioneStoria {
                 }
             }
         };
-        loopEnigma.run();
+        
+        // Visualizza il testo dell'indovinello diviso in due passaggi nel pannello dei dialoghi di gioco
+        engine.mostraDialogoCallback(portoScreen, "PORTO", "David", descrizione, spriteDavid, () -> {
+            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", domanda, spriteDavid, loopEnigma);
+        });
     }
 
     private void gestisciEripetaInCripta(GameScreen criptaScreen, Personaggio eripeta, JsonObject eripetaDb) {
