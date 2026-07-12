@@ -8,6 +8,9 @@ import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.View.LetteraScreen;
 import aeg.giocomap.Util.JsonLoader;
 import aeg.giocomap.Util.Parser;
+import aeg.giocomap.GameEngine.CostantiMappa;
+import aeg.giocomap.GameEngine.CostantiHitbox;
+import aeg.giocomap.GameEngine.StatoStoria;
 
 import aeg.giocomap.Model.Enigmi.Enigma;
 import aeg.giocomap.Model.Enigmi.EnigmaSceltaMultipla;
@@ -43,7 +46,29 @@ public class ProgressioneStoria {
     private final Map<String, Personaggio> registroNPC = new HashMap<>();
 
     // Stato logico della fase "Città con il porto"
-    private final int[] statoCity = {0};
+    private StatoStoria statoAttuale = StatoStoria.INIZIO;
+    private Personaggio ab1;
+    private Personaggio ab2;
+    private Personaggio ab3;
+    private Personaggio mrCooper;
+    private Personaggio contadino;
+    private Personaggio pescivendolo;
+    private Personaggio david;
+    private Personaggio ladroFox;
+    private Personaggio guardiaReale;
+    private Personaggio eripeta;
+    private Personaggio marien;
+
+    private GameScreen palazzoScreen;
+    private GameScreen criptaScreen;
+    private GameScreen ingressoScreen;
+    private GameScreen grottaScreen;
+    private GameScreen karundisScreen;
+    private GameScreen boscoDeepScreen;
+    private GameScreen boscoScreen;
+    private GameScreen stallaScreen;
+    private GameScreen portoScreen;
+    private GameScreen piazzaCentrale;
 
     // Stato logico del primo accesso al palazzo per mostrare solo una volta la frase
     private boolean primoAccessoPalazzo = true;
@@ -77,11 +102,11 @@ public class ProgressioneStoria {
 
     // stato di avanzamento della fase città (per salvataggio/caricamento)
     public int getStatoCity() {
-        return statoCity[0];
+        return statoAttuale.getValore();
     }
 
     public void setStatoCity(int valore) {
-        statoCity[0] = valore;
+        statoAttuale = StatoStoria.daValore(valore);
     }
 
     public boolean isPrimoAccessoPalazzo() {
@@ -104,18 +129,18 @@ public class ProgressioneStoria {
         inizializzaRoot();
         
         engine.getFrame().setFrecceListener(
-            e -> eseguiCollegamento("NORD"),
-            e -> eseguiCollegamento("SUD"),
-            e -> eseguiCollegamento("EST"),
-            e -> eseguiCollegamento("OVEST")
+            e -> eseguiCollegamento(CostantiMappa.NORD),
+            e -> eseguiCollegamento(CostantiMappa.SUD),
+            e -> eseguiCollegamento(CostantiMappa.EST),
+            e -> eseguiCollegamento(CostantiMappa.OVEST)
         );
     }
 
     private void inizializzaRoot() {
-        registraCollegamentoSemplice("PIAZZA_CENTRALE", "NORD", "PORTO");
-        registraCollegamentoSemplice("PORTO", "SUD", "PIAZZA_CENTRALE");
+        registraCollegamentoSemplice(CostantiMappa.PIAZZA_CENTRALE, CostantiMappa.NORD, CostantiMappa.PORTO);
+        registraCollegamentoSemplice(CostantiMappa.PORTO, CostantiMappa.SUD, CostantiMappa.PIAZZA_CENTRALE);
         
-        registraCollegamento("PIAZZA_CENTRALE", "SUD", () -> {
+        registraCollegamento(CostantiMappa.PIAZZA_CENTRALE, CostantiMappa.SUD, () -> {
             int scelta = JOptionPane.showConfirmDialog(engine.getFrame(), 
                 "Stai per uscire dal regno e andare nel regno di Luluna, sei sicuro di proseguire?", 
                 "Attenzione", 
@@ -129,50 +154,50 @@ public class ProgressioneStoria {
         String testoLocali = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("inizio").get("locali_chiusi").getAsString();
         Fantoccio fantoccioOvest = registraFantoccio("Fantoccio_Ovest", Arrays.asList(testoLocali));
         
-        registraCollegamento("PIAZZA_CENTRALE", "OVEST", () -> {
+        registraCollegamento(CostantiMappa.PIAZZA_CENTRALE, CostantiMappa.OVEST, () -> {
             if (engine.getGiocatore().isPossiedeMappa()) { 
-                engine.getSceneManager().mostraScena("STALLA");
-                if ((statoCity[0] == 0 || statoCity[0] == 4) && mrCooperInteraction != null) {
+                engine.getSceneManager().mostraScena(CostantiMappa.STALLA);
+                if ((statoAttuale == StatoStoria.INIZIO || statoAttuale == StatoStoria.CONSEGNATA_CENA) && mrCooperInteraction != null) {
                     mrCooperInteraction.run();
                 }
             } else {
-                GameScreen piazza = (GameScreen) engine.getSceneManager().getScena("PIAZZA_CENTRALE");
-                engine.mostraDialogoNPC(piazza, "PIAZZA_CENTRALE", fantoccioOvest, null);
+                GameScreen piazza = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.PIAZZA_CENTRALE);
+                engine.mostraDialogoNPC(piazza, CostantiMappa.PIAZZA_CENTRALE, fantoccioOvest, null);
             }
         });
         
         String testoBlocco = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Guardiano").get("stop_carrozza").getAsString();
         Personaggio guardiano = registraNPC("Guardiano", Arrays.asList(testoBlocco));
         
-        registraCollegamento("PIAZZA_CENTRALE", "EST", () -> {
-            if (statoCity[0] == 5) {
-                engine.getSceneManager().mostraScena("BOSCO");
+        registraCollegamento(CostantiMappa.PIAZZA_CENTRALE, CostantiMappa.EST, () -> {
+            if (statoAttuale == StatoStoria.CAROTE_CONSEGNATE) {
+                engine.getSceneManager().mostraScena(CostantiMappa.BOSCO);
                 if (foxInteraction != null) foxInteraction.run();
-            } else if (statoCity[0] > 5) {
-                engine.getSceneManager().mostraScena("BOSCO");
+            } else if (statoAttuale.getValore() > 5) {
+                engine.getSceneManager().mostraScena(CostantiMappa.BOSCO);
             } else {
-                GameScreen piazza = (GameScreen) engine.getSceneManager().getScena("PIAZZA_CENTRALE");
-                engine.mostraDialogoNPC(piazza, "PIAZZA_CENTRALE", guardiano, null);
+                GameScreen piazza = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.PIAZZA_CENTRALE);
+                engine.mostraDialogoNPC(piazza, CostantiMappa.PIAZZA_CENTRALE, guardiano, null);
             }
         });
 
-        registraCollegamentoSemplice("STALLA", "NORD", "PIAZZA_CENTRALE");
+        registraCollegamentoSemplice(CostantiMappa.STALLA, CostantiMappa.NORD, CostantiMappa.PIAZZA_CENTRALE);
         
-        registraCollegamentoSemplice("BOSCO", "SUD", "PIAZZA_CENTRALE");
-        registraCollegamento("BOSCO", "NORD", () -> {
-            if (statoCity[0] >= 7) {
-                engine.getSceneManager().mostraScena("KARUNDIS");
+        registraCollegamentoSemplice(CostantiMappa.BOSCO, CostantiMappa.SUD, CostantiMappa.PIAZZA_CENTRALE);
+        registraCollegamento(CostantiMappa.BOSCO, CostantiMappa.NORD, () -> {
+            if (statoAttuale.getValore() >= 7) {
+                engine.getSceneManager().mostraScena(CostantiMappa.KARUNDIS);
             } else {
                 String bloccoFox = engine.getDbWallOfText().getAsJsonObject("Schermo").get("blocco_fox_karundis").getAsString();
-                GameScreen bosco = (GameScreen) engine.getSceneManager().getScena("BOSCO");
-                engine.mostraDialogoCallback(bosco, "BOSCO", "Fox", bloccoFox, new ImageIcon(getClass().getResource("/sprites/Personaggi/Fox.png")), null);
+                GameScreen bosco = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.BOSCO);
+                engine.mostraDialogoCallback(bosco, CostantiMappa.BOSCO, "Fox", bloccoFox, new ImageIcon(getClass().getResource("/sprites/Personaggi/Fox.png")), null);
             }
         });
-        registraCollegamentoSemplice("BOSCO", "OVEST", "BOSCO_DEEP");
+        registraCollegamentoSemplice(CostantiMappa.BOSCO, CostantiMappa.OVEST, CostantiMappa.BOSCO_DEEP);
         
-        registraCollegamento("BOSCO_DEEP", "EST", () -> {
-            engine.getSceneManager().mostraScena("BOSCO");
-            if (statoCity[0] == 6) {
+        registraCollegamento(CostantiMappa.BOSCO_DEEP, CostantiMappa.EST, () -> {
+            engine.getSceneManager().mostraScena(CostantiMappa.BOSCO);
+            if (statoAttuale == StatoStoria.INCONTRO_FOX) {
                 boolean haFiore = engine.getGiocatore().getInventario().cercaOggetto("Fiore Viola") != null ||
                                   engine.getGiocatore().getInventario().cercaOggetto("Fiore Rosso") != null ||
                                   engine.getGiocatore().getInventario().cercaOggetto("Fiore Blu") != null;
@@ -182,12 +207,12 @@ public class ProgressioneStoria {
             }
         });
         
-        registraCollegamentoSemplice("KARUNDIS", "OVEST", "BOSCO");
+        registraCollegamentoSemplice(CostantiMappa.KARUNDIS, CostantiMappa.OVEST, CostantiMappa.BOSCO);
         
         String testoBloccoKarundis = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Guardiano").get("stop_palazzo").getAsString();
         Personaggio fantoccioNord = registraNPC("Guardiano", Arrays.asList(testoBloccoKarundis));
         
-        registraCollegamento("KARUNDIS", "NORD", () -> {
+        registraCollegamento(CostantiMappa.KARUNDIS, CostantiMappa.NORD, () -> {
             if (engine.getGiocatore().getInventario().cercaOggetto("Spada Sincro") != null) {
                 if (primoAccessoPalazzo) {
                     primoAccessoPalazzo = false;
@@ -201,63 +226,63 @@ public class ProgressioneStoria {
                     
                     if (engine.getGiocatore().isEnigmaRisolto("EVENT_BLOCCO_KARUNDIS")) {
                         String testoPassaggio = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("inizio").get("passaggio_cavaglieri").getAsString();
-                        GameScreen karundis = (GameScreen) engine.getSceneManager().getScena("KARUNDIS");
-                        engine.mostraDialogoCallback(karundis, "KARUNDIS", "Eryndor", testoPassaggio, null, () -> {
-                            engine.getSceneManager().mostraScena("INGRESSO_PALAZZO");
+                        GameScreen karundis = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.KARUNDIS);
+                        engine.mostraDialogoCallback(karundis, CostantiMappa.KARUNDIS, "Eryndor", testoPassaggio, null, () -> {
+                            engine.getSceneManager().mostraScena(CostantiMappa.INGRESSO_PALAZZO);
                         });
                     } else {
-                        engine.getSceneManager().mostraScena("INGRESSO_PALAZZO");
+                        engine.getSceneManager().mostraScena(CostantiMappa.INGRESSO_PALAZZO);
                     }
                 } else {
-                    engine.getSceneManager().mostraScena("INGRESSO_PALAZZO");
+                    engine.getSceneManager().mostraScena(CostantiMappa.INGRESSO_PALAZZO);
                 }
             } else {
                 engine.getGiocatore().aggiungiEnigmaRisolto("EVENT_BLOCCO_KARUNDIS");
-                GameScreen karundis = (GameScreen) engine.getSceneManager().getScena("KARUNDIS");
-                engine.mostraDialogoNPC(karundis, "KARUNDIS", fantoccioNord, null);
+                GameScreen karundis = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.KARUNDIS);
+                engine.mostraDialogoNPC(karundis, CostantiMappa.KARUNDIS, fantoccioNord, null);
             }
         });
         
-        registraCollegamentoSemplice("GROTTA", "SUD", "KARUNDIS");
+        registraCollegamentoSemplice(CostantiMappa.GROTTA, CostantiMappa.SUD, CostantiMappa.KARUNDIS);
         
-        registraCollegamentoSemplice("INGRESSO_PALAZZO", "SUD", "KARUNDIS");
+        registraCollegamentoSemplice(CostantiMappa.INGRESSO_PALAZZO, CostantiMappa.SUD, CostantiMappa.KARUNDIS);
         
         String testoBloccoChiave = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Guardiano").get("stop_chiave").getAsString();
         Fantoccio bloccoChiaveNord = registraFantoccio("Blocco_Chiave_Nord", Arrays.asList(testoBloccoChiave));
         
-        registraCollegamento("INGRESSO_PALAZZO", "NORD", () -> {
-            if (statoCity[0] >= 9) {
-                engine.getSceneManager().mostraScena("SCALE");
-                if (statoCity[0] == 9) {
+        registraCollegamento(CostantiMappa.INGRESSO_PALAZZO, CostantiMappa.NORD, () -> {
+            if (statoAttuale.getValore() >= 9) {
+                engine.getSceneManager().mostraScena(CostantiMappa.SCALE);
+                if (statoAttuale == StatoStoria.CHIAVE_CONSEGNATA) {
                     avviaIntercettazioneEripeta();
                 }
             } else {
-                GameScreen ingresso = (GameScreen) engine.getSceneManager().getScena("INGRESSO_PALAZZO");
-                engine.mostraDialogoNPC(ingresso, "INGRESSO_PALAZZO", bloccoChiaveNord, null);
+                GameScreen ingresso = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.INGRESSO_PALAZZO);
+                engine.mostraDialogoNPC(ingresso, CostantiMappa.INGRESSO_PALAZZO, bloccoChiaveNord, null);
             }
         });
         
-        registraCollegamentoSemplice("SCALE", "SUD", "INGRESSO_PALAZZO");
-        registraCollegamento("SCALE", "NORD", () -> {
-            if (statoCity[0] >= 15) {
-                engine.getSceneManager().mostraScena("PALAZZO_PRINCIPESSA");
+        registraCollegamentoSemplice(CostantiMappa.SCALE, CostantiMappa.SUD, CostantiMappa.INGRESSO_PALAZZO);
+        registraCollegamento(CostantiMappa.SCALE, CostantiMappa.NORD, () -> {
+            if (statoAttuale.getValore() >= 15) {
+                engine.getSceneManager().mostraScena(CostantiMappa.PALAZZO_PRINCIPESSA);
             } else {
-                GameScreen scale = (GameScreen) engine.getSceneManager().getScena("SCALE");
+                GameScreen scale = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.SCALE);
                 String rifiuto = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta").get("rifiuto").getAsString();
-                engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", rifiuto, new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png")), null);
+                engine.mostraDialogoCallback(scale, CostantiMappa.SCALE, "Eripeta", rifiuto, new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png")), null);
             }
         });
-        registraCollegamento("SCALE", "OVEST", () -> {
-            engine.getSceneManager().mostraScena("CRIPTA_ERIPETA");
-            if (statoCity[0] < 15) {
-                GameScreen cripta = (GameScreen) engine.getSceneManager().getScena("CRIPTA_ERIPETA");
+        registraCollegamento(CostantiMappa.SCALE, CostantiMappa.OVEST, () -> {
+            engine.getSceneManager().mostraScena(CostantiMappa.CRIPTA_ERIPETA);
+            if (statoAttuale.getValore() < 15) {
+                GameScreen cripta = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.CRIPTA_ERIPETA);
                 JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
                 gestisciEripetaInCripta(cripta, registroNPC.get("Eripeta"), eripetaDb);
             }
         });
         
-        registraCollegamentoSemplice("PALAZZO_PRINCIPESSA", "SUD", "SCALE");
-        registraCollegamentoSemplice("CRIPTA_ERIPETA", "EST", "SCALE");
+        registraCollegamentoSemplice(CostantiMappa.PALAZZO_PRINCIPESSA, CostantiMappa.SUD, CostantiMappa.SCALE);
+        registraCollegamentoSemplice(CostantiMappa.CRIPTA_ERIPETA, CostantiMappa.EST, CostantiMappa.SCALE);
     }
 
     private void registraCollegamento(String daScena, String direzione, Runnable azione) {
@@ -281,38 +306,51 @@ public class ProgressioneStoria {
     }
 
     public void costruisciScene() {
+        inizializzaPersonaggiPrincipali();
+        costruisciPiazzaCentrale();
+        costruisciPorto();
+        costruisciStalla();
+        costruisciBosco();
+        costruisciKarundis();
+        costruisciGrotta();
+        costruisciIngressoPalazzo();
+        costruisciCripta();
+        costruisciPalazzoPrincipessa();
+        costruisciLettere();
+    }
+
+    private void inizializzaPersonaggiPrincipali() {
         
-        List<String> lettera=JsonLoader.estraiLista(engine.getDbWallOfText().getAsJsonObject("Lettera"),"lettera_iniziale");
         
-        String enigmaText = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Enigma_1_Lettera").getAsString();
-        List<String> letteraRetro = Arrays.asList(enigmaText);
+        
+        
+        
 
         List<String> hints = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
 
-        Map<double[], Runnable> zonePiazza = new HashMap<>();
-        final GameScreen[] piazzaCentraleArr = new GameScreen[1];
+        } private void costruisciPiazzaCentrale() { Map<double[], Runnable> zonePiazza = new HashMap<>();
 
-        Personaggio ab1 = registraNPC("Abitante 1", Arrays.asList(hints.get(0)));
-        Personaggio ab2 = registraNPC("Abitante 2", Arrays.asList(hints.get(1)));
-        Personaggio ab3 = registraNPC("Abitante 3", Arrays.asList(hints.get(2)));
+        ab1 = registraNPC("Abitante 1", Arrays.asList(hints.get(0)));
+        ab2 = registraNPC("Abitante 2", Arrays.asList(hints.get(1)));
+        ab3 = registraNPC("Abitante 3", Arrays.asList(hints.get(2)));
 
         JsonObject mrCooperDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("MrCooper");
         JsonObject contadinoDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Contadino_Green");
         JsonObject pescivendoloDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Pescivendolo");
         JsonObject davidDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("David");
 
-        Personaggio mrCooper = registraNPC("Mr. Cooper", Arrays.asList(
+        mrCooper = registraNPC("Mr. Cooper", Arrays.asList(
             mrCooperDb.get("saluto").getAsString() + "\n" +
             mrCooperDb.get("prezzo").getAsString() + "\n" +
             mrCooperDb.get("proposta").getAsString()
         ));
         
-        Personaggio contadino = registraNPC("Contadino Green", Arrays.asList(
+        contadino = registraNPC("Contadino Green", Arrays.asList(
             contadinoDb.get("saluto").getAsString() + "\n" +
             contadinoDb.get("richiesta").getAsString()
         ));
         
-        Personaggio pescivendolo = registraNPC("Pescivendolo", Arrays.asList(
+        pescivendolo = registraNPC("Pescivendolo", Arrays.asList(
             pescivendoloDb.get("saluto").getAsString() + "\n" +
             pescivendoloDb.get("richiesta").getAsString()
         ));
@@ -320,9 +358,9 @@ public class ProgressioneStoria {
         ImageIcon spriteMrCooper = new ImageIcon(getClass().getResource("/sprites/Personaggi/MrCooper.png"));
         ImageIcon spriteGreen = new ImageIcon(getClass().getResource("/sprites/Personaggi/Green.png"));
 
-        double[] hitboxAb1 = new double[]{0.3090, 0.6083, 0.08, 0.25};
-        double[] hitboxAb2 = new double[]{0.5349, 0.4436, 0.08, 0.25};
-        double[] hitboxAb3 = new double[]{0.6228, 0.6285, 0.08, 0.25};
+        double[] hitboxAb1 = CostantiHitbox.PIAZZA_ABITANTE_1;
+        double[] hitboxAb2 = CostantiHitbox.PIAZZA_ABITANTE_2;
+        double[] hitboxAb3 = CostantiHitbox.PIAZZA_ABITANTE_3;
 
         // Interazione abitante 1: hint Enigma 1 (prima della mappa) o hint Enigma 5 (ritorno da Eripeta).
         // Estratta in variabile per poterla ri-registrare quando la storia riabilita gli aiuti.
@@ -331,12 +369,12 @@ public class ProgressioneStoria {
                 List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
                 Personaggio tempAb1 = new Personaggio("Abitante 1");
                 tempAb1.setDialoghi(Arrays.asList(hintsE1.get(0)));
-                engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb1, null);
-            } else if (statoCity[0] == 11 || statoCity[0] == 12) {
+                engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, tempAb1, null);
+            } else if (statoAttuale == StatoStoria.ACCUSA_ERIPETA_SUPERATA || statoAttuale == StatoStoria.DAVID_INTERPELLATO) {
                 List<String> hintsE5 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_5_Vincolo");
                 Personaggio tempAb1 = new Personaggio("Abitante 1");
                 tempAb1.setDialoghi(Arrays.asList(hintsE5.get(0)));
-                engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb1, null);
+                engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, tempAb1, null);
             }
         };
         zonePiazza.put(hitboxAb1, interazioneAb1);
@@ -346,12 +384,12 @@ public class ProgressioneStoria {
             if (!engine.getGiocatore().isPossiedeMappa()) {
                 List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
                 tempAb2.setDialoghi(Arrays.asList(hintsE1.get(1)));
-            } else if (statoCity[0] < 3) {
+            } else if (statoAttuale.getValore() < 3) {
                 tempAb2.setDialoghi(Arrays.asList(davidDb.get("consiglio_stalla").getAsString()));
             } else {
                 tempAb2.setDialoghi(Arrays.asList(davidDb.get("saluto_generico").getAsString()));
             }
-            engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb2, null);
+            engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, tempAb2, null);
         });
 
         // Interazione abitante 3: hint Enigma 1 (prima della mappa) o hint Enigma 5 (ritorno da Eripeta).
@@ -360,18 +398,18 @@ public class ProgressioneStoria {
                 List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
                 Personaggio tempAb3 = new Personaggio("Abitante 3");
                 tempAb3.setDialoghi(Arrays.asList(hintsE1.get(2)));
-                engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb3, null);
-            } else if (statoCity[0] == 11 || statoCity[0] == 12) {
+                engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, tempAb3, null);
+            } else if (statoAttuale == StatoStoria.ACCUSA_ERIPETA_SUPERATA || statoAttuale == StatoStoria.DAVID_INTERPELLATO) {
                 List<String> hintsE5 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_5_Vincolo");
                 Personaggio tempAb3 = new Personaggio("Abitante 3");
                 tempAb3.setDialoghi(Arrays.asList(hintsE5.get(1)));
-                engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", tempAb3, null);
+                engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, tempAb3, null);
             }
         };
         zonePiazza.put(hitboxAb3, interazioneAb3);
 
-        zonePiazza.put(new double[]{0.7187, 0.3525, 0.1289, 0.3745}, () -> {
-            if (statoCity[0] == 1) { 
+        zonePiazza.put(CostantiHitbox.PIAZZA_CONTADINO, () -> {
+            if (statoAttuale == StatoStoria.MISSIONE_COOPER_ACCETTATA) { 
                 contadino.setDialoghi(Arrays.asList(contadinoDb.get("saluto").getAsString()));
                 Runnable loopContadino = new Runnable() {
                     @Override
@@ -380,7 +418,7 @@ public class ProgressioneStoria {
                         if (input == null) return;
                         if (Parser.contieneRadiceParola(input, "carot*")) {
                             contadino.setDialoghi(Arrays.asList(contadinoDb.get("richiesta").getAsString()));
-                            engine.mostraDialogoNPCCallback(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen, () -> {
+                            engine.mostraDialogoNPCCallback(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, () -> {
                                 Runnable loopConfermaContadino = new Runnable() {
                                     int countRifiuti = 0;
                                     JsonArray rifiutiJson = engine.getDbHint().getAsJsonObject("Loop_Rifiuti_Quest").getAsJsonArray("Contadino_Green");
@@ -390,13 +428,13 @@ public class ProgressioneStoria {
                                         int scelta = JOptionPane.showConfirmDialog(engine.getFrame(), "Accetti la proposta del Contadino?", "Scelta", JOptionPane.YES_NO_OPTION);
                                         if (scelta == JOptionPane.YES_OPTION) {
                                             contadino.setDialoghi(Arrays.asList(contadinoDb.get("ringraziamento").getAsString()));
-                                            engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen);
-                                            statoCity[0] = 2; 
+                                            engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen);
+                                            setStatoCity(2); 
                                         } else {
                                             String frase = rifiutiJson.get(Math.min(countRifiuti, rifiutiJson.size() - 1)).getAsString();
                                             countRifiuti++;
                                             contadino.setDialoghi(Arrays.asList(frase));
-                                            engine.mostraDialogoNPCCallback(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen, this);
+                                            engine.mostraDialogoNPCCallback(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, this);
                                         }
                                     }
                                 };
@@ -404,25 +442,25 @@ public class ProgressioneStoria {
                             });
                         } else {
                             contadino.setDialoghi(Arrays.asList(contadinoDb.get("incomprensione").getAsString()));
-                            engine.mostraDialogoNPCCallback(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen, this);
+                            engine.mostraDialogoNPCCallback(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, this);
                         }
                     }
                 };
-                engine.mostraDialogoNPCCallback(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen, loopContadino);
-            } else if (statoCity[0] == 3) { 
+                engine.mostraDialogoNPCCallback(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, loopContadino);
+            } else if (statoAttuale == StatoStoria.ENIGMA_PESCIVENDOLO_RISOLTO) { 
                 contadino.setDialoghi(Arrays.asList(contadinoDb.get("consegna").getAsString()));
-                engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen);
+                engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen);
                 Oggetto cena = engine.getGiocatore().getInventario().cercaOggetto("Cena di pesce");
                 if (cena != null) engine.getGiocatore().getInventario().rimuoviOggetto(cena);
                 engine.getGiocatore().getInventario().aggiungiOggetto(engine.getTxt().getOggettoDaCatalogo(3));
-                statoCity[0] = 4;
+                setStatoCity(4);
                 contadino.setDialoghi(Arrays.asList(contadinoDb.get("augurio").getAsString()));
-            } else if (statoCity[0] >= 4) {
+            } else if (statoAttuale.getValore() >= 4) {
                 contadino.setDialoghi(Arrays.asList(contadinoDb.get("fretta").getAsString()));
-                engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen);
+                engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen);
             } else {
                 contadino.setDialoghi(Arrays.asList(contadinoDb.get("fretta").getAsString()));
-                engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", contadino, spriteGreen);
+                engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen);
             }
         });
 
@@ -435,18 +473,17 @@ public class ProgressioneStoria {
 
         GameScreen piazzaCentrale = new GameScreen(sfondoPiazza, zonePiazza);
         
-        piazzaCentraleArr[0] = piazzaCentrale;
-        engine.getSceneManager().registraScena("PIAZZA_CENTRALE", piazzaCentrale);
+        this.piazzaCentrale = piazzaCentrale;
+        engine.getSceneManager().registraScena(CostantiMappa.PIAZZA_CENTRALE, piazzaCentrale);
         
 
-        Map<double[], Runnable> zonePorto = new HashMap<>();
-        final GameScreen[] portoScreenArr = new GameScreen[1];
+        } private void costruisciPorto() { Map<double[], Runnable> zonePorto = new HashMap<>();
 
         String dialogoDavid = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("David").get("incontro_1").getAsString();
-        Personaggio david = registraNPC("David", Arrays.asList(dialogoDavid));
+        david = registraNPC("David", Arrays.asList(dialogoDavid));
         ImageIcon spriteDavid = new ImageIcon(getClass().getResource("/sprites/Personaggi/David.png"));
 
-        double[] davidHitbox = new double[]{0.7187, 0.3525, 0.1289, 0.3745};
+        double[] davidHitbox = CostantiHitbox.PIAZZA_CONTADINO;
 
         // Ripristina la hitbox di David con il comportamento "dopo la mappa".
         // Viene invocata sia al caricamento di un salvataggio avanzato, sia live
@@ -458,12 +495,12 @@ public class ProgressioneStoria {
 
         riattivaDavidDopoMappa = () -> {
             zonePorto.put(davidHitbox, () ->
-                    gestisciDavidDopoMappa(portoScreenArr[0], david, spriteDavid, davidDb));
+                    gestisciDavidDopoMappa(this.portoScreen, david, spriteDavid, davidDb));
             // Gli aiuti degli abitanti 1 e 3 si abilitano solo dopo che David annuncia
             // l'Enigma del Vincolo (statoCity 12). A statoCity 11 (appena tornato da
             // Eripeta) l'enigma non è ancora stato dettato, quindi niente aiuti.
             // Qui copro il caso del salvataggio ricaricato con enigma già in corso.
-            if (statoCity[0] == 12) {
+            if (statoAttuale == StatoStoria.DAVID_INTERPELLATO) {
                 attivaAiutiEnigma5.run();
             }
         };
@@ -475,7 +512,7 @@ public class ProgressioneStoria {
 
         if (!engine.getGiocatore().isPossiedeMappa()) {
             zonePorto.put(davidHitbox, () -> {
-                engine.mostraDialogoNPC(portoScreenArr[0], "PORTO", david, spriteDavid);
+                engine.mostraDialogoNPC(this.portoScreen, CostantiMappa.PORTO, david, spriteDavid);
                 Enigma enigma1 = IstanzaEnigma.creaEnigma1(null);
                 engine.getStatistics().enigmaRisolto(enigma1);
                 engine.getGiocatore().setPossiedeMappa(true);
@@ -491,26 +528,26 @@ public class ProgressioneStoria {
                 // Rendi David non cliccabile per il resto della fase iniziale
                 zonePorto.remove(davidHitbox);
             });
-        } else if (statoCity[0] >= 11) {
+        } else if (statoAttuale.getValore() >= 11) {
             // Salvataggio ricaricato in fase avanzata: la hitbox va ripristinata subito
             riattivaDavidDopoMappa.run();
         }
 
         final boolean[] pescivendoloPreambleShown = {false};
-        zonePorto.put(new double[]{0.1, 0.5, 0.2, 0.2}, () -> {
-            if (statoCity[0] == 2) {
+        zonePorto.put(CostantiHitbox.PORTO_PESCIVENDOLO, () -> {
+            if (statoAttuale == StatoStoria.PARLATO_CONTADINO) {
                 Runnable startEnigma = () -> {
                     Enigma enigma2 = IstanzaEnigma.creaEnigma2(engine.getTxt().getOggettoDaCatalogo(4));
                     engine.getStatistics().iniziaEnigma(enigma2);
                     // Quando ricominciano a parlare (per gli aiuti dell'Enigma 2),
                     // assegno i nuovi testi presi dal JSON e riaggiungo le hitbox così tornano cliccabili (icona mano)
                     ab1.setDialoghi(Arrays.asList(enigma2.getAiuti().get(0)));
-                    zonePiazza.put(hitboxAb1, () -> engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab1, null));
+                    zonePiazza.put(hitboxAb1, () -> engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, ab1, null));
                     
                     ab2.setDialoghi(Arrays.asList(enigma2.getAiuti().get(1)));
                     
                     ab3.setDialoghi(Arrays.asList(enigma2.getAiuti().get(2)));
-                    zonePiazza.put(hitboxAb3, () -> engine.mostraDialogoNPC(piazzaCentraleArr[0], "PIAZZA_CENTRALE", ab3, null));
+                    zonePiazza.put(hitboxAb3, () -> engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, ab3, null));
                     Runnable loopEnigma = new Runnable() {
                         @Override
                         public void run() {
@@ -519,18 +556,18 @@ public class ProgressioneStoria {
                             if (enigma2.verifica(risposta)) {
                                 engine.getStatistics().enigmaRisolto(enigma2);
                                 pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("risolto").getAsString()));
-                                engine.mostraDialogoNPC(portoScreenArr[0], "PORTO", pescivendolo, null);
-                                statoCity[0] = 3;
+                                engine.mostraDialogoNPC(this.portoScreen, CostantiMappa.PORTO, pescivendolo, null);
+                                setStatoCity(3);
                                 zonePiazza.remove(hitboxAb1);
                                 zonePiazza.remove(hitboxAb3);
                                 ab2.setDialoghi(Arrays.asList(davidDb.get("saluto_generico").getAsString()));
                             } else {
                                 pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("risposta_errata").getAsString()));
-                                engine.mostraDialogoNPCCallback(portoScreenArr[0], "PORTO", pescivendolo, null, this);
+                                engine.mostraDialogoNPCCallback(this.portoScreen, CostantiMappa.PORTO, pescivendolo, null, this);
                             }
                         }
                     };
-                    engine.mostraDialogoCallback(portoScreenArr[0], "PORTO", "Fantoccio", enigma2.getTesto(), null, loopEnigma);
+                    engine.mostraDialogoCallback(this.portoScreen, CostantiMappa.PORTO, "Fantoccio", enigma2.getTesto(), null, loopEnigma);
                 };
 
                 if (pescivendoloPreambleShown[0]) {
@@ -544,27 +581,27 @@ public class ProgressioneStoria {
                             if (input == null) return;
                             if (Parser.contieneRadiceParola(input, "cen*")) {
                                 String EryndorText = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Pescivendolo").get("cena_green").getAsString();
-                                engine.mostraDialogoCallback(portoScreenArr[0], "PORTO", engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer(), EryndorText, null, () -> {
+                                engine.mostraDialogoCallback(this.portoScreen, CostantiMappa.PORTO, engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer(), EryndorText, null, () -> {
                                     pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("richiesta").getAsString()));
-                                    engine.mostraDialogoNPCCallback(portoScreenArr[0], "PORTO", pescivendolo, null, () -> {
+                                    engine.mostraDialogoNPCCallback(this.portoScreen, CostantiMappa.PORTO, pescivendolo, null, () -> {
                                         pescivendoloPreambleShown[0] = true;
                                         startEnigma.run();
                                     });
                                 });
                             } else {
                                 pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("incomprensione").getAsString()));
-                                engine.mostraDialogoNPCCallback(portoScreenArr[0], "PORTO", pescivendolo, null, this);
+                                engine.mostraDialogoNPCCallback(this.portoScreen, CostantiMappa.PORTO, pescivendolo, null, this);
                             }
                         }
                     };
-                    engine.mostraDialogoNPCCallback(portoScreenArr[0], "PORTO", pescivendolo, null, loopPescivendolo);
+                    engine.mostraDialogoNPCCallback(this.portoScreen, CostantiMappa.PORTO, pescivendolo, null, loopPescivendolo);
                 }
-            } else if (statoCity[0] >= 3) {
+            } else if (statoAttuale.getValore() >= 3) {
                 pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("ringraziamento_finale").getAsString()));
-                engine.mostraDialogoNPC(portoScreenArr[0], "PORTO", pescivendolo, null);
+                engine.mostraDialogoNPC(this.portoScreen, CostantiMappa.PORTO, pescivendolo, null);
             } else {
                 pescivendolo.setDialoghi(Arrays.asList(pescivendoloDb.get("chiuso").getAsString()));
-                engine.mostraDialogoNPC(portoScreenArr[0], "PORTO", pescivendolo, null);
+                engine.mostraDialogoNPC(this.portoScreen, CostantiMappa.PORTO, pescivendolo, null);
             }
         });
 
@@ -575,21 +612,20 @@ public class ProgressioneStoria {
             System.err.println("Errore caricamento sfondo porto: " + e.getMessage());
         }
         GameScreen portoScreen = new GameScreen(sfondoPorto, zonePorto);
-        portoScreen.abilitaDebugCoordinate();
-        portoScreenArr[0] = portoScreen;
+        portoScreen.abilitaDebugCoordinate(); // disabilitato per test
+        this.portoScreen = portoScreen;
         
         
-        engine.getSceneManager().registraScena("PORTO", portoScreen);
+        engine.getSceneManager().registraScena(CostantiMappa.PORTO, portoScreen);
         
-        Map<double[], Runnable> zoneStalla = new HashMap<>();
-        final GameScreen[] stallaScreenArr = new GameScreen[1];
+        } private void costruisciStalla() { Map<double[], Runnable> zoneStalla = new HashMap<>();
         mrCooperInteraction = () -> {
-            if (statoCity[0] >= 5) {
+            if (statoAttuale.getValore() >= 5) {
                 mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("vai_al_bosco").getAsString()));
-                engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
+                engine.mostraDialogoNPC(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper);
             } else {
-                switch (statoCity[0]) {
-                    case 0:
+                switch (statoAttuale) {
+                    case INIZIO:
                         mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("saluto").getAsString()));
                         Runnable loopCooper = new Runnable() {
                             @Override
@@ -598,11 +634,11 @@ public class ProgressioneStoria {
                                 if (input == null) return;
                                 if (Parser.contieneRadiceParola(input, "carroz*")) {
                                     mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("prezzo").getAsString()));
-                                    engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, () -> {
+                                    engine.mostraDialogoNPCCallback(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, () -> {
                                         String EryndorText = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("MrCooper").get("no_soldi").getAsString();
-                                        engine.mostraDialogoCallback(stallaScreenArr[0], "STALLA", engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer(), EryndorText, null, () -> {
+                                        engine.mostraDialogoCallback(this.stallaScreen, CostantiMappa.STALLA, engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer(), EryndorText, null, () -> {
                                             mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("proposta").getAsString()));
-                                            engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, () -> {
+                                            engine.mostraDialogoNPCCallback(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, () -> {
                                                 Runnable loopConfermaCooper = new Runnable() {
                                                     int countRifiuti = 0;
                                                     JsonArray rifiutiJson = engine.getDbHint().getAsJsonObject("Loop_Rifiuti_Quest").getAsJsonArray("MrCooper");
@@ -612,13 +648,13 @@ public class ProgressioneStoria {
                                                         int scelta = JOptionPane.showConfirmDialog(engine.getFrame(), "Accetti la proposta di Mr.Cooper?", "Scelta", JOptionPane.YES_NO_OPTION);
                                                         if (scelta == JOptionPane.YES_OPTION) {
                                                             mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("missione").getAsString()));
-                                                            engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
-                                                            statoCity[0] = 1;
+                                                            engine.mostraDialogoNPC(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper);
+                                                            setStatoCity(1);
                                                         } else {
                                                             String frase = rifiutiJson.get(Math.min(countRifiuti, rifiutiJson.size() - 1)).getAsString();
                                                             countRifiuti++;
                                                             mrCooper.setDialoghi(Arrays.asList(frase));
-                                                            engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, this);
+                                                            engine.mostraDialogoNPCCallback(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, this);
                                                         }
                                                     }
                                                 };
@@ -628,60 +664,58 @@ public class ProgressioneStoria {
                                     });
                                 } else {
                                     mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("non_capisco").getAsString()));
-                                    engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, this);
+                                    engine.mostraDialogoNPCCallback(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, this);
                                 }
                             }
-                        };  engine.mostraDialogoNPCCallback(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper, loopCooper);
+                        };  engine.mostraDialogoNPCCallback(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper, loopCooper);
                         break;
-                    case 4:
+                    case CONSEGNATA_CENA:
                         mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("ringraziamento").getAsString()));
-                        engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
+                        engine.mostraDialogoNPC(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper);
                         Oggetto carote = engine.getGiocatore().getInventario().cercaOggetto("Carote");
                         if (carote != null) engine.getGiocatore().getInventario().rimuoviOggetto(carote);
-                        statoCity[0] = 5;
+                        setStatoCity(5);
                         break;
                     default:
                         mrCooper.setDialoghi(Arrays.asList(mrCooperDb.get("hai_carote").getAsString()));
-                        engine.mostraDialogoNPC(stallaScreenArr[0], "STALLA", mrCooper, spriteMrCooper);
+                        engine.mostraDialogoNPC(this.stallaScreen, CostantiMappa.STALLA, mrCooper, spriteMrCooper);
                         break;
                 }
             }
         };
-        zoneStalla.put(new double[]{0.3, 0.3, 0.4, 0.5}, mrCooperInteraction);
+        zoneStalla.put(CostantiHitbox.STALLA_MR_COOPER, mrCooperInteraction);
         GameScreen stallaScreen = engine.getSceneManager().creaScenaBase("Stalla.png", zoneStalla);
-        stallaScreenArr[0] = stallaScreen;
-        engine.getSceneManager().registraScena("STALLA", stallaScreen);
-        Map<double[], Runnable> zoneBosco = new HashMap<>();
-        final GameScreen[] boscoScreenArr = new GameScreen[1];
+        this.stallaScreen = stallaScreen;
+        engine.getSceneManager().registraScena(CostantiMappa.STALLA, stallaScreen);
+        } private void costruisciBosco() { Map<double[], Runnable> zoneBosco = new HashMap<>();
         JsonObject foxDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Fox");
         JsonObject eryndorFoxDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Fox");
-        Personaggio ladroFox = registraNPC("Fox", new ArrayList<>());
+        ladroFox = registraNPC("Fox", new ArrayList<>());
         ImageIcon spriteFox = new ImageIcon(getClass().getResource("/sprites/Personaggi/Fox.png"));
 
-        Map<double[], Runnable> zoneBoscoDeep = new HashMap<>();
-        final GameScreen[] boscoDeepScreenArr = new GameScreen[1];        // Array per bypassare final e permettere di capire se il cartello è stato letto (anche per il raccogliFiore)
+        Map<double[], Runnable> zoneBoscoDeep = new HashMap<>();        // Array per bypassare final e permettere di capire se il cartello è stato letto (anche per il raccogliFiore)
         final boolean[] cartelloLetto = {false};
 
-        double[] hitboxFioreBlu = new double[]{0.28, 0.43, 0.06, 0.06}; // ID 6
-        double[] hitboxFioreRosso = new double[]{0.84, 0.48, 0.06, 0.09}; // ID 5
-        double[] hitboxFioreViola = new double[]{0.61, 0.44, 0.06, 0.06}; // ID 7
+        double[] hitboxFioreBlu = CostantiHitbox.BOSCODEEP_FIORE_BLU; // ID 6
+        double[] hitboxFioreRosso = CostantiHitbox.BOSCODEEP_FIORE_ROSSO; // ID 5
+        double[] hitboxFioreViola = CostantiHitbox.BOSCODEEP_FIORE_VIOLA; // ID 7
 
         java.util.function.Consumer<String> verificaFiore = (scelta) -> {
-            if (statoCity[0] != 6) return;
+            if (statoAttuale.getValore() != 6) return;
             EnigmaSceltaMultipla enigma3 = IstanzaEnigma.creaEnigma3(engine.getTxt().getOggettoDaCatalogo(1));
             if (enigma3.verifica(scelta)) {
-                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("consegna_corretta").getAsString(), null, () -> {
+                engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("consegna_corretta").getAsString(), null, () -> {
                     ladroFox.setDialoghi(Arrays.asList(foxDb.get("reazione_pianta_corretta_1").getAsString()));
-                    engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
+                    engine.mostraDialogoNPCCallback(this.boscoScreen, CostantiMappa.BOSCO, ladroFox, spriteFox, () -> {
                         ladroFox.setDialoghi(Arrays.asList(foxDb.get("reazione_pianta_corretta_2").getAsString()));
-                        engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
+                        engine.mostraDialogoNPCCallback(this.boscoScreen, CostantiMappa.BOSCO, ladroFox, spriteFox, () -> {
                             ladroFox.setDialoghi(Arrays.asList(foxDb.get("addormentato").getAsString()));
-                            engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
-                                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("pensiero_vittoria_1").getAsString(), null, () -> {
-                                    engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("pensiero_vittoria_2").getAsString(), null, () -> {
+                            engine.mostraDialogoNPCCallback(this.boscoScreen, CostantiMappa.BOSCO, ladroFox, spriteFox, () -> {
+                                engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("pensiero_vittoria_1").getAsString(), null, () -> {
+                                    engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("pensiero_vittoria_2").getAsString(), null, () -> {
                                         engine.getStatistics().enigmaRisolto(enigma3);
                                         engine.getGiocatore().getInventario().aggiungiOggetto(engine.getTxt().getOggettoDaCatalogo(8)); // Chiave Fox
-                                        statoCity[0] = 7;
+                                        setStatoCity(7);
                                         // Rimuovi il fiore viola dall'inventario
                                         Oggetto fv = engine.getGiocatore().getInventario().cercaOggetto("Fiore Viola");
                                         if (fv != null) engine.getGiocatore().getInventario().rimuoviOggetto(fv);
@@ -694,8 +728,8 @@ public class ProgressioneStoria {
                                         String recTessuto = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Recuper_tessuto").getAsString();
                                         String narrBorsa = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Narrazione_Fox_Borsa").getAsString();
 
-                                        engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Fantoccio", recTessuto, null, () -> {
-                                            engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Fantoccio", narrBorsa, null, null);
+                                        engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Fantoccio", recTessuto, null, () -> {
+                                            engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Fantoccio", narrBorsa, null, null);
                                         });
                                     });
                                 });
@@ -704,12 +738,12 @@ public class ProgressioneStoria {
                     });
                 });
             } else {
-                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("consegna_errata").getAsString(), null, () -> {
+                engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("consegna_errata").getAsString(), null, () -> {
                     ladroFox.setDialoghi(Arrays.asList(foxDb.get("reazione_pianta_errata").getAsString()));
-                    engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
-                        engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("pensiero_consegna_errata_1").getAsString(), null, () -> {
-                            engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("pensiero_consegna_errata_2").getAsString(), null, () -> {
-                                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("correzione_consegna").getAsString(), null, () -> {
+                    engine.mostraDialogoNPCCallback(this.boscoScreen, CostantiMappa.BOSCO, ladroFox, spriteFox, () -> {
+                        engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("pensiero_consegna_errata_1").getAsString(), null, () -> {
+                            engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("pensiero_consegna_errata_2").getAsString(), null, () -> {
+                                engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("correzione_consegna").getAsString(), null, () -> {
                                     // Rimuovi il fiore sbagliato dall'inventario
                                     Oggetto f = engine.getGiocatore().getInventario().cercaOggetto(scelta.equals("0") ? "Fiore Rosso" : "Fiore Blu");
                                     if (f != null) engine.getGiocatore().getInventario().rimuoviOggetto(f);
@@ -722,22 +756,22 @@ public class ProgressioneStoria {
         };
 
         foxInteraction = () -> {
-            if (statoCity[0] < 6) {
+            if (statoAttuale.getValore() < 6) {
                 ladroFox.setDialoghi(Arrays.asList(foxDb.get("incontro").getAsString()));
-                engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
-                    engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("reazione_furto").getAsString(), null, () -> {
+                engine.mostraDialogoNPCCallback(this.boscoScreen, CostantiMappa.BOSCO, ladroFox, spriteFox, () -> {
+                    engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("reazione_furto").getAsString(), null, () -> {
                         ladroFox.setDialoghi(Arrays.asList(foxDb.get("ricatto").getAsString()));
-                        engine.mostraDialogoNPCCallback(boscoScreenArr[0], "BOSCO", ladroFox, spriteFox, () -> {
-                            engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("reazione_inseguimento").getAsString(), null, () -> {
-                                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Fox", foxDb.get("parlato_richiesta_pianta").getAsString(), spriteFox, () -> {
-                                    engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Fox", foxDb.get("pensiero_richiesta_pianta").getAsString(), spriteFox, () -> {
-                                        engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("pensiero_accordo").getAsString(), null, () -> {
-                                            engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Eryndor", eryndorFoxDb.get("parlato_accordo").getAsString(), null, () -> {
+                        engine.mostraDialogoNPCCallback(this.boscoScreen, CostantiMappa.BOSCO, ladroFox, spriteFox, () -> {
+                            engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("reazione_inseguimento").getAsString(), null, () -> {
+                                engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Fox", foxDb.get("parlato_richiesta_pianta").getAsString(), spriteFox, () -> {
+                                    engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Fox", foxDb.get("pensiero_richiesta_pianta").getAsString(), spriteFox, () -> {
+                                        engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("pensiero_accordo").getAsString(), null, () -> {
+                                            engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("parlato_accordo").getAsString(), null, () -> {
                                                 Oggetto tessuto = engine.getGiocatore().getInventario().cercaOggetto("Tessuto");
                                                 if (tessuto != null) {
                                                     engine.getGiocatore().getInventario().rimuoviOggetto(tessuto);
                                                 }
-                                                statoCity[0] = 6;
+                                                setStatoCity(6);
                                                 ladroFox.setDialoghi(new ArrayList<>());
                                             });
                                         });
@@ -747,7 +781,7 @@ public class ProgressioneStoria {
                         });
                     });
                 });
-            } else if (statoCity[0] == 6) {
+            } else if (statoAttuale == StatoStoria.INCONTRO_FOX) {
                 if (engine.getGiocatore().getInventario().cercaOggetto("Fiore Viola") != null) {
                     verificaFiore.accept("2");
                 } else if (engine.getGiocatore().getInventario().cercaOggetto("Fiore Rosso") != null) {
@@ -755,16 +789,16 @@ public class ProgressioneStoria {
                 } else if (engine.getGiocatore().getInventario().cercaOggetto("Fiore Blu") != null) {
                     verificaFiore.accept("1");
                 } else {
-                    engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Fox", foxDb.get("sbrigati").getAsString(), spriteFox, null);
+                    engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Fox", foxDb.get("sbrigati").getAsString(), spriteFox, null);
                 }
             } else {
-                engine.mostraDialogoCallback(boscoScreenArr[0], "BOSCO", "Fox", foxDb.get("addormentato").getAsString(), spriteFox, null);
+                engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Fox", foxDb.get("addormentato").getAsString(), spriteFox, null);
             }
         };
 
 
         Consumer<Integer> raccogliFiore = (idFiore) -> {
-            if (statoCity[0] != 6) return;
+            if (statoAttuale.getValore() != 6) return;
             
             Oggetto fR = engine.getGiocatore().getInventario().cercaOggetto("Fiore Rosso");
             Oggetto fB = engine.getGiocatore().getInventario().cercaOggetto("Fiore Blu");
@@ -779,7 +813,7 @@ public class ProgressioneStoria {
             Oggetto nuovoFiore = engine.getTxt().getOggettoDaCatalogo(idFiore);
             if (engine.getGiocatore().getInventario().cercaOggetto(nuovoFiore.getNomeOggetto()) != null) {
                 String strGiaRaccolto = engine.getDbWallOfText().getAsJsonObject("Schermo").get("fiore_gia_raccolto").getAsString();
-                engine.mostraDialogoCallback(boscoDeepScreenArr[0], "BOSCO_DEEP", "Fantoccio", strGiaRaccolto, null, null);
+                engine.mostraDialogoCallback(this.boscoDeepScreen, CostantiMappa.BOSCO_DEEP, "Fantoccio", strGiaRaccolto, null, null);
                 return;
             }
             
@@ -792,17 +826,17 @@ public class ProgressioneStoria {
             
             if (fioreLasciato) {
                 String strLasciato = engine.getDbWallOfText().getAsJsonObject("Schermo").get("fiore_sostituito").getAsString();
-                engine.mostraDialogoCallback(boscoDeepScreenArr[0], "BOSCO_DEEP", "Fantoccio", strLasciato + nuovoFiore.getNomeOggetto(), null, null);
+                engine.mostraDialogoCallback(this.boscoDeepScreen, CostantiMappa.BOSCO_DEEP, "Fantoccio", strLasciato + nuovoFiore.getNomeOggetto(), null, null);
             } else {
                 String strRaccolto = engine.getDbWallOfText().getAsJsonObject("Schermo").get("fiore_raccolto").getAsString();
-                engine.mostraDialogoCallback(boscoDeepScreenArr[0], "BOSCO_DEEP", "Fantoccio", strRaccolto + nuovoFiore.getNomeOggetto(), null, null);
+                engine.mostraDialogoCallback(this.boscoDeepScreen, CostantiMappa.BOSCO_DEEP, "Fantoccio", strRaccolto + nuovoFiore.getNomeOggetto(), null, null);
             }
         };
 
 
 
         // Ripristino hitboxes se l'utente ha già letto il cartello / ha già un fiore ricaricando
-        if (statoCity[0] == 6) {
+        if (statoAttuale == StatoStoria.INCONTRO_FOX) {
             boolean haGiaUnFiore = engine.getGiocatore().getInventario().cercaOggetto("Fiore Rosso") != null ||
                                    engine.getGiocatore().getInventario().cercaOggetto("Fiore Blu") != null ||
                                    engine.getGiocatore().getInventario().cercaOggetto("Fiore Viola") != null;
@@ -815,8 +849,8 @@ public class ProgressioneStoria {
         }
 
         // Hitbox Cartello
-        zoneBoscoDeep.put(new double[]{0.10, 0.68, 0.08, 0.08}, () -> {
-            if (statoCity[0] == 6) {
+        zoneBoscoDeep.put(CostantiHitbox.BOSCODEEP_CARTELLO, () -> {
+            if (statoAttuale == StatoStoria.INCONTRO_FOX) {
                 cartelloLetto[0] = true;
                 // Aggiungiamo i fiori dinamicamente in modo che il cursore a mano si attivi solo ora
                 zoneBoscoDeep.put(hitboxFioreBlu, () -> raccogliFiore.accept(6));
@@ -825,33 +859,31 @@ public class ProgressioneStoria {
 
                 EnigmaSceltaMultipla enigma3 = IstanzaEnigma.creaEnigma3(engine.getTxt().getOggettoDaCatalogo(1));
                 engine.getStatistics().iniziaEnigma(enigma3);
-                engine.mostraDialogoCallback(boscoDeepScreenArr[0], "BOSCO_DEEP", "Cartello", enigma3.getTesto(), null, null);
-            } else if (statoCity[0] >= 7) {
+                engine.mostraDialogoCallback(this.boscoDeepScreen, CostantiMappa.BOSCO_DEEP, "Cartello", enigma3.getTesto(), null, null);
+            } else if (statoAttuale.getValore() >= 7) {
                 String strFoxAddormentato = engine.getDbWallOfText().getAsJsonObject("Schermo").get("fox_addormentato").getAsString();
-                engine.mostraDialogoCallback(boscoDeepScreenArr[0], "BOSCO_DEEP", "Fantoccio", strFoxAddormentato, null, null);
+                engine.mostraDialogoCallback(this.boscoDeepScreen, CostantiMappa.BOSCO_DEEP, "Fantoccio", strFoxAddormentato, null, null);
             }
         });
 
         GameScreen boscoScreen = engine.getSceneManager().creaScenaBase("BoscoLosco.png", zoneBosco);
-        boscoScreenArr[0] = boscoScreen;
-        engine.getSceneManager().registraScena("BOSCO", boscoScreen);
+        this.boscoScreen = boscoScreen;
+        engine.getSceneManager().registraScena(CostantiMappa.BOSCO, boscoScreen);
         
         GameScreen boscoDeepScreen = engine.getSceneManager().creaScenaBase("BoscoINN.png", zoneBoscoDeep);
-        boscoDeepScreen.abilitaDebugCoordinate();
-        boscoDeepScreenArr[0] = boscoDeepScreen;
-        engine.getSceneManager().registraScena("BOSCO_DEEP", boscoDeepScreen);
+        boscoDeepScreen.abilitaDebugCoordinate(); // disabilitato per test
+        this.boscoDeepScreen = boscoDeepScreen;
+        engine.getSceneManager().registraScena(CostantiMappa.BOSCO_DEEP, boscoDeepScreen);
         
         // Karundis
-        Map<double[], Runnable> zoneKarundis = new HashMap<>();
-        final GameScreen[] karundisScreenArr = new GameScreen[1];
-        final GameScreen[] grottaScreenArr = new GameScreen[1]; // Dichiarato qui per poterlo usare nel callback
+        } private void costruisciKarundis() { Map<double[], Runnable> zoneKarundis = new HashMap<>(); // Dichiarato qui per poterlo usare nel callback
         
         List<String> idleDialogs = JsonLoader.estraiLista(engine.getDbHint(), "Dialoghi_Generici_Idle");
         this.npcKarundis1 = registraNPC("Abitante 1", Arrays.asList(idleDialogs.get(0)));
         this.npcKarundis2 = registraNPC("Abitante 2", Arrays.asList(idleDialogs.get(1)));
         
         List<String> hintChiave = JsonLoader.estraiLista(engine.getDbHint(), "Ricerca_Chiave_Castello");
-        if (statoCity[0] >= 8 && statoCity[0] < 9) {
+        if (statoAttuale.getValore() >= 8 && statoAttuale.getValore() < 9) {
             if (!primoAccessoPalazzo) {
                 npcKarundis1.setDialoghi(Arrays.asList(hintChiave.get(0)));
                 npcKarundis2.setDialoghi(Arrays.asList(hintChiave.get(1)));
@@ -859,21 +891,21 @@ public class ProgressioneStoria {
                 npcKarundis1.setDialoghi(Arrays.asList(idleDialogs.get(0)));
                 npcKarundis2.setDialoghi(Arrays.asList(idleDialogs.get(1)));
             }
-        } else if (statoCity[0] >= 9) {
+        } else if (statoAttuale.getValore() >= 9) {
             npcKarundis1.setDialoghi(Arrays.asList(idleDialogs.get(2)));
             npcKarundis2.setDialoghi(Arrays.asList(idleDialogs.get(3)));
         }
         
-        zoneKarundis.put(new double[]{0.36, 0.57, 0.08, 0.2}, () -> {
-            engine.mostraDialogoNPC(karundisScreenArr[0], "KARUNDIS", npcKarundis1, null);
+        zoneKarundis.put(CostantiHitbox.KARUNDIS_ABITANTE_1, () -> {
+            engine.mostraDialogoNPC(this.karundisScreen, CostantiMappa.KARUNDIS, npcKarundis1, null);
         });
-        zoneKarundis.put(new double[]{0.56, 0.57, 0.08, 0.2}, () -> {
-            engine.mostraDialogoNPC(karundisScreenArr[0], "KARUNDIS", npcKarundis2, null);
+        zoneKarundis.put(CostantiHitbox.KARUNDIS_ABITANTE_2, () -> {
+            engine.mostraDialogoNPC(this.karundisScreen, CostantiMappa.KARUNDIS, npcKarundis2, null);
         });
 
-        zoneKarundis.put(new double[]{0.12, 0.57, 0.10, 0.2}, () -> {
-            engine.getSceneManager().mostraScena("GROTTA");
-            if (statoCity[0] == 7) {
+        zoneKarundis.put(CostantiHitbox.KARUNDIS_GROTTA, () -> {
+            engine.getSceneManager().mostraScena(CostantiMappa.GROTTA);
+            if (statoAttuale == StatoStoria.ENIGMA_FIORI_RISOLTO) {
                 JsonObject clockDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Saggio_Clock");
                 JsonObject eryndorDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Saggio_Clock");
                 
@@ -884,48 +916,48 @@ public class ProgressioneStoria {
                 String clock3 = clockDb.get("missione").getAsString();
                 
                 Runnable step5 = () -> {
-                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Saggio Clock", clock3, new ImageIcon(getClass().getResource("/sprites/Personaggi/Clock.png")), () -> {
+                    engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Saggio Clock", clock3, new ImageIcon(getClass().getResource("/sprites/Personaggi/Clock.png")), () -> {
                         setStatoCity(8);
                     });
                 };
                 Runnable step4 = () -> {
-                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", ery2, null, step5);
+                    engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Eryndor", ery2, null, step5);
                 };
                 Runnable step3 = () -> {
-                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Saggio Clock", clock2, new ImageIcon(getClass().getResource("/sprites/Personaggi/Clock.png")), step4);
+                    engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Saggio Clock", clock2, new ImageIcon(getClass().getResource("/sprites/Personaggi/Clock.png")), step4);
                 };
                 Runnable step2 = () -> {
-                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", ery1, null, step3);
+                    engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Eryndor", ery1, null, step3);
                 };
-                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Saggio Clock", clock1, new ImageIcon(getClass().getResource("/sprites/Personaggi/Clock.png")), step2);
+                engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Saggio Clock", clock1, new ImageIcon(getClass().getResource("/sprites/Personaggi/Clock.png")), step2);
             }
         });
         
         GameScreen karundisScreen = engine.getSceneManager().creaScenaBase("Karundis.png", zoneKarundis);
-        karundisScreenArr[0] = karundisScreen;
-        engine.getSceneManager().registraScena("KARUNDIS", karundisScreen);
+        this.karundisScreen = karundisScreen;
+        engine.getSceneManager().registraScena(CostantiMappa.KARUNDIS, karundisScreen);
         
         // Grotta
-        Map<double[], Runnable> zoneGrotta = new HashMap<>();
+        } private void costruisciGrotta() { Map<double[], Runnable> zoneGrotta = new HashMap<>();
         final boolean[] enigma4Attivo = {false};
         List<String> hintsEnigma4 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_4_Orologio_Fucina");
 
-        double[] orologioHitbox = new double[]{0.51, 0.19, 0.10, 0.10};
-        double[] calderoneHitbox = new double[]{0.82, 0.56, 0.10, 0.12};
+        double[] orologioHitbox = CostantiHitbox.GROTTA_OROLOGIO;
+        double[] calderoneHitbox = CostantiHitbox.GROTTA_CALDERONE;
 
         String titoloOrologio = engine.getDbHint().getAsJsonObject("Titoli_Aiuti").get("Titolo_Orologio_Fucina").getAsString();
         String titoloCalderone = engine.getDbHint().getAsJsonObject("Titoli_Aiuti").get("Titolo_Calderone_Fucina").getAsString();
 
         Runnable actOrologio = () -> {
-            engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", titoloOrologio, hintsEnigma4.get(0), null, null);
+            engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, titoloOrologio, hintsEnigma4.get(0), null, null);
         };
         Runnable actCalderone = () -> {
-            engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", titoloCalderone, hintsEnigma4.get(1), null, null);
+            engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, titoloCalderone, hintsEnigma4.get(1), null, null);
         };
 
-        zoneGrotta.put(new double[]{0.45, 0.45, 0.15, 0.20}, () -> { // Incudine
+        zoneGrotta.put(CostantiHitbox.GROTTA_INCUDINE, () -> { // Incudine
             if (engine.getGiocatore().getInventario().cercaOggetto("Spada Sincro") != null || engine.getGiocatore().getInventario().cercaOggetto("Spada") != null) {
-                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", "L'incudine è vuota. Ho già preso la Spada.", null, null);
+                engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Eryndor", "L'incudine è vuota. Ho già preso la Spada.", null, null);
                 return;
             }
 
@@ -947,11 +979,11 @@ public class ProgressioneStoria {
                         engine.getGiocatore().ricaricaSpadaSincro();
                         String txtSblocco = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Spada_sbloccata").getAsString();
                         String txtSuccesso = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("successo_spada").getAsString();
-                        engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Fantoccio", txtSblocco, null, () -> {
-                            engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", txtSuccesso, null, null);
+                        engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Fantoccio", txtSblocco, null, () -> {
+                            engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Eryndor", txtSuccesso, null, null);
                         });
                     } else {
-                        engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("fallimento_spada").getAsString(), null, this);
+                        engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Grotta").get("fallimento_spada").getAsString(), null, this);
                     }
                 }
             };
@@ -967,42 +999,41 @@ public class ProgressioneStoria {
                 String narrazioneTesto = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Narrazione_Spada_Fucina").getAsString();
 
                 Runnable apriInput = () -> {
-                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Fantoccio", enigma4.getTesto(), null, loopEnigma);
+                    engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Fantoccio", enigma4.getTesto(), null, loopEnigma);
                 };
 
                 Runnable step2 = () -> {
-                    engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Fantoccio", narrazioneTesto, null, apriInput);
+                    engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Fantoccio", narrazioneTesto, null, apriInput);
                 };
 
-                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Fantoccio", cartelloTesto, null, step2);
+                engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Fantoccio", cartelloTesto, null, step2);
             } else {
-                engine.mostraDialogoCallback(grottaScreenArr[0], "GROTTA", "Fantoccio", enigma4.getTesto(), null, loopEnigma);
+                engine.mostraDialogoCallback(this.grottaScreen, CostantiMappa.GROTTA, "Fantoccio", enigma4.getTesto(), null, loopEnigma);
             }
         });
         GameScreen grottaScreen = engine.getSceneManager().creaScenaBase("GrottaDellaFucina.png", zoneGrotta);
-        grottaScreenArr[0] = grottaScreen;
-        engine.getSceneManager().registraScena("GROTTA", grottaScreen);
+        this.grottaScreen = grottaScreen;
+        engine.getSceneManager().registraScena(CostantiMappa.GROTTA, grottaScreen);
         
         // Cancello del Castello - Guardia Reale
-        Map<double[], Runnable> zoneIngresso = new HashMap<>();
-        final GameScreen[] ingressoScreenArr = new GameScreen[1];
+        } private void costruisciIngressoPalazzo() { Map<double[], Runnable> zoneIngresso = new HashMap<>();
         JsonObject guardiaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Guardiano");
         JsonObject eryndorGuardiaDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Guardiano");
-        Personaggio guardiaReale = registraNPC("Guardiano", Arrays.asList(guardiaDb.get("richiesta_chiave").getAsString()));
+        guardiaReale = registraNPC("Guardiano", Arrays.asList(guardiaDb.get("richiesta_chiave").getAsString()));
         
-        double[] guardiaHitbox = new double[]{0.35, 0.30, 0.28, 0.50};
-        if (statoCity[0] < 9) {
+        double[] guardiaHitbox = CostantiHitbox.INGRESSO_GUARDIA;
+        if (statoAttuale.getValore() < 9) {
             zoneIngresso.put(guardiaHitbox, () -> {
                 if (!parlatoConGuardia) {
                     guardiaReale.setDialoghi(Arrays.asList(guardiaDb.get("richiesta_chiave").getAsString()));
-                    engine.mostraDialogoNPCCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", guardiaReale, null, () -> {
+                    engine.mostraDialogoNPCCallback(this.ingressoScreen, CostantiMappa.INGRESSO_PALAZZO, guardiaReale, null, () -> {
                         parlatoConGuardia = true;
                     });
                 } else {
                     Oggetto chiave = engine.getGiocatore().getInventario().cercaOggetto("Chiave Fox");
                     if (chiave != null) {
                         guardiaReale.setDialoghi(Arrays.asList(guardiaDb.get("domanda_chiave").getAsString()));
-                        engine.mostraDialogoNPCCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", guardiaReale, null, () -> {
+                        engine.mostraDialogoNPCCallback(this.ingressoScreen, CostantiMappa.INGRESSO_PALAZZO, guardiaReale, null, () -> {
                             int scelta = JOptionPane.showConfirmDialog(
                                 engine.getFrame(),
                                 "Sicuro che hai la chiave?",
@@ -1012,53 +1043,51 @@ public class ProgressioneStoria {
                             );
                             if (scelta == JOptionPane.YES_OPTION) {
                                 guardiaReale.setDialoghi(Arrays.asList(guardiaDb.get("accettazione").getAsString()));
-                                engine.mostraDialogoNPCCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", guardiaReale, null, () -> {
+                                engine.mostraDialogoNPCCallback(this.ingressoScreen, CostantiMappa.INGRESSO_PALAZZO, guardiaReale, null, () -> {
                                     engine.getGiocatore().getInventario().rimuoviOggetto(chiave);
-                                    statoCity[0] = 9;
+                                    setStatoCity(9);
                                     zoneIngresso.remove(guardiaHitbox);
                                     // Ripristino dialoghi generici NPC Karundis
                                     npcKarundis1.setDialoghi(Arrays.asList(idleDialogs.get(2)));
                                     npcKarundis2.setDialoghi(Arrays.asList(idleDialogs.get(3)));
                                     // Pensiero di Eryndor sulla chiave rubata da Fox
-                                    engine.mostraDialogoCallback(ingressoScreenArr[0], "INGRESSO_PALAZZO", "Eryndor", eryndorGuardiaDb.get("pensiero_chiave").getAsString(), null, null);
+                                    engine.mostraDialogoCallback(this.ingressoScreen, CostantiMappa.INGRESSO_PALAZZO, "Eryndor", eryndorGuardiaDb.get("pensiero_chiave").getAsString(), null, null);
                                 });
                             }
                         });
                     } else {
                         guardiaReale.setDialoghi(Arrays.asList(guardiaDb.get("richiesta_chiave").getAsString()));
-                        engine.mostraDialogoNPC(ingressoScreenArr[0], "INGRESSO_PALAZZO", guardiaReale, null);
+                        engine.mostraDialogoNPC(this.ingressoScreen, CostantiMappa.INGRESSO_PALAZZO, guardiaReale, null);
                     }
                 }
             });
         }
         
         GameScreen ingressoScreen = engine.getSceneManager().creaScenaBase("CancelloCastello.png", zoneIngresso);
-        ingressoScreen.abilitaDebugCoordinate();
-        ingressoScreenArr[0] = ingressoScreen;
-        engine.getSceneManager().registraScena("INGRESSO_PALAZZO", ingressoScreen);
-        engine.getSceneManager().registraScena("SCALE", engine.getSceneManager().creaScenaBase("ScalePalazzo.png", null));
+        ingressoScreen.abilitaDebugCoordinate(); // disabilitato per test
+        this.ingressoScreen = ingressoScreen;
+        engine.getSceneManager().registraScena(CostantiMappa.INGRESSO_PALAZZO, ingressoScreen);
+        engine.getSceneManager().registraScena(CostantiMappa.SCALE, engine.getSceneManager().creaScenaBase("ScalePalazzo.png", null));
         
         // Cripta Eripeta
-        Map<double[], Runnable> zoneCripta = new HashMap<>();
-        final GameScreen[] criptaScreenArr = new GameScreen[1];
+        } private void costruisciCripta() { Map<double[], Runnable> zoneCripta = new HashMap<>();
         JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
-        Personaggio eripeta = registraNPC("Eripeta", Arrays.asList(eripetaDb.get("rifiuto").getAsString()));
-        zoneCripta.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
-            gestisciEripetaInCripta(criptaScreenArr[0], eripeta, eripetaDb);
+        eripeta = registraNPC("Eripeta", Arrays.asList(eripetaDb.get("rifiuto").getAsString()));
+        zoneCripta.put(CostantiHitbox.CRIPTA_ERIPETA, () -> {
+            gestisciEripetaInCripta(this.criptaScreen, eripeta, eripetaDb);
         });
         GameScreen criptaScreen = engine.getSceneManager().creaScenaBase("Cripta.png", zoneCripta);
-        criptaScreenArr[0] = criptaScreen;
-        engine.getSceneManager().registraScena("CRIPTA_ERIPETA", criptaScreen);
+        this.criptaScreen = criptaScreen;
+        engine.getSceneManager().registraScena(CostantiMappa.CRIPTA_ERIPETA, criptaScreen);
         
         // palazzo reale principessa
-        Map<double[], Runnable> zonePalazzo = new HashMap<>();
-        final GameScreen[] palazzoScreenArr = new GameScreen[1];
+        } private void costruisciPalazzoPrincipessa() { Map<double[], Runnable> zonePalazzo = new HashMap<>();
         JsonObject marienDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Marien");
-        Personaggio marien = registraNPC("Principessa Marien", Arrays.asList(marienDb.get("sfida").getAsString()));
-        zonePalazzo.put(new double[]{0.4, 0.4, 0.2, 0.2}, () -> {
+        marien = registraNPC("Principessa Marien", Arrays.asList(marienDb.get("sfida").getAsString()));
+        zonePalazzo.put(CostantiHitbox.PALAZZO_MARIEN, () -> {
             if (engine.getGiocatore().isEnigmaRisolto("Enigma_Finale_Principessa")) {
                 marien.setDialoghi(Arrays.asList("Sei già il mio sposo! Il regno è salvo."));
-                engine.mostraDialogoNPC(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", marien, null);
+                engine.mostraDialogoNPC(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, marien, null);
                 return;
             }
             EnigmaSceltaMultipla enigmaFinale = IstanzaEnigma.creaEnigmaFinale(new Oggetto(8, "Titolo Nobile", "Hai vinto il cuore della principessa e il titolo."));
@@ -1074,40 +1103,44 @@ public class ProgressioneStoria {
                         // Enigma finale: ultima ricarica della Spada Sincro (99%)
                         engine.getGiocatore().ricaricaSpadaSincro();
                         marien.setDialoghi(Arrays.asList(marienDb.get("vittoria_finale").getAsString()));
-                        engine.mostraDialogoNPC(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", marien, null);
+                        engine.mostraDialogoNPC(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, marien, null);
                     } else {
-                        engine.mostraDialogoCallback(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", "Principessa Marien", marienDb.get("errore_cacciata").getAsString(), null, () -> {
-                            engine.mostraDialogoCallback(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Marien").get("errore_ordine").getAsString(), null, this);
+                        engine.mostraDialogoCallback(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienDb.get("errore_cacciata").getAsString(), null, () -> {
+                            engine.mostraDialogoCallback(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Marien").get("errore_ordine").getAsString(), null, this);
                         });
                     }
                 }
             };
-            engine.mostraDialogoCallback(palazzoScreenArr[0], "PALAZZO_PRINCIPESSA", "Principessa Marien", marienDb.get("enigma_leggi").getAsString(), null, loopEnigma);
+            engine.mostraDialogoCallback(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienDb.get("enigma_leggi").getAsString(), null, loopEnigma);
         });
         GameScreen palazzoScreen = engine.getSceneManager().creaScenaBase("SalaDellaPrincipessa.png", zonePalazzo);
-        palazzoScreenArr[0] = palazzoScreen;
-        engine.getSceneManager().registraScena("PALAZZO_PRINCIPESSA", palazzoScreen);
+        this.palazzoScreen = palazzoScreen;
+        engine.getSceneManager().registraScena(CostantiMappa.PALAZZO_PRINCIPESSA, palazzoScreen);
 
-        LetteraScreen schermata_retro = new LetteraScreen(letteraRetro, () -> {
+        } private void costruisciLettere() {
+        List<String> lettera=JsonLoader.estraiLista(engine.getDbWallOfText().getAsJsonObject("Lettera"),"lettera_iniziale");
+        String enigmaText = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Enigma_1_Lettera").getAsString();
+        List<String> letteraRetro = Arrays.asList(enigmaText);
+ LetteraScreen schermata_retro = new LetteraScreen(letteraRetro, () -> {
             System.out.println("DEBUG: Lettera retro finita, gioco START");
             
             engine.getGiocatore().setPossiedeInventario(true);
             
-            engine.getSceneManager().mostraScena("PIAZZA_CENTRALE");
+            engine.getSceneManager().mostraScena(CostantiMappa.PIAZZA_CENTRALE);
         });
-        engine.getSceneManager().registraScena("LETTERA_RETRO", schermata_retro);
+        engine.getSceneManager().registraScena(CostantiMappa.LETTERA_RETRO, schermata_retro);
 
         LetteraScreen schermata_lettera = new LetteraScreen(lettera, () -> {
             System.out.println("DEBUG: Lettera finita, mostro retro");
             
-            engine.getSceneManager().mostraScena("LETTERA_RETRO");
+            engine.getSceneManager().mostraScena(CostantiMappa.LETTERA_RETRO);
 
         });
-        engine.getSceneManager().registraScena("LETTERA", schermata_lettera);
+        engine.getSceneManager().registraScena(CostantiMappa.LETTERA, schermata_lettera);
     }
 
     private void avviaIntercettazioneEripeta() {
-        GameScreen scale = (GameScreen) engine.getSceneManager().getScena("SCALE");
+        GameScreen scale = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.SCALE);
         ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
         
         JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
@@ -1125,36 +1158,36 @@ public class ProgressioneStoria {
         String txt5 = eripetaDb.get("invito").getAsString();
         
         Runnable step7 = () -> {
-            engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt5, spriteEripeta, () -> {
+            engine.mostraDialogoCallback(scale, CostantiMappa.SCALE, "Eripeta", txt5, spriteEripeta, () -> {
                 setStatoCity(10);
-                engine.getSceneManager().mostraScena("CRIPTA_ERIPETA");
+                engine.getSceneManager().mostraScena(CostantiMappa.CRIPTA_ERIPETA);
                 avviaAccusaEripeta();
             });
         };
         Runnable step6 = () -> {
-            engine.mostraDialogoCallback(scale, "SCALE", eryName, txt4, null, step7);
+            engine.mostraDialogoCallback(scale, CostantiMappa.SCALE, eryName, txt4, null, step7);
         };
         Runnable step5 = () -> {
-            engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt3_4, spriteEripeta, step6);
+            engine.mostraDialogoCallback(scale, CostantiMappa.SCALE, "Eripeta", txt3_4, spriteEripeta, step6);
         };
         Runnable step4 = () -> {
-            engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt3_3, spriteEripeta, step5);
+            engine.mostraDialogoCallback(scale, CostantiMappa.SCALE, "Eripeta", txt3_3, spriteEripeta, step5);
         };
         Runnable step3_2 = () -> {
-            engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt3_2, spriteEripeta, step4);
+            engine.mostraDialogoCallback(scale, CostantiMappa.SCALE, "Eripeta", txt3_2, spriteEripeta, step4);
         };
         Runnable step3_1 = () -> {
-            engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt3_1, spriteEripeta, step3_2);
+            engine.mostraDialogoCallback(scale, CostantiMappa.SCALE, "Eripeta", txt3_1, spriteEripeta, step3_2);
         };
         Runnable step2 = () -> {
-            engine.mostraDialogoCallback(scale, "SCALE", eryName, txt2, null, step3_1);
+            engine.mostraDialogoCallback(scale, CostantiMappa.SCALE, eryName, txt2, null, step3_1);
         };
         
-        engine.mostraDialogoCallback(scale, "SCALE", "Eripeta", txt1, spriteEripeta, step2);
+        engine.mostraDialogoCallback(scale, CostantiMappa.SCALE, "Eripeta", txt1, spriteEripeta, step2);
     }
 
     private void avviaAccusaEripeta() {
-        GameScreen cripta = (GameScreen) engine.getSceneManager().getScena("CRIPTA_ERIPETA");
+        GameScreen cripta = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.CRIPTA_ERIPETA);
         ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
         
         JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
@@ -1174,45 +1207,45 @@ public class ProgressioneStoria {
         String txt5_3 = eripetaDb.get("indizio_3").getAsString();
         
         Runnable step9 = () -> {
-            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt5_3, spriteEripeta, () -> {
+            engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", txt5_3, spriteEripeta, () -> {
                 setStatoCity(11);
                 // David torna interpellabile al Porto (mandato da Eripeta): ne riattivo la hitbox
                 if (riattivaDavidDopoMappa != null) riattivaDavidDopoMappa.run();
-                engine.getSceneManager().mostraScena("SCALE");
+                engine.getSceneManager().mostraScena(CostantiMappa.SCALE);
             });
         };
         Runnable step8_2 = () -> {
-            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt5_2, spriteEripeta, step9);
+            engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", txt5_2, spriteEripeta, step9);
         };
         Runnable step8_1 = () -> {
-            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt5_1, spriteEripeta, step8_2);
+            engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", txt5_1, spriteEripeta, step8_2);
         };
         Runnable step7 = () -> {
-            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", eryName, txt4, null, step8_1);
+            engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, eryName, txt4, null, step8_1);
         };
         Runnable step6 = () -> {
-            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt3, spriteEripeta, step7);
+            engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", txt3, spriteEripeta, step7);
         };
         Runnable step5_2 = () -> {
-            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", eryName, txt2_parlato_2, null, step6);
+            engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, eryName, txt2_parlato_2, null, step6);
         };
         Runnable step5_1 = () -> {
-            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", eryName, txt2_parlato_1, null, step5_2);
+            engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, eryName, txt2_parlato_1, null, step5_2);
         };
         Runnable step4 = () -> {
-            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", eryName, txt2_pensiero, null, step5_1);
+            engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, eryName, txt2_pensiero, null, step5_1);
         };
         Runnable step3 = () -> {
-            engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt1_2, spriteEripeta, step4);
+            engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", txt1_2, spriteEripeta, step4);
         };
         
-        engine.mostraDialogoCallback(cripta, "CRIPTA_ERIPETA", "Eripeta", txt1_1, spriteEripeta, step3);
+        engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", txt1_1, spriteEripeta, step3);
     }
 
     private void gestisciDavidDopoMappa(GameScreen portoScreen, Personaggio david, ImageIcon spriteDavid, JsonObject davidDb) {
-        if (statoCity[0] == 11) {
+        if (statoAttuale == StatoStoria.ACCUSA_ERIPETA_SUPERATA) {
             String ritorno1 = davidDb.get("ritorno_1").getAsString();
-            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", ritorno1, spriteDavid, () -> {
+            engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", ritorno1, spriteDavid, () -> {
                 String input = JOptionPane.showInputDialog(engine.getFrame(), "Cosa rispondi a David?");
                 if (input == null || input.trim().isEmpty()) return;
                 
@@ -1221,21 +1254,21 @@ public class ProgressioneStoria {
                 if (Parser.contieneParolaChiave(input, "Eripeta")) {
                     setStatoCity(12);
                     String ritorno2 = davidDb.get("ritorno_2").getAsString();
-                    engine.mostraDialogoCallback(portoScreen, "PORTO", "David", ritorno2, spriteDavid, () -> {
+                    engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", ritorno2, spriteDavid, () -> {
                         lanciaEnigma5(portoScreen, david, spriteDavid, davidDb);
                     });
                 } else {
                     String incomprensione = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Contadino_Green").get("incomprensione").getAsString();
-                    engine.mostraDialogoCallback(portoScreen, "PORTO", "David", incomprensione, spriteDavid, null);
+                    engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", incomprensione, spriteDavid, null);
                 }
             });
-        } else if (statoCity[0] == 12) {
+        } else if (statoAttuale == StatoStoria.DAVID_INTERPELLATO) {
             lanciaEnigma5(portoScreen, david, spriteDavid, davidDb);
-        } else if (statoCity[0] == 13) {
+        } else if (statoAttuale == StatoStoria.ENIGMA_VINCOLO_RISOLTO) {
             mostraStoriaEripeta(portoScreen, spriteDavid, davidDb);
         } else {
             String salutoGenerico = davidDb.get("saluto_generico").getAsString();
-            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", salutoGenerico, spriteDavid, null);
+            engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", salutoGenerico, spriteDavid, null);
         }
     }
 
@@ -1276,14 +1309,14 @@ public class ProgressioneStoria {
                     mostraEsitoEnigma5(portoScreen, spriteDavid, davidDb);
                 } else {
                     String erroreMsg = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta").get("errore").getAsString();
-                    engine.mostraDialogoCallback(portoScreen, "PORTO", "David", erroreMsg, spriteDavid, this);
+                    engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", erroreMsg, spriteDavid, this);
                 }
             }
         };
         
         // Visualizza il testo dell'indovinello diviso in due passaggi nel pannello dei dialoghi di gioco
-        engine.mostraDialogoCallback(portoScreen, "PORTO", "David", descrizione, spriteDavid, () -> {
-            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", domanda, spriteDavid, loopEnigma);
+        engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", descrizione, spriteDavid, () -> {
+            engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", domanda, spriteDavid, loopEnigma);
         });
     }
 
@@ -1293,9 +1326,9 @@ public class ProgressioneStoria {
         String soluzione1 = davidDb.get("soluzione_enigma_1").getAsString();
         String soluzione2 = davidDb.get("soluzione_enigma_2").getAsString();
         String soluzione3 = davidDb.get("soluzione_enigma_3").getAsString();
-        engine.mostraDialogoCallback(portoScreen, "PORTO", "David", soluzione1, spriteDavid, () ->
-            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", soluzione2, spriteDavid, () ->
-                engine.mostraDialogoCallback(portoScreen, "PORTO", "David", soluzione3, spriteDavid, () ->
+        engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", soluzione1, spriteDavid, () ->
+            engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", soluzione2, spriteDavid, () ->
+                engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", soluzione3, spriteDavid, () ->
                     mostraStoriaEripeta(portoScreen, spriteDavid, davidDb))));
     }
 
@@ -1304,8 +1337,8 @@ public class ProgressioneStoria {
     private void mostraStoriaEripeta(GameScreen portoScreen, ImageIcon spriteDavid, JsonObject davidDb) {
         String parte1 = davidDb.get("storia_eripeta_1").getAsString();
         String parte2 = davidDb.get("storia_eripeta_2").getAsString();
-        engine.mostraDialogoCallback(portoScreen, "PORTO", "David", parte1, spriteDavid, () ->
-            engine.mostraDialogoCallback(portoScreen, "PORTO", "David", parte2, spriteDavid, null));
+        engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", parte1, spriteDavid, () ->
+            engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", parte2, spriteDavid, null));
     }
 
     private void gestisciEripetaInCripta(GameScreen criptaScreen, Personaggio eripeta, JsonObject eripetaDb) {
@@ -1313,17 +1346,17 @@ public class ProgressioneStoria {
         String eryName = engine.getGiocatore().getNomePlayer().isEmpty() ? "Eryndor" : engine.getGiocatore().getNomePlayer();
         ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
 
-        if (statoCity[0] < 13) {
+        if (statoAttuale.getValore() < 13) {
             String indizio2 = eripetaDb.get("indizio_2").getAsString();
-            engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", "Eripeta", indizio2, spriteEripeta, null);
-        } else if (statoCity[0] == 13) {
+            engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", indizio2, spriteEripeta, null);
+        } else if (statoAttuale == StatoStoria.ENIGMA_VINCOLO_RISOLTO) {
             String ringr1 = eripetaDb.get("ringraziamento_1").getAsString();
             String ringr2 = eripetaDb.get("ringraziamento_2").getAsString();
             String comprensione = eryndorDb.get("comprensione").getAsString();
             String congedo = eripetaDb.get("congedo").getAsString();
             
             Runnable step4 = () -> {
-                engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", "Eripeta", congedo, spriteEripeta, () -> {
+                engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", congedo, spriteEripeta, () -> {
                     Oggetto ampolla = engine.getGiocatore().getInventario().cercaOggetto("Ampolla d'oro");
                     if (ampolla != null) {
                         engine.getGiocatore().getInventario().rimuoviOggetto(ampolla);
@@ -1334,16 +1367,16 @@ public class ProgressioneStoria {
                 });
             };
             Runnable step3 = () -> {
-                engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", eryName, comprensione, null, step4);
+                engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, eryName, comprensione, null, step4);
             };
             Runnable step2 = () -> {
-                engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", "Eripeta", ringr2, spriteEripeta, step3);
+                engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", ringr2, spriteEripeta, step3);
             };
             
-            engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", "Eripeta", ringr1, spriteEripeta, step2);
+            engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", ringr1, spriteEripeta, step2);
         } else {
             String congedo = eripetaDb.get("congedo").getAsString();
-            engine.mostraDialogoCallback(criptaScreen, "CRIPTA_ERIPETA", "Eripeta", congedo, spriteEripeta, null);
+            engine.mostraDialogoCallback(criptaScreen, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", congedo, spriteEripeta, null);
         }
     }
 
