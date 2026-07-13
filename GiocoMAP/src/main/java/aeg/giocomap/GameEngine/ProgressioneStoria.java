@@ -1,6 +1,7 @@
 package aeg.giocomap.GameEngine;
 
 import aeg.giocomap.Model.Oggetti.Oggetto;
+import aeg.giocomap.Model.Stanza;
 import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.Model.Personaggi.Fantoccio;
 import aeg.giocomap.View.GameScreen;
@@ -37,6 +38,13 @@ public class ProgressioneStoria {
 
     // Struttura dati per astrarre la logica dei percorsi (routing table)
     private final Map<String, Map<String, Runnable>> collegamentiMappa = new HashMap<>();
+    
+    // Mappa per le Stanze (routing standard)
+    private final Map<String, Stanza> mappaStanze = new HashMap<>();
+
+    private Stanza getOrCreaStanza(String nome) {
+        return mappaStanze.computeIfAbsent(nome, n -> new Stanza(n));
+    }
 
     // Registro dei personaggi attivi nella partita
     private final Map<String, Personaggio> registroNPC = new HashMap<>();
@@ -129,10 +137,6 @@ public class ProgressioneStoria {
         this.primoAccessoPalazzo = valore;
     }
 
-    public boolean isParlatoConGuardia() {
-        return parlatoConGuardia;
-    }
-
     public void setParlatoConGuardia(boolean valore) {
         this.parlatoConGuardia = valore;
     }
@@ -159,7 +163,7 @@ public class ProgressioneStoria {
                 JOptionPane.YES_NO_OPTION, 
                 JOptionPane.WARNING_MESSAGE);
             if (scelta == JOptionPane.YES_OPTION) {
-                engine.ExitGame();
+                engine.exitGame();
             }
         });
         
@@ -298,18 +302,30 @@ public class ProgressioneStoria {
     }
     
     private void registraCollegamentoSemplice(String daScena, String direzione, String aScena) {
-        registraCollegamento(daScena, direzione, () -> engine.getSceneManager().mostraScena(aScena));
+        Stanza da = getOrCreaStanza(daScena);
+        Stanza a = getOrCreaStanza(aScena);
+        da.impostaUscita(direzione, a);
     }
     
     private void eseguiCollegamento(String direzione) {
         String scena = engine.getSceneManager().getScenaCorrente();
         if (scena == null) return;
         
-        Map<String, Runnable> uscite = collegamentiMappa.get(scena);
-        if (uscite != null && uscite.containsKey(direzione)) {
-            uscite.get(direzione).run();
+        // Assicuriamoci che il giocatore sappia in che stanza si trova
+        Stanza stanzaCorrente = getOrCreaStanza(scena);
+        
+        Map<String, Runnable> usciteSpeciali = collegamentiMappa.get(scena);
+        if (usciteSpeciali != null && usciteSpeciali.containsKey(direzione)) {
+            // Usa la logica custom/condizionale
+            usciteSpeciali.get(direzione).run();
         } else {
-            System.out.println("DEBUG: Nessuna direzione a " + direzione + " da " + scena);
+            // Usa la classe Stanza per il routing standard
+            Stanza adiacente = stanzaCorrente.getStanzaAdiacente(direzione);
+            if (adiacente != null) {
+                engine.getSceneManager().mostraScena(adiacente.getNome());
+            } else {
+                System.out.println("DEBUG: Nessuna direzione a " + direzione + " da " + scena);
+            }
         }
     }
 

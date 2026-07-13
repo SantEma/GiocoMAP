@@ -18,7 +18,6 @@ public abstract class Enigma {
     protected final List<String> aiuti;
     protected final Oggetto reward;
     protected boolean risolto;
-    protected int indiceAiutoCorrente;
 
     public Enigma(String id, String testo, List<String> aiuti, Oggetto reward) {
         this.id = id;
@@ -26,7 +25,6 @@ public abstract class Enigma {
         this.aiuti = aiuti;
         this.reward = reward;
         this.risolto = false;
-        this.indiceAiutoCorrente = 0;
     }
 
         public String getId() { 
@@ -35,10 +33,6 @@ public abstract class Enigma {
     
     public String getTesto() {
         return testo; 
-    }
-    
-    public boolean isRisolto() { 
-        return risolto; 
     }
     
     public Oggetto getReward() { 
@@ -50,15 +44,5 @@ public abstract class Enigma {
     }
 
     public abstract boolean verifica(String risposta);
-
-    // Restituisce il prossimo aiuto disponibile
-    public String prossimoAiuto() {
-        if (aiuti == null || aiuti.isEmpty())
-            return "Nessun aiuto disponibile.";
-        if (indiceAiutoCorrente >= aiuti.size())
-            return "Nessun altro aiuto disponibile.";
-        return aiuti.get(indiceAiutoCorrente++);
-    }
-
 
 }

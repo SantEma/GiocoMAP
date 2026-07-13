@@ -21,7 +21,7 @@
             "cena_green": "Sono qui per ritirare la cena di Green"
         },
         "Fox": {
-            "reazione_furto": "Ridammela né ho bisogno per il mio scopo. Non ti darò pace fin quando non ti trovo.",
+            "reazione_furto": "Ridammela, né ho bisogno per il mio scopo. Non ti darò pace fin quando non ti trovo.",
             "reazione_inseguimento": "Mi stavi seguendo dall'inizio quindi... Va bene, ne va del mio onore, dimmi cosa vuoi.",
             "pensiero_accordo": "(Ottimo e ora... Un attimo, se nessuno sa dov'è o com'è fatta posso fregarlo a mio vantaggio).",
             "parlato_accordo": "Va bene, resta qui. La cerco immediatamente!",

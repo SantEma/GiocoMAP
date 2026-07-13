@@ -92,7 +92,7 @@ public class SceneManager {
     }
     
     // Logiche della Mappa
-    public void ApriMappa(){
+    public void apriMappa(){
         if(!mapOpen){
             // salvo il contenuto della scena precedente
             if (frame.getContentPane().getComponentCount() > 0)
@@ -106,7 +106,7 @@ public class SceneManager {
         }
     }
 
-    public void ChiudiMappa(){
+    public void chiudiMappa(){
         if(mapOpen && scenaPrecedente != null){
             //Rinserimento scena precedente
             frame.mostraPannello(scenario_precedente);
@@ -122,7 +122,7 @@ public class SceneManager {
     }
     
     // Logiche dell'Inventario
-    public void ApriInventario(){
+    public void apriInventario(){
         if(!inventarioOpen){
             // Salvo la scena precedente di gioco
             if(frame.getContentPane().getComponentCount()>0) {
@@ -145,7 +145,7 @@ public class SceneManager {
         }
     }
     
-    public void ChiudiInventario(){
+    public void chiudiInventario(){
         if(inventarioOpen && scenario_precedente!=null){
             frame.mostraPannello(scenario_precedente);
             scenaCorrente = scenaPrecedente;

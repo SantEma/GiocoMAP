@@ -28,10 +28,6 @@ public class GameNetwork {
         this.sceneManager = sceneManager;
     }
 
-    public boolean isServerAvviato() {
-        return gameServer != null;
-    }
-
     public void toggleChat() {
         if (gameClient == null) {
             gameServer = new GameServer();
@@ -54,6 +50,26 @@ public class GameNetwork {
     }
 
     public void connettiComeClient(String ip) {
+        if (gameServer != null) {
+            JOptionPane.showMessageDialog(
+                frame,
+                "Sei già l'host! Non puoi unirti nuovamente come client.",
+                "Errore Host",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        if (gameClient != null && gameClient.isConnesso()) {
+            JOptionPane.showMessageDialog(
+                frame,
+                "Sei già connesso a una chat!",
+                "Errore Connessione",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
         String nome = JOptionPane.showInputDialog(
             frame,
             "Inserisci il tuo nome:",

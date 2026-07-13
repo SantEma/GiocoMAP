@@ -144,7 +144,7 @@ public class ModelDB {
     }
 
     // Metodo se l'utente crea una nuova partita
-    public void NewStart(){
+    public void newStart(){
         String query = "DELETE FROM saves";
         PreparedStatement pstm = null;
         try{
@@ -170,7 +170,7 @@ public class ModelDB {
     //   [0] = nome scena, [1] = statoCity, [2] = possiedeMappa,
     //   [3] = enigmi risolti (id separati da virgola), [4] = inventario,
     //   [5] = primoAccessoPalazzo, [6] = caricaSpada
-    public String[] LoadGame() {
+    public String[] loadGame() {
         try {
             String query = "SELECT stanza_attuale, stato_city, possiede_mappa, enigmi_risolti, inventario, primo_accesso_palazzo, carica_spada FROM saves WHERE id = 1";
             PreparedStatement pstm = conn.prepareStatement(query);
