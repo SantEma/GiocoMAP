@@ -1,5 +1,10 @@
 package aeg.giocomap.GameEngine;
 
+
+/*
+ * @author emanuele
+*/
+
 import aeg.giocomap.View.MappaPanel;
 import aeg.giocomap.View.InventarioPanel;
 import aeg.giocomap.View.TitleScreen;
