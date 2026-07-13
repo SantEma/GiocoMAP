@@ -37,20 +37,6 @@ public class JsonLoader {
         }
     }
 
-    public static String estraiTesto(JsonObject oggetto, String chiave){
-        try{
-            JsonArray array = oggetto.getAsJsonArray(chiave);
-            StringBuilder sb = new StringBuilder();
-            for(JsonElement riga : array){
-                sb.append(riga.getAsString());
-            }
-            return sb.toString();
-        }
-        catch(Exception e){
-            System.err.println("Errore estrazione chiave " + chiave + ": " + e.getMessage());
-            return "";
-        }
-    }
 
     public static List<String> estraiLista(JsonObject oggetto, String chiave){
         List<String> lista = new ArrayList<>();

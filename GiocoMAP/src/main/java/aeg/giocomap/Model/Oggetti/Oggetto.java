@@ -5,9 +5,9 @@ package aeg.giocomap.Model.Oggetti;
  * @author emanuele
  */
 public class Oggetto {
-    int idOggetto;
-    String nomeOggetto;
-    String descrizioneOggetto;
+    private int idOggetto;
+    private String nomeOggetto;
+    private String descrizioneOggetto;
     
     public Oggetto(int idOggetto, String nome, String descrizioneOggetto){
         this.idOggetto=idOggetto;

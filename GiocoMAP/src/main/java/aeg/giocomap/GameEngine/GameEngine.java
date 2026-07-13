@@ -62,7 +62,7 @@ public class GameEngine {
         this.frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                ExitGame();
+                exitGame();
             }
         });
 
@@ -96,7 +96,7 @@ public class GameEngine {
         registraMenuPausa();
         registraComandi();
 
-        TitleScreenImp();
+        titleScreenImp();
         progression.impostaFrecceLogica();
         sceneManager.mostraScena("MENU_PRINCIPALE");
     }
@@ -133,17 +133,9 @@ public class GameEngine {
         return statistics; 
     }
     
-    public GameNetwork getNetwork() { 
-        return network; 
-    }
-    
-    public ProgressioneStoria getProgression() { 
-        return progression; 
-    }
-    
-    private void TitleScreenImp() {
+    private void titleScreenImp() {
         title_screen.addNPListener(e -> {
-            db.NewStart();
+            db.newStart();
             music_player.stopMusic();
             avviaGioco(false);
         });
@@ -154,7 +146,7 @@ public class GameEngine {
 
         title_screen.addRecordListener(e -> {
             music_player.stopMusic();
-            statistics.Statistiche(false);
+            statistics.statistiche(false);
         });
        
         title_screen.addConnettiListener(e -> {
@@ -171,7 +163,7 @@ public class GameEngine {
     }
 
     private void avviaGioco(boolean carica) {
-        String[] salvataggio = db.LoadGame();
+        String[] salvataggio = db.loadGame();
 
         if (carica) {
             if (salvataggio == null) {
@@ -343,9 +335,9 @@ public class GameEngine {
             System.out.println("DEBUG: Testo in corso mappa non apribile");
             return;
         }
-        if (sceneManager.isOpenInventario()) sceneManager.ChiudiInventario();
-        if (!sceneManager.isMapOpen()) sceneManager.ApriMappa();
-        else sceneManager.ChiudiMappa();
+        if (sceneManager.isOpenInventario()) sceneManager.chiudiInventario();
+        if (!sceneManager.isMapOpen()) sceneManager.apriMappa();
+        else sceneManager.chiudiMappa();
     }
 
     private void impostaKeyBindingChat() {
@@ -369,8 +361,8 @@ public class GameEngine {
             System.out.println("DEBUG: Testo in corso, chat non apribile");
             return;
         }
-        if (sceneManager.isMapOpen()) sceneManager.ChiudiMappa();
-        if (sceneManager.isOpenInventario()) sceneManager.ChiudiInventario();
+        if (sceneManager.isMapOpen()) sceneManager.chiudiMappa();
+        if (sceneManager.isOpenInventario()) sceneManager.chiudiInventario();
         network.toggleChat();
     }
 
@@ -381,8 +373,8 @@ public class GameEngine {
                 System.out.println("DEBUG: Testo in corso, chat non apribile");
                 return;
             }
-            if (sceneManager.isMapOpen()) sceneManager.ChiudiMappa();
-            if (sceneManager.isOpenInventario()) sceneManager.ChiudiInventario();
+            if (sceneManager.isMapOpen()) sceneManager.chiudiMappa();
+            if (sceneManager.isOpenInventario()) sceneManager.chiudiInventario();
         }
         network.toggleChat();
     }
@@ -416,9 +408,9 @@ public class GameEngine {
             System.out.println("DEBUG: Inventario non ancora disponibile");
             return;
         }
-        if (sceneManager.isMapOpen()) sceneManager.ChiudiMappa();
-        if (!sceneManager.isOpenInventario()) sceneManager.ApriInventario();
-        else sceneManager.ChiudiInventario();
+        if (sceneManager.isMapOpen()) sceneManager.chiudiMappa();
+        if (!sceneManager.isOpenInventario()) sceneManager.apriInventario();
+        else sceneManager.chiudiInventario();
     }
 
     private void impostaKeyBindingEsc() {
@@ -439,8 +431,8 @@ public class GameEngine {
         if (isDialogoActive) return;
 
         if (sceneManager.isChatOpen()) { network.toggleChat(); return; }
-        if (sceneManager.isMapOpen()) { sceneManager.ChiudiMappa(); return; }
-        if (sceneManager.isOpenInventario()) { sceneManager.ChiudiInventario(); return; }
+        if (sceneManager.isMapOpen()) { sceneManager.chiudiMappa(); return; }
+        if (sceneManager.isOpenInventario()) { sceneManager.chiudiInventario(); return; }
 
         switch (sceneManager.getScenaCorrente()) {
             case "MENU_PRINCIPALE":
@@ -469,13 +461,10 @@ public class GameEngine {
         }
 
         Map<double[], Runnable> zone = new HashMap<>();
-        zone.put(new double[]{0.085, 0.375, 0.28, 0.105},           
-            () -> sceneManager.mostraScena(scenaDaSalvare));
-        zone.put(new double[]{0.085, 0.535, 0.29, 0.105},           
-            () -> sceneManager.mostraScena("COMANDI"));
-        zone.put(new double[]{0.085, 0.690, 0.28, 0.105},           
-            this::salvaEdEsci);
-
+        zone.put(CostantiHitbox.PAUSA_RIPRENDI,()->sceneManager.mostraScena(scenaDaSalvare));
+        zone.put(CostantiHitbox.PAUSA_COMANDI, ()->sceneManager.mostraScena("COMANDI"));
+        zone.put(CostantiHitbox.PAUSA_ESCI, () -> this.salvaEdEsci());
+        
         GameScreen menuPausa = new GameScreen(sfondoMenu, zone);
         sceneManager.registraScena("MENU_PAUSA", menuPausa);
     }
@@ -536,7 +525,7 @@ public class GameEngine {
     }
 
     private void salvaEdEsci() {
-        db.NewStart();
+        db.newStart();
         String enigmi = String.join(",", giocatore.getEnigmiRisolti());
         
         ArrayList<String> invIds = new ArrayList<>();
@@ -554,10 +543,10 @@ public class GameEngine {
         db.salvaPartita(scenaDaSalvare, progression.getStatoCity(),
                         giocatore.isPossiedeMappa(), enigmi, inventario, progression.isPrimoAccessoPalazzo(),
                         caricaSpada);
-        ExitGame();
+        exitGame();
     }
 
-    public void ExitGame() {
+    public void exitGame() {
         System.out.println("WARNING: Stiamo uscendo dal gioco");
         network.fermaNetwork();
         db.chiudiConnessione();

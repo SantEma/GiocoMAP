@@ -84,7 +84,7 @@ public class GameStatistics {
         };
     }
 
-    public void Statistiche(boolean fineGioco) {
+    public void statistiche(boolean fineGioco) {
         String nome = "";
         int punteggio = 0;
 
