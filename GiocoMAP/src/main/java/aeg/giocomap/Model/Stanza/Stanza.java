@@ -1,4 +1,4 @@
-package aeg.giocomap.Model;
+package aeg.giocomap.Model.Stanza;
 
 import java.util.*;
 
