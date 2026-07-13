@@ -496,7 +496,7 @@ public class ProgressioneStoria {
         david = registraNPC("David", Arrays.asList(dialogoDavid));
         ImageIcon spriteDavid = new ImageIcon(getClass().getResource("/sprites/Personaggi/David.png"));
 
-        double[] davidHitbox = CostantiHitbox.PIAZZA_CONTADINO;
+        double[] davidHitbox = CostantiHitbox.PORTO_DAVID;
 
         // Ripristina la hitbox di David con il comportamento "dopo la mappa".
         // Viene invocata sia al caricamento di un salvataggio avanzato, sia live

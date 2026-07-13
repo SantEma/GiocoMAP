@@ -469,13 +469,10 @@ public class GameEngine {
         }
 
         Map<double[], Runnable> zone = new HashMap<>();
-        zone.put(new double[]{0.085, 0.375, 0.28, 0.105},           
-            () -> sceneManager.mostraScena(scenaDaSalvare));
-        zone.put(new double[]{0.085, 0.535, 0.29, 0.105},           
-            () -> sceneManager.mostraScena("COMANDI"));
-        zone.put(new double[]{0.085, 0.690, 0.28, 0.105},           
-            this::salvaEdEsci);
-
+        zone.put(CostantiHitbox.PAUSA_RIPRENDI,()->sceneManager.mostraScena(scenaDaSalvare));
+        zone.put(CostantiHitbox.PAUSA_COMANDI, ()->sceneManager.mostraScena("COMANDI"));
+        zone.put(CostantiHitbox.PAUSA_ESCI, () -> this.salvaEdEsci());
+        
         GameScreen menuPausa = new GameScreen(sfondoMenu, zone);
         sceneManager.registraScena("MENU_PAUSA", menuPausa);
     }
