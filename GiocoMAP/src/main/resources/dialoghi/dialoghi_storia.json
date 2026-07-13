@@ -4,7 +4,7 @@
             "lettera_retro_pensiero": "(Mmm... Non so come arrivarci però. Fammi controllare se sul retro c'è qualcosa).",
             "lettera_retro_parlato": "Il retro riporta una sottospecie di enigma, dice:",
             "locali_chiusi": "Sembra attualmente chiuso, ci ripasserò dopo",
-            "passaggio_cavaglieri": "Diavolo, mi son perso l'armata reale ma almeno ora la strada è libera",
+            "passaggio_cavaglieri": "Diavolo, mi son perso l'armata reale, ma almeno ora la strada è libera",
             "post_sbronza": "Come ci son finito qui... e tu chi sei?"
         },
         "Grotta": {
@@ -21,9 +21,9 @@
             "cena_green": "Sono qui per ritirare la cena di Green"
         },
         "Fox": {
-            "reazione_furto": "Ridammela, né ho bisogno per il mio scopo. Non ti darò pace fin quando non ti trovo.",
+            "reazione_furto": "Ridammela, né ho bisogno per il mio scopo. Non ti darò pace fin quando non ti trovo!",
             "reazione_inseguimento": "Mi stavi seguendo dall'inizio quindi... Va bene, ne va del mio onore, dimmi cosa vuoi.",
-            "pensiero_accordo": "(Ottimo e ora... Un attimo, se nessuno sa dov'è o com'è fatta posso fregarlo a mio vantaggio).",
+            "pensiero_accordo": "(Ottimo, e ora cosa faccio... \nUn attimo, se nessuno sa dov'è o com'è fatta posso fregarlo a mio vantaggio).",
             "parlato_accordo": "Va bene, resta qui. La cerco immediatamente!",
             "consegna_errata": "Ecco, prendi questa. È la pianta che cercavi.",
             "pensiero_consegna_errata_1": "(Un attimo! Se gli do la cura reale o un'erba qualunque, questo furfante si rimetterà in sesto o scapperà comunque con la mia stoffa... Mi sta palesemente truffando!)",
@@ -35,17 +35,17 @@
             "reazione_guarigione": "Maledizione! Fox si è curato e mi attacca! Devo riprovare l'enigma..."
         },
         "Saggio_Clock": {
-            "stupore": "Wow, sua saggezza è ... strano e strabiliante. Cosa posso fare per lei?",
-            "ammissione": "Si è inutile che lo nascondo, specialmente ad un mago..."
+            "stupore": "Wow, sua saggezza è ... strabiliante, ma anche di una stranezza. Cosa posso fare per lei?",
+            "ammissione": "Sì, è inutile che lo nascondo, specialmente ad un mago..."
         },
         "Eripeta": {
-            "domanda": "Si e lei chi sarebbe?",
+            "domanda": "Sì. Lei chi sarebbe?",
             "risposta": "Cosa posso fare per lei dunque?",
             "pensiero_difesa": "(Diamine! Dovevo immaginarlo che avrebbero scoperto il mio obiettivo prima o poi...).",
             "parlato_difesa_1": "La prego, le prometto che adempirò al mio dovere e non farò nulla di male al regno.",
-            "parlato_difesa_2": "In cambio di qualche favore può chiudere un occhio, tutti lo fanno no? E tutti hanno bisogno di qualcosa, parola di mercante.",
+            "parlato_difesa_2": "In cambio di qualche favore può chiudere un occhio, tanto tutti lo fanno no? E tutti hanno bisogno di qualcosa, parola di mercante!",
             "domanda_sfida": "Come posso fare allora?",
-            "comprensione": "Si capisco, perdonami se ti ho incuso timore e se ho scoperto della tua storia non era mia intenzione. Ecco... quindi... Io proseguo"
+            "comprensione": "Capisco, perdonami se ti ho incuso timore e se ho scoperto della tua storia non era mia intenzione. Ecco... quindi... io proseguirei per la mia strada"
         },
         "Marien": {
             "presentazione": "Eryndor, sua signoria. Al suo servizio.",
@@ -68,7 +68,7 @@
     
     "Dialoghi_NPC": {
         "Guardiano": {
-            "stop_carrozza": "Mi dispiace ma senza carrozza da qui non si passa, non è un sentiero da fare a piedi",
+            "stop_carrozza": "Mi dispiace ma senza carrozza da qui non si passa, non è un sentiero da fare a piedi.",
             "stop_palazzo": "Mi dispiace non puoi passare di qui. A breve passerà la scuderia del Re.\nPassa più tardi",
             "stop_chiave": "Alt! Ordini del Re. Senza il permesso con la chiave nessuno deve oltrepassare, mi spiace.",
             "richiesta_chiave": "Viandante, per ordine del Re solo chi possiede la chiave reale può oltrepassare questo cancello. Se ce l'hai mostrala.",
