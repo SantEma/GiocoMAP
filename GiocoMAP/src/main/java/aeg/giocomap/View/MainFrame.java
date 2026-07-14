@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package aeg.giocomap.View;
 
 import java.awt.BorderLayout;
@@ -10,7 +6,11 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.LinearGradientPaint;
+import java.awt.Point;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -22,10 +22,13 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
+import javax.swing.Timer;
 import javax.swing.UnsupportedLookAndFeelException;
+
 /**
  *
- * @author Utente
+ * @author andrea
  */
 public class MainFrame extends javax.swing.JFrame {
 
@@ -35,6 +38,10 @@ public class MainFrame extends javax.swing.JFrame {
     // nel JFrame (getLayeredPane), su un livello sopra al content pane. Cosi
     // fluttua sopra qualunque scena senza interferire con mostraPannello()
     private JButton btnChatFluttuante;
+
+    // Pannello del lampo arcobaleno, mostrato in dissolvenza sopra la glass pane
+    private JPanel lampoArcobaleno;
+    private float opacitaLampo = 0f;
     
     // Frecce direzionali in sovraimpressione
     private JButton btnNord;
@@ -198,6 +205,76 @@ public class MainFrame extends javax.swing.JFrame {
     // registra l'azione da eseguire al click del bottone chat fluttuante
     public void setChatListener(ActionListener listener) {
         btnChatFluttuante.addActionListener(listener);
+    }
+
+    // nasconde/mostra il bottone chat fluttuante (es. durante i titoli di coda)
+    public void setChatButtonVisibile(boolean visibile) {
+        if (btnChatFluttuante != null) {
+            btnChatFluttuante.setVisible(visibile);
+        }
+    }
+
+    // Mezzo lampo arcobaleno a tutto schermo, per dare enfasi ai momenti clou
+    // (es. la Spada Sincro che raggiunge il MAX). Dissolvenza rapida in entrata
+    // e in uscita, non intercetta i click perche' resta visibile solo un istante.
+    public void mostraLampoArcobaleno() {
+        if (lampoArcobaleno == null) {
+            lampoArcobaleno = new JPanel() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    if (opacitaLampo <= 0f) return;
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    int w = getWidth();
+                    int h = getHeight();
+                    int alpha = Math.max(0, Math.min(255, Math.round(140 * opacitaLampo)));
+                    Color[] colori = {
+                        new Color(255, 0, 0, alpha),
+                        new Color(255, 165, 0, alpha),
+                        new Color(255, 255, 0, alpha),
+                        new Color(0, 200, 0, alpha),
+                        new Color(0, 120, 255, alpha),
+                        new Color(150, 0, 255, alpha)
+                    };
+                    float[] frazioni = {0f, 0.2f, 0.4f, 0.6f, 0.8f, 1f};
+                    g2.setPaint(new LinearGradientPaint(new Point(0, 0), new Point(w, h), frazioni, colori));
+                    g2.fillRect(0, 0, w, h);
+                    g2.dispose();
+                }
+            };
+            lampoArcobaleno.setOpaque(false);
+        }
+
+        setGlassPane(lampoArcobaleno);
+        lampoArcobaleno.setVisible(true);
+
+        Timer fadeIn = new Timer(20, null);
+        fadeIn.addActionListener(e -> {
+            opacitaLampo += 0.15f;
+            lampoArcobaleno.repaint();
+            if (opacitaLampo >= 1f) {
+                opacitaLampo = 1f;
+                ((Timer) e.getSource()).stop();
+
+                Timer pausa = new Timer(250, null);
+                pausa.setRepeats(false);
+                pausa.addActionListener(ev -> {
+                    Timer fadeOut = new Timer(20, null);
+                    fadeOut.addActionListener(ev2 -> {
+                        opacitaLampo -= 0.08f;
+                        lampoArcobaleno.repaint();
+                        if (opacitaLampo <= 0f) {
+                            opacitaLampo = 0f;
+                            lampoArcobaleno.setVisible(false);
+                            ((Timer) ev2.getSource()).stop();
+                        }
+                    });
+                    fadeOut.start();
+                });
+                pausa.start();
+            }
+        });
+        fadeIn.start();
     }
 
     // registra le azioni per le frecce direzionali

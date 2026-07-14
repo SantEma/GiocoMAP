@@ -1,3 +1,4 @@
+
 package aeg.giocomap.Util;
 
 import com.google.gson.*;
@@ -5,6 +6,10 @@ import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ *
+ * @author andrea
+ */
 public class JsonLoader {
     
     public static JsonObject caricaJson(String percorso){
@@ -17,7 +22,7 @@ public class JsonLoader {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             return JsonParser.parseReader(reader).getAsJsonObject();
         }
-        catch(Exception e){
+        catch(JsonIOException | JsonSyntaxException | UnsupportedEncodingException e){
             System.err.println("Errore lettura JSON " + percorso + ": " + e.getMessage());
             return null;
         }
@@ -33,20 +38,6 @@ public class JsonLoader {
         }
     }
 
-    public static String estraiTesto(JsonObject oggetto, String chiave){
-        try{
-            JsonArray array = oggetto.getAsJsonArray(chiave);
-            StringBuilder sb = new StringBuilder();
-            for(JsonElement riga : array){
-                sb.append(riga.getAsString());
-            }
-            return sb.toString();
-        }
-        catch(Exception e){
-            System.err.println("Errore estrazione chiave " + chiave + ": " + e.getMessage());
-            return "";
-        }
-    }
 
     public static List<String> estraiLista(JsonObject oggetto, String chiave){
         List<String> lista = new ArrayList<>();

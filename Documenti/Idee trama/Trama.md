@@ -87,7 +87,7 @@ Alla risoluzione del terzo enigma e all'ottenimento del tessuto, sussegue il seg
 ---
 #### Karundis
 Risolte queste avversità il protagonista potrà uscire finalmente dal bosco arrivando a Karundis la periferia a valle situata poco lontana dal palazzo reale.
-Interagendo con ciò che è presente nella città, come due / tre NPC [da implementare], si intravede il sentiero che porta sopra alla montagna al castello e in lontananza c'è una piccola fucina in una grotta.
+Interagendo con ciò che è presente nella città, come due / tre NPC, si intravede il sentiero che porta sopra alla montagna al castello e in lontananza c'è una piccola fucina in una grotta.
 Andando verso la grotta il protagonista incontra un potente mago che si manifesta a lui.
 
 *   **Saggio Clock**: *"Benvenuto, Eryndor. So chi sei. So tutto di tutti nel regno io. Lascia che mi presenti, sono il Saggio Clock, antico mago temporale e aiutante del Re prima del mio ritiro. Sai sono io che ho dato vita al costrutto del Re che ti ha dato la Mappa."*
@@ -112,7 +112,7 @@ Risolto l'enigma la spada si sblocca e il giocatore ottiene la spada sincro, anc
 
 ---
 #### Castello ingresso
-Il protagonista scalando il sentiero della montagna arriva al cancello principale del castello ma una guardia reale gli blocca il passaggio spiegandoli che per accedere al portone gli serve una chiave. Il protagonista potrà parlare con gli NPC presenti nella mappa (o nell'online) per capire dove trovare questa chiave, mostrandogli volendo anche vari oggetti.
+Il protagonista scalando il sentiero della montagna arriva al cancello principale del castello ma una guardia reale gli blocca il passaggio spiegandoli che per accedere al portone gli serve una chiave. Il protagonista potrà parlare con gli NPC presenti nella mappa (o nell'online) per capire dove trovare questa chiave.
 
 >[!TODO] Thread and Socket
 >Da implementare che gli amici con l'online ti aiutano negli enigmi
@@ -121,7 +121,7 @@ Alla conclusione di ciò e dei dialoghi da implementare con gli NPC il giocatore
 
 ---
 #### Interno del castello
-Salendo le scale il protagonista viene fermato da una **Lamia Nobile**, di razza centaura, mezzo uomo mezzo cavallo.
+Salendo le scale il protagonista viene fermato da una **Lamia Nobile**, di razza centaura, mezzo umano e mezzo cavallo.
 
 **Eripeta**: *"Viaggiatore, sei diretto nel Palazzo della principessa situato in cima a queste scale per la riunione dei mercanti?"*
 **Eryndor**: *"Si e lei chi sarebbe?"*

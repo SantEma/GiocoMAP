@@ -11,11 +11,14 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
+/**
+ *
+ * @author emanuele
+ */
 public class GameNetwork {
     private GameServer gameServer;
     private GameClient gameClient;
     private ChatPanel chatPanel;
-    private boolean serverAvviato = false;
 
     private final MainFrame frame;
     private final SceneManager sceneManager;
@@ -29,7 +32,6 @@ public class GameNetwork {
         if (gameClient == null) {
             gameServer = new GameServer();
             gameServer.avvia();
-            serverAvviato = true;
 
             gameClient = new GameClient("Eryndor");
             chatPanel = new ChatPanel();
@@ -48,6 +50,26 @@ public class GameNetwork {
     }
 
     public void connettiComeClient(String ip) {
+        if (gameServer != null) {
+            JOptionPane.showMessageDialog(
+                frame,
+                "Sei già l'host! Non puoi unirti nuovamente come client.",
+                "Errore Host",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
+        if (gameClient != null && gameClient.isConnesso()) {
+            JOptionPane.showMessageDialog(
+                frame,
+                "Sei già connesso a una chat!",
+                "Errore Connessione",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return;
+        }
+
         String nome = JOptionPane.showInputDialog(
             frame,
             "Inserisci il tuo nome:",

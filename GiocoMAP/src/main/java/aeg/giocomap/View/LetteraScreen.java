@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.View;
 
 import javax.swing.*;
@@ -11,11 +7,11 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.util.List;
+
 /**
  *
- * @author Andrea e Giulio
+ * @author andrea e giulio
  */
-
 public class LetteraScreen extends JPanel {
     private BufferedImage sfondo;
     private final String testo;

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.View;
 import javax.swing.*;
 import java.awt.*;
@@ -14,14 +10,19 @@ import java.util.List;
 
 /**
  *
- * @author murgo
+ * @author giulio
  */
 public class TitoliDiCoda extends JPanel {
-
-    private JButton btn_indietro;          // presente solo nelle Statistiche
-    private PannelloScorrimento scroll;    // presente solo nei titoli di coda
+     
+    // Presente solo nelle Statistiche
+    private JButton btn_indietro;   
+    // Presente solo nei titoli di coda
+    private PannelloScorrimento scroll;
 
     /**
+     * @param records
+     * @param punteggioAttuale
+     * @param nomeGiocatore
      * @param soloHallOfFame true = mostra solo la Hall of Fame statica con il
      *                       bottone indietro (schermata Statistiche dal menu);
      *                       false = titoli di coda che scorrono, senza bottone,

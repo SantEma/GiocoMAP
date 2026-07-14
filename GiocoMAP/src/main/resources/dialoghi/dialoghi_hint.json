@@ -1,4 +1,34 @@
 {
+  "Opzioni_Enigmi": {
+    "Enigma_3_Fiori": [
+      "Consegna l'Erba Rossa",
+      "Consegna l'Erba Blu",
+      "Consegna l'Erba Viola"
+    ],
+    "Enigma_5_Vincolo": [
+      "Uno",
+      "Tre",
+      "Cinque"
+    ]
+  },
+  "Vestiti_Enigmi": {
+    "Enigma_Finale_Principessa": {
+      "vestiti": [
+        "Seta Celeste",
+        "Velluto Cremisi",
+        "Broccato Dorato",
+        "Lino Candido",
+        "Damasco Verde Smeraldo"
+      ],
+      "ordine_corretto": [
+        "Velluto Cremisi",
+        "Seta Celeste",
+        "Lino Candido",
+        "Damasco Verde Smeraldo",
+        "Broccato Dorato"
+      ]
+    }
+  },
   "Aiuti_Enigmi": {
     "Enigma_1_Porto": [
       "Hai provato a seguire il suono della grande campana di bronzo? Si dice che guidi sempre i viandanti verso l'acqua.",
@@ -18,11 +48,15 @@
       "Non pensare di dover presentare un pezzo tagliato su misura per ogni nuovo giorno. Ricorda che il Custode può darti il resto. Se il primo giorno gli cedi un frammento singolo, il secondo giorno potresti cedergliene un frammento doppio, riprendendoti indietro quello singolo!",
       "Pensa alla matematica dei raddoppi. Se tu avessi a disposizione un frammento che vale 1, un frammento che vale 2 e un frammento che vale 4, potresti scambiarli per ottenere qualsiasi valore da 1 a 7."
     ],
-    "Enigma_7_Mercanti_Collaborano": [
+    "Enigma_Finale_Mercanti_Collaborano": [
       "Il primo manichino deve pesare più del tessuto del porto... il Velluto Cremisi è il più pesante in assoluto, non credi?",
       "Ascoltate me! Se il Lino Candido deve per forza occupare una posizione dispari, ma dopo il tessuto del porto... potrebbe essere la terza?",
       "Ricordate la seconda legge! Seta e Broccato sono legati da tre posizioni di scarto. Se la Seta fosse al due, il Broccato andrebbe al cinque per forza!"
     ]
+  },
+  "Titoli_Aiuti": {
+    "Titolo_Orologio_Fucina": "Indizio sull'orologio",
+    "Titolo_Calderone_Fucina": "Indizio sul calderone"
   },
   "Ricerca_Chiave_Castello": [
     "Ho sentito che le guardie hanno perso una chiave molto importante mentre pattugliavano il Bosco Losco. Che sbadati!",

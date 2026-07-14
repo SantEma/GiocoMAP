@@ -5,7 +5,7 @@
             "Sono lieto di invitarvi al palazzo reale con lo scopo di rendere uno di voi il mio artigiano di corte.\n\n",
             "Come certamente le voci di corridoio avranno già sussurrato alle vostre orecchie, il cuore di mia figlia,\n la Principessa Marien, è stato conquistato dal capitano delle guardie Jack, e i preparativi per il matrimonio dell'anno sono ufficialmente aperti.\n Un evento di tale magnitudo, destinato a rimanere scolpito negli annali della nostra società, esige un fasto senza precedenti.\n Gli occhi del mondo intero saranno puntati sull'abito della sposa. Desideriamo per lei non un tessuto comune,\n ma un capolavoro di trama e ordito, capace di catturare la luce dei lampadari di cristallo e la meraviglia di ogni invitato.\n\n",
             "Ordunque, necessito che mi portiate il tessuto migliore che avete e tra tutti voi concorrenti sceglierò il migliore\n con cui sarà vergato l'abito per mia figlia, e fidatevi, sarete ben che meno ricompensati.\n\n",
-            "Distinti saluti, Vostra Imminenza"
+            "Distinti saluti, Vostra Eminenza"
         ],
         "lettera_finale":[
             "Partono le nozze regali e tutti i mercanti ricorderanno per sempre il nome di Eryndor come uno dei mercanti più astuti e forti della storia.\n",
@@ -17,11 +17,16 @@
         ]
     },
     "Schermo":{
-        "tessuto_rubato": "Il tuo tessuto è stato rubato dalla figura losca che si para d'inanzi a te",
+        "tessuto_rubato": "Il tuo tessuto è stato rubato dalla figura losca che si para dinanzi a te",
         "trovi_chiave": "Trovi una chiave mentre rovisti nelle tasche di Fox, sembra importante e decidi di tenerla",
         "strano_liquido": "Il robot sembra danneggiato e ti ha dato uno strano liquido da bere",
         "ubriacato": "Improvvisamente vedi tutto nero. Ti risvegli dopo qualche ora cosciente nel palazzo reale",
         "acivment": "Complimenti, hai sbloccato il finale segreto. Grazie per aver giocato!",
+        "fiore_gia_raccolto": "Hai già raccolto questo fiore.",
+        "fiore_sostituito": "Hai lasciato il fiore precedente e raccolto: ",
+        "fiore_raccolto": "Hai raccolto: ",
+        "fox_addormentato": "Hai già raccolto l'erba giusta, Fox sta dormendo.",
+        "blocco_fox_karundis": "Ehi! Dove credi di andare? Non abbiamo ancora finito qui!",
         "Enigma_1_Lettera": "Lascia il telaio e segui la via a Nord, guidato dalla voce della grande campana di bronzo.\nIl tuo cammino termina dove la strada si fa di legno e il vento sa di sale.\nCerca la piccola vasca di pietra che respira: due volte al giorno il mare la riempie, due volte al giorno la svuota.\nLì, all'ombra dei giganti che riposano con le ali di tela chiuse, il custode della via ti attende.",
         "Enigma_2_Germi": "Hai un vaso di vetro con dentro un solo germe.\nDopo un minuto, il germe si suddivide in due germi. Dopo un altro minuto, i due germi si suddividono di nuovo, formando un totale di quattro germi.\nCon questo ritmo, partendo da un germe il vaso sarà pieno di germi dopo esattamente un'ora di tempo.\nSapresti dire dopo quanti minuti si riempirà il vaso partendo con due germi anziché uno?",
         "Cartello_Esploratori": "La febbre dei boschi si cura solo con il fiore blu, il colore del cielo.\nAttenzione al fiore viola: il suo veleno addormenta all'istante anche un orso.",
@@ -32,12 +37,13 @@
         "Narrazione_Spada_Fucina": "Nemmeno con tutta la forza del mondo riusciresti a prendere questa cianfrusaglia.\nC'è un disegno dietro all'incudine però...",
         "Enigma_4_Orologio": "Un normalissimo orologio tradizionale ha due lancette e naturalmente la lancetta più lunga gira più in fretta rispetto all'altra.\nSupponendo che l'orologio qui raffigurato funzioni perfettamente, sapresti dire quante volte le lancette passeranno l'una sull'altra nell'arco di tempo compreso tra mezzogiorno e mezzanotte?",
         "Spada_sbloccata": "La spada si è sbloccata, ora riesci a sollevarla",
-        "Enigma_5_Vincolo": "Possiedi un antico Vincolo d'Oro, una linea ininterrotta forgiata da sette lacrime di luce.\nIl Custode della locanda esige un pedaggio rigoroso: una lacrima esatta per ogni alba, per sette albe consecutive.\nIl Custode è equo e scambierà con te le lacrime dei giorni precedenti come resto, ma fai attenzione: ogni volta che spezzi il Vincolo, la sua essenza magica sanguina e si indebolisce.\nQuante ferite, al minimo indispensabile, dovrai infliggere al tuo Vincolo per saziare il Custode ogni singolo giorno?",
+        "Enigma_5_Vincolo": "Possiedi un antico Vincolo d'Oro, una linea ininterrotta forgiata da sette lacrime di luce.\nIl Custode della locanda esige un pedaggio rigoroso: una lacrima esatta per ogni alba, per sette albe consecutive.\nIl Custode è equo e scambierà con te le lacrime dei giorni precedenti come resto, ma fai attenzione: ogni volta che spezzi il Vincolo, la sua essenza magica sanguina e si indebolisce.",
+        "Enigma_5_Vincolo_domanda": "Quante ferite, al minimo indispensabile, dovrai infliggere al tuo Vincolo per saziare il Custode ogni singolo giorno?",
         "Narrazione_Fox_Borsa": "Nelle tasche di Fox trovi anche una chiave, sembra importante così decidi di tenerla.",
         "Recuper_tessuto": "Hai recuperato il tuo tessuto",
         "altri_mercanti": "Origliando senti che alcuni mercanti stanno facendo squadra tra loro",
         "mercante_piumato": "Un mercante con un turbante piumato spinge via Eryndor con il gomito, ridacchiando",
-        "disposizione_mercante": "Il mercante dispone i tessuti esattamente secondo l'opzione n.",
+        "disposizione_mercante": "Il mercante dispone i tessuti esattamente secondo l'opzione pensata da te",
         "opzione_vestito": "Quale delle seguenti opzioni scegli? ",
         "cattura_piumato": "Le guardie lo trascinano via mentre i suoi nastri piumati volano per la sala",
         "interruzione_jack": "Il momento viene spezzato all'improvviso.\n Le gigantesche porte della sala vengono spalancate\n con una violenza tale da far tremare i lampadari di cristallo.\n Una figura imponente in armatura pesante fa il suo ingresso, accecata dall'ira.",

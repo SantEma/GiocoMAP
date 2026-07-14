@@ -1,13 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package aeg.giocomap;
 
 import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.GameEngine.GameEngine;
 import aeg.giocomap.Model.Storage.*;
-
 
 /**
  *

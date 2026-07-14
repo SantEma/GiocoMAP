@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.View;
 
 import java.awt.Color;
@@ -12,9 +8,8 @@ import javax.swing.JButton;
 
 /**
  *
- * @author Andrea
+ * @author andrea
  */
-
 public class BottoneAvanti extends JButton {
     public BottoneAvanti(ActionListener listener) {
         super("Avanti \u2192");

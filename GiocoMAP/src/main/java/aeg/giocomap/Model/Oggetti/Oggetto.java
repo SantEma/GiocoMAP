@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.Model.Oggetti;
 
 /**
@@ -9,9 +5,9 @@ package aeg.giocomap.Model.Oggetti;
  * @author emanuele
  */
 public class Oggetto {
-    int idOggetto;
-    String nomeOggetto;
-    String descrizioneOggetto;
+    private int idOggetto;
+    private String nomeOggetto;
+    private String descrizioneOggetto;
     
     public Oggetto(int idOggetto, String nome, String descrizioneOggetto){
         this.idOggetto=idOggetto;

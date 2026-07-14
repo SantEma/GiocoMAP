@@ -1,17 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.Network;
 
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
 /**
  *
- * @author murgo
+ * @author giulio
  */
-
 public class GameServer implements Runnable {
 
     public static final int PORTA = 12345;

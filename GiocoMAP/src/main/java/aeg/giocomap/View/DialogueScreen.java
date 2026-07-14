@@ -1,23 +1,23 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.View;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.util.regex.Pattern;
+
 /**
  *
- * @author Andrea
+ * @author andrea
  */
 public class DialogueScreen extends JLayeredPane {
-    private GameScreen scena_stanza;
-    private JPanel panelSpritePG;
+    // Regex: intercetta il simbolo di grado (es. negli elenchi "1° Giorno") per
+    // colorare la battuta di azzurro, come avviene per i pensieri tra parentesi
+    private static final Pattern PATTERN_GRADO = Pattern.compile("°");
+
+    private final GameScreen scena_stanza;
+    private final JPanel panelSpritePG;
     private Image imageSprite;
-    private JPanel boxDialogo;
-    private JTextArea area_text;
-    private JButton btnAvanti;
+    private final JPanel boxDialogo;
+    private final JTextArea area_text;
     
     public DialogueScreen(GameScreen scena_stanza,Runnable azioneAvanti){
         this.scena_stanza=scena_stanza;
@@ -76,7 +76,7 @@ public class DialogueScreen extends JLayeredPane {
         //(DA TESTARE) il bottone richiamato
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         southPanel.setOpaque(false);
-        southPanel.add(btnAvanti=new BottoneAvanti(e -> azioneAvanti.run()));
+        southPanel.add(new BottoneAvanti(e -> azioneAvanti.run()));
         boxDialogo.add(southPanel,BorderLayout.SOUTH); // Pannello con il dialogo dentro sotto
         
         // Tutto ciò che abbiamo inserito va messo tutto nel gestore dei livelli di Layout
@@ -119,6 +119,17 @@ public class DialogueScreen extends JLayeredPane {
         if(nome!=null && !nome.equals("Fantoccio"))
             area_text.setText(nome+ ":\n"+ battuta);
         else area_text.setText(battuta);
+        
+        // Se l'intera battuta contiene una parentesi (pensiero) o il simbolo di grado °
+        // (elenchi tipo "1° Giorno"), colorala di azzurro.
+        // Se contiene l'indizio di eripeta, colorala di giallo.
+        if (battuta.contains("(") || PATTERN_GRADO.matcher(battuta).find()) {
+            area_text.setForeground(new Color(85, 170, 255));
+        } else if (battuta.contains("il mio nome e sarai ricompensato")) {
+            area_text.setForeground(Color.YELLOW);
+        } else {
+            area_text.setForeground(Color.WHITE); // Colore standard per il dialogo parlato
+        }
         
         if (sprite != null) {
             this.imageSprite = sprite.getImage();

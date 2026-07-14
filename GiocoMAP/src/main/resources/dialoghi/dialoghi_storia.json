@@ -1,10 +1,18 @@
 {
     "Eryndor":{
         "inizio":{
-            "lettera_retro": "(Mmm... Non so come arrivarci però. Fammi controllare se sul retro c'è qualcosa). Il retro riporta una sottospecie di enigma, dice:",
+            "lettera_retro_pensiero": "(Mmm... Non so come arrivarci però. Fammi controllare se sul retro c'è qualcosa).",
+            "lettera_retro_parlato": "Il retro riporta una sottospecie di enigma, dice:",
             "locali_chiusi": "Sembra attualmente chiuso, ci ripasserò dopo",
-            "passaggio_cavaglieri": "Diavolo, mi son perso l'armata reale ma almeno ora la strada è libera",
+            "passaggio_cavaglieri": "Diavolo, mi son perso l'armata reale, ma almeno ora la strada è libera",
             "post_sbronza": "Come ci son finito qui... e tu chi sei?"
+        },
+        "Grotta": {
+            "successo_spada": "Incredibile! L'incudine si è aperta e ho estratto la Spada Sincro!",
+            "fallimento_spada": "L'incudine non si muove. La risposta deve essere sbagliata."
+        },
+        "Guardiano": {
+            "pensiero_chiave": "(Un momento... questa chiave era nelle tasche di Fox. Quell'infame deve averla rubata a qualche guardia reale che passava prima di me. Per fortuna l'ho recuperata io!)"
         },
         "MrCooper": {
             "no_soldi": "Non ho soldi con me purtroppo"
@@ -13,115 +21,167 @@
             "cena_green": "Sono qui per ritirare la cena di Green"
         },
         "Fox": {
-            "reazione_furto": "Ridammela ne ho bisogno per il mio scopo. Non ti darò pace fin quando non ti trovo.",
+            "reazione_furto": "Ridammela, ne ho bisogno per il mio scopo. Non ti darò pace fin quando non ti trovo!",
             "reazione_inseguimento": "Mi stavi seguendo dall'inizio quindi... Va bene, ne va del mio onore, dimmi cosa vuoi.",
-            "accordo": "(Ottimo e ora... Un attimo, se nessuno sa dov'è o com'è fatta posso fregarlo a mio vantaggio). Va bene, resta qui. La cerco immediatamente!",
+            "pensiero_accordo": "(Ottimo, e ora cosa faccio... \nUn attimo, se nessuno sa dov'è o com'è fatta posso fregarlo a mio vantaggio).",
+            "parlato_accordo": "Va bene, resta qui. La cerco immediatamente!",
             "consegna_errata": "Ecco, prendi questa. È la pianta che cercavi.",
             "pensiero_consegna_errata_1": "(Un attimo! Se gli do la cura reale o un'erba qualunque, questo furfante si rimetterà in sesto o scapperà comunque con la mia stoffa... Mi sta palesemente truffando!)",
-            "pensiero_consegna_errata_2": "(Non posso rischiare. Devo dargli la pianta giusta per addormentarlo, così potrò riprendermi il tessuto dalle sue tasche mentre è svenuto. Meglio fermarlo prima che scappi!)",
-            "correzione_consegna": "Aspetta, Fox! Mi sono sbagliato, quella non è la pianta giusta. Guarda meglio nella mia borsa...",
+            "pensiero_consegna_errata_2": "(Non posso rischiare. Devo dargli la pianta velenosa viola per addormentarlo, così potrò riprendermi il tessuto dalle sue tasche mentre è svenuto. Meglio fermarlo prima che scappi!)",
+            "correzione_consegna": "Aspetta, Fox! Mi sono sbagliato, quella non è la pianta giusta. Vado a guardare meglio, credo sia quella velenosa ...",
             "consegna_corretta": "Ecco a te. Questa è la rarissima erba medica che cercavi.",
             "pensiero_vittoria_1": "(Perfetto. Il cartello degli esploratori aveva ragione: il fiore viola è un potente sonnifero, altro che medicina!)",
-            "pensiero_vittoria_2": "(Ora che sta dormendo come un sasso, posso riprendermi il tessuto della Principessa direttamente dalle sue tasche senza che possa muovere un dito. Giustizia è fatta!)"
+            "pensiero_vittoria_2": "(Ora che sta dormendo come un sasso, posso riprendermi il tessuto della Principessa direttamente dalle sue tasche senza che possa muovere un dito. Giustizia è fatta!)",
+            "reazione_guarigione": "Maledizione! Fox si è curato e mi attacca! Devo riprovare l'enigma..."
         },
         "Saggio_Clock": {
-            "stupore": "Wow, sua saggezza è ... strano e strabiliante. Cosa posso fare per lei?",
-            "ammissione": "Si è inutile che lo nascondo, specialmente ad un mago..."
+            "stupore": "Wow, sua saggezza è ... strabiliante, ma anche di una stranezza. Cosa posso fare per lei?",
+            "ammissione": "Sì, è inutile che lo nascondo, specialmente ad un mago..."
         },
         "Eripeta": {
-            "domanda": "Si e lei chi sarebbe?",
+            "domanda": "Sì. Lei chi sarebbe?",
             "risposta": "Cosa posso fare per lei dunque?",
-            "difesa": "(Diamine! Dovevo immaginarlo che avrebbero scoperto il mio obiettivo prima o poi...).\nLa prego, le prometto che adempirò al mio dovere e non farò nulla di male al regno.\nIn cambio di qualche favore può chiudere un occhio, tutti lo fanno no? E tutti hanno bisogno di qualcosa, parola di mercante.",
+            "pensiero_difesa": "(Diamine! Dovevo immaginarlo che avrebbero scoperto il mio obiettivo prima o poi...).",
+            "parlato_difesa_1": "La prego, le prometto che adempirò al mio dovere e non farò nulla di male al regno.",
+            "parlato_difesa_2": "In cambio di qualche favore può chiudere un occhio, tanto tutti lo fanno, no? E tutti hanno bisogno di qualcosa, parola di mercante!",
             "domanda_sfida": "Come posso fare allora?",
-            "comprensione": "Si capisco, perdonami se ti ho incuso timore e se ho scoperto della tua storia non era mia intenzione. Ecco... quindi... Io proseguo"
+            "comprensione": "Capisco, perdonami se ti ho incusso timore e se ho scoperto della tua storia, non era mia intenzione. Ecco... quindi... io proseguirei per la mia strada"
         },
         "Marien": {
             "presentazione": "Eryndor, sua signoria. Al suo servizio.",
             "racconto": "Sua altezza, il viaggio per giungere fin qui è stato il mio vero maestro d'astuzia.\nHo dovuto decifrare i segreti delle maree al porto di MareBlu, comprendere i pericoli del Bosco Losco per sventare i piani di un furfante, e persino svelare i misteri dello scorrere del tempo.",
-            "seduzione_1": "(Le sue parole confermano ciò che speravo. Ho la sua totale ammirazione. Devo continuare a tessere questa tela e assecondarla... lei è la mia chiave per ottenere ciò che merito davvero).\nSiete troppo gentile, mia signora. La vera forza non risiede sempre nell'acciaio, ma nella trama delle nostre scelte.\nOgni tappa del mio viaggio era solo un filo necessario per tessere la strada che mi avrebbe condotto al cospetto della vostra impareggiabile intelligenza.",
-            "seduzione_2": "(Perfetto. È completamente rapita. Un mercante sa sempre cogliere l'occasione quando gli si presenta davanti).\nHo sfidato le insidie del regno intero per portarvi il mio tessuto migliore, Principessa.\nEssere compreso e apprezzato da una mente brillante come la vostra... è un onore che per me vale molto più di qualsiasi ricompensa in oro.",
+            "pensiero_seduzione_1": "(Le sue parole confermano ciò che speravo. Ho la sua totale ammirazione. Devo continuare a tessere questa tela e assecondarla... lei è la mia chiave per ottenere ciò che merito davvero).",
+            "parlato_seduzione_1": "Siete troppo gentile, mia signora. La vera forza non risiede sempre nell'acciaio, ma nella trama delle nostre scelte.\nOgni tappa del mio viaggio era solo un filo necessario per tessere la strada che mi avrebbe condotto al cospetto della vostra impareggiabile intelligenza.",
+            "pensiero_seduzione_2": "(Perfetto. È completamente rapita. Un mercante sa sempre cogliere l'occasione quando gli si presenta davanti).",
+            "parlato_seduzione_2": "Ho sfidato le insidie del regno intero per portarvi il mio tessuto migliore, Principessa.\nEssere compreso e apprezzato da una mente brillante come la vostra... è un onore che per me vale molto più di qualsiasi ricompensa in oro.",
             "pensiero_mercante_piumato": "(Per poco non ho commesso lo stesso errore. Con cinque tessuti la trappola è doppia: non basta più incrociare due indizi, bisogna verificarli tutti insieme prima di muovere un solo dito.)",
-            "tradimento": "Tu chi sei e che ci fai abbracciato al mio futuro sposo. Via di qui, tutti e due!"
+            "tradimento": "Tu chi sei e che ci fai abbracciato al mio futuro sposo. Via di qui, tutti e due!",
+            "errore_ordine": "Per poco non ho commesso lo stesso errore... devo riprovare."
         },
         "Jack": {
-            "pensiero_sfida": "(Diamine ho solo una spada mal messa per combattere... O la va o la spacca, ne va della mia vita. Arrivato fin qui non posso tirarmi indietro)",
+            "pensiero_sfida": "(Diamine, ho solo una spada mal messa per combattere... O la va o la spacca, ne va della mia vita. Arrivato fin qui non posso tirarmi indietro)",
             "pensiero_spada": "(Un secondo... ma la mia spada ora è carica, come sarà successo. Speriamo che questo 100% mi porti alla vittoria)",
-            "vittoria": "(Ecco perché Clock era fissato col tempo, potevo arrivarci da solo) E' la mia occasione allora bene, fatti avanti. Potere a me!"
+            "pensiero_vittoria": "(Ecco perché Clock era fissato col tempo, potevo arrivarci da solo)",
+            "parlato_vittoria": "È la mia occasione allora bene, fatti avanti. Potere a me!"
         }    
     },
     
     "Dialoghi_NPC": {
-        "Bloccatore": {
-            "stop_carrozza": "Mi dispiace ma senza carrozza da qui non si passa, non è un sentiero da fare a piedi",
-            "stop_palazzo": "Mi dispiace non puoi passare di qui. A breve passerà la scuderia del Re.\nPassa più tardi",
-            "stop_chiave": "Alt! Ordini del Re. Senza il permesso con la chiave nessuno deve oltrepassare, mi spiace."
+        "Guardiano": {
+            "stop_carrozza": "Mi dispiace, ma senza carrozza da qui non si passa, non è un sentiero da fare a piedi.",
+            "stop_palazzo": "Mi dispiace, non puoi passare di qui. A breve passerà la scuderia del Re.\nPassa più tardi",
+            "stop_chiave": "Alt! Ordini del Re. Senza il permesso con la chiave, nessuno deve oltrepassare, mi spiace.",
+            "richiesta_chiave": "Viandante, per ordine del Re, solo chi possiede la chiave reale può oltrepassare questo cancello. Se ce l'hai, mostrala.",
+            "domanda_chiave": "Hai con te la chiave, quindi?",
+            "accettazione": "La chiave è autentica. Procedi pure, viaggiatore. Il castello ti attende."
         },
         "David": {
-            "incontro_1": "Complimenti! Hai superato il primo ostacolo, ma il tuo cammino sarà ancora più tortuoso, sua maestà cerca solamente gente competente nel suo castello.\nPer ora ti sei meritato la mappa per andare verso il castello.\nPremi 'M' per aprire la mappa",
-            "ritorno_1": "Ti serve qualcosa amico, vedo che sei tornato da me.",
-            "ritorno_2": "Ohhh capisco... Quindi ti ha mandato per questo, speravo che prima o poi si ricongiungesse a lui.\nPer darti questo oggetto di estrema importanza devo testare la tua preparazione.\nEryndor hai fatto molta strada vediamo se riesci a superare un problema così complesso però.",
-            "storia_eripeta": "Purtroppo le lacrime di questo indovinello sono quelle di Eripeta.\nDevi sapere che è diventata veggente proprio per trovare chi ha trasformato suo figlio in oro liquido. Prima era una guerriera ma il Re non voleva consegnargli questo oggetto, credeva che l'avrebbe fatta soffrire troppo. Per questo l'ha dato via.\nMa una persona onesta e giusta dal cuore nobile credo che debba riunire sempre una madre col proprio figlio,\n per quanto male possa fare, è la cosa giusta da dover eseguire.",
-            "crash_robot": "Biiip Biiiip... Bop bop, trunz trunz. CLANK!"
+            "incontro_1": "Complimenti! Hai superato il primo ostacolo, ma il tuo cammino sarà ancora più tortuoso. Sua maestà cerca solamente gente competente nel suo castello.\nPer ora ti sei meritato la mappa per andare verso il castello.\nPremi 'M' per aprire la mappa",
+            "ritorno_1": "Ti serve qualcosa, amico, vedo che sei tornato da me.",
+            "ritorno_2": "Ohhh capisco... Quindi ti ha mandato per questo. Speravo che prima o poi si ricongiungesse a lui.\nPer darti questo oggetto di estrema importanza, devo testare la tua preparazione.\nEryndor, hai fatto molta strada, vediamo se riesci a superare un problema così complesso però.",
+            "soluzione_enigma_1": "La risposta è 1 sola ferita (taglio).\nInfrangendo solo il terzo elemento del Vincolo, otterrai esattamente tre parti distinte:\n- La singola lacrima spezzata (valore 1)\n- Un filo da due lacrime intatte (valore 2)\n- Un filo da quattro lacrime intatte (valore 4)",
+            "soluzione_enigma_2": "I pagamenti avverranno in questo modo perfetto:\n- 1° Giorno: Cedi il frammento da 1.\n- 2° Giorno: Cedi il frammento da 2, ricevendo l'1 come resto.\n- 3° Giorno: Cedi il frammento da 1 (ora il Custode ha 1 e 2).\n- 4° Giorno: Cedi il frammento da 4, ricevendo 1 e 2 come resto.",
+            "soluzione_enigma_3": "- 5° Giorno: Cedi il frammento da 1.\n- 6° Giorno: Cedi il frammento da 2, ricevendo l'1 come resto.\n- 7° Giorno: Cedi l'ultimo frammento da 1.",
+            "storia_eripeta_1": "Purtroppo le lacrime di questo indovinello sono quelle di Eripeta.\nDevi sapere che è diventata veggente proprio per trovare chi ha trasformato suo figlio in oro liquido. Prima era una guerriera, ma il Re non voleva consegnarle questo oggetto, credeva che l'avrebbe fatta soffrire troppo. Per questo l'ha dato via.",
+            "storia_eripeta_2": "Ma una persona onesta e giusta dal cuore nobile, credo che debba riunire sempre una madre col proprio figlio,\n per quanto male possa fare, è la cosa giusta da dover eseguire.",
+            "crash_robot": "Biiip Biiiip... Bop bop, trunz trunz. CLANK!",
+            "saluto_generico": "Buona fortuna con la tua avventura, straniero!",
+            "consiglio_stalla": "La prossima tappa è il bosco! Per arrivare nel bosco ti serve una carrozza, vai alla stalla."
         },
         "MrCooper": {
-            "saluto": "Cosa posso fare per te giovanotto? Qui puoi trovare la mia scuderia, tutto ad ottimo prezzo, posso assicurartelo.",
+            "saluto": "Cosa posso fare per te, giovanotto? Qui puoi trovare la mia scuderia, tutto ad ottimo prezzo, posso assicurartelo.",
             "prezzo": "Per lunghe distanze posso dartene una da 100 monete d'oro, altrimenti anche 80 d'argento vanno bene per brevi durate.",
-            "proposta": "Mmm... Capisco, se proprio desideri quella a brevi distanze te la potrei concedere, ma dovrai fare qualcosa per me.",
-            "missione": "Ottimo! Dovrai andare a prendere le carote dal contadino per darle alle mie puledre. Sai ormai ho una certa età.",
-            "ringraziamento": "Sei stato grande, come promesso la carrozza è tua"
+            "proposta": "Mmm... Capisco, se proprio desideri quella a brevi distanze, te la potrei concedere, ma dovrai fare qualcosa per me.",
+            "missione": "Ottimo! Dovrai andare a prendere le carote dal contadino per darle alle mie puledre. Sai, ormai ho una certa età.",
+            "ringraziamento": "Sei stato grande, come promesso, la carrozza è tua",
+            "non_capisco": "Non capisco cosa tu intenda, giovanotto. Riprova.",
+            "vai_al_bosco": "La carrozza è tua, vai al bosco.",
+            "buona_fortuna": "Buona fortuna per il tuo viaggio, giovanotto! Spero troverai ciò che cerchi.",
+            "hai_carote": "Hai portato le carote?"
         },
         "Contadino_Green": {
-            "saluto": "Salve bottegaio come posso esserle utile?",
+            "saluto": "Salve, bottegaio, come posso esserle utile?",
             "richiesta": "Certo, nessun problema se non fosse che avrei un favore da chiederti in cambio.\nPurtroppo le mie galline continuano a scappare in continuazione e non riesco ad andare al porto per prendere la cena di questa sera, potresti andare tu in cambio delle carote?",
-            "ringraziamento": "Eryndor, non so come ringraziarti.\nNon puoi sbagliarti il pescivendolo è proprio all'ingresso del Porto. Attendo un tuo ritorno.",
-            "consegna": "Perfetto amico, ecco a te la scorta migliore di carote che ho. Tutte tue"
+            "ringraziamento": "Eryndor, non so come ringraziarti.\nNon puoi sbagliarti, il pescivendolo è proprio all'ingresso del Porto. Attendo un tuo ritorno.",
+            "consegna": "Perfetto, amico, ecco a te la scorta migliore di carote che ho. Tutte tue",
+            "incomprensione": "Non ho capito cosa cerchi. Riprova.",
+            "augurio": "Buona fortuna con la tua avventura!",
+            "fretta": "Non ho tempo da perdere, devo badare alle mie galline."
         },
         "Pescivendolo": {
-            "saluto": "Pesce, seppie, aragoste e molluschi. Solito pescato a km0, direttamente da questo porto, amico!",
-            "richiesta": "Ah ma certo certo... \nSolo che devi sapere, -mi vergogno a dirlo-, sono analfabeta e dovrei capire assolutamente come risolvere questo problema presente su questo foglio.\nMa non so leggere, potresti risolverlo per me è molto importante e personale.\nMia figlia mi accetterà nuovamente a casa se gli dimostro un minimo di istruzione.",
+            "saluto": "Pesce, seppie, aragoste e molluschi. Solito pescato a km 0, direttamente da questo porto, amico!",
+            "richiesta": "Ah ma certo certo... \nSolo che devi sapere, -mi vergogno a dirlo-, sono analfabeta e dovrei capire assolutamente come risolvere questo problema presente su questo foglio.\nMa non so leggere, potresti risolverlo per me, è molto importante e personale.\nMia figlia mi accetterà nuovamente a casa se le dimostro un minimo di istruzione.",
             "risolto": "59... capisco, o meglio, l'hai capito tu. Riferirò testuale risposta. Grazie del tuo aiuto, eccoti la cena di Green",
-            "risposta_errata": "Non penso, non mi tornano i conti poiché questa risposta la diedi pure io e non è quella giusta, riprova"
+            "risposta_errata": "Non penso, non mi tornano i conti poiché questa risposta la diedi pure io e non è quella giusta, riprova",
+            "incomprensione": "Cosa? Parla chiaro.",
+            "ringraziamento_finale": "Grazie ancora per il tuo aiuto!",
+            "chiuso": "Sono chiuso, ripassa più tardi."
         },
         "Fox": {
             "incontro": "Andrò io al palazzo reale spacciandomi per te e andrò direttamente IO dalla principessa. Addio babbeo!",
-            "ricatto": "Se proprio ci tieni a riprendere il tuo tessuto vieni a prenderlo... Anzi, lavora per me, come lavori per tutti.",
-            "richiesta_pianta": "Splendido... Vedi, facendo questo LAVORO, sono molto malato e ho bisogno di una pianta medica presente nei meandri di questo bosco.\nSe la trovi il resto è tutto tuo. Ma tanto nessuno sa dove sia o come sia fatta.",
+            "ricatto": "Se proprio ci tieni a riprendere il tuo tessuto, vieni a prenderlo... Anzi, lavora per me, come lavori per tutti.",
+            "parlato_richiesta_pianta": "Splendido... Vedi, facendo questo LAVORO, sono molto malato e ho bisogno di una pianta medica presente nei meandri di questo bosco.\nSe la trovi, il resto è tutto tuo. Ma tanto nessuno sa dove sia o come sia fatta.",
+            "pensiero_richiesta_pianta": "(Lui non sa che tanto non gli darò nulla e cercherà a vuoto)",
             "reazione_pianta_errata": "Ah, fammi vedere... Sì, sembra proprio lei! Grazie del disturbo, babbeo!\nOra, come promesso... col cavolo che ti ridò il tessuto! Ciao!",
             "reazione_pianta_corretta_1": "Davvero? Ottimo! Dammela subito!",
-            "reazione_pianta_corretta_2": "Ahah! Funziona, sento già gli effetti! E ora, come ti dicevo prima... il tessuto me lo tengo io, fesso! Non ti ridò un bel nient...\nAspetta... perché... mi sento le palpebre... così pesanti...?"
+            "reazione_pianta_corretta_2": "Ahah! Funziona, sento già gli effetti! E ora, come ti dicevo prima... il tessuto me lo tengo io, fesso! Non ti ridò un bel nient...\nAspetta... perché... mi sento le palpebre... così pesanti...?",
+            "addormentato": "Zzz... che sonno ...",
+            "sbrigati": "Allora, hai trovato la pianta che mi serve o no? Muoviti!",
+            "guarigione": "Ah! Sento di essermi guarito! Non ti darò mai il tessuto, fesso!"
         },
         "Saggio_Clock": {
-            "presentazione": "Benvenuto, Eryndor. So chi sei. So tutto di tutti nel regno io.\nLascia che mi presenti, sono il Saggio Clock, antico mago temporale e aiutante del Re prima del mio ritiro.\nSai sono io che ho dato vita al costrutto del Re che ti ha dato la Mappa.",
+            "presentazione": "Benvenuto, Eryndor. So chi sei. So tutto di tutti nel regno io.\nLascia che mi presenti, sono il Saggio Clock, antico mago temporale e aiutante del Re prima del mio ritiro.\nSai, sono io che ho dato vita al costrutto del Re che ti ha dato la Mappa.",
             "intenzioni": "Se al castello vuoi arrivare, una prova dovrai superare.\nVedo nella tua anima che vendere il tessuto al Re non è il tuo unico scopo, vuoi molto di più. Sappiamo entrambi di cosa stiamo parlando...",
-            "missione": "Il tempo scorre senza mai fermarsi ricordalo. Dimostra quanto vali, vai verso quella fucina."
+            "missione": "Il tempo scorre senza mai fermarsi, ricordalo. Dimostra quanto vali, vai verso quella fucina."
         },
         "Eripeta": {
             "blocco": "Viaggiatore, sei diretto nel Palazzo della principessa situato in cima a queste scale per la riunione dei mercanti?",
-            "presentazione": "Che scortese, perdonami. Sono Eripeta. Sono la veggente del Re.\nDevi sapere che ci sono molte persone nella stanza già.\nIl capo delle guardie reali Jack mi ha detto di esaminare gli ultimi arrivati, dato che lui si è allontanato un attimo.\nDi solito non rispondo a lui ma per oggi sto facendo un eccezione in vista del matrimonio della Principessa.",
+            "presentazione_1": "Che scortese, perdonami. Sono Eripeta. Sono la veggente del Re.",
+            "presentazione_2": "Devi sapere che ci sono molte persone nella stanza già.",
+            "presentazione_3": "Il capo delle guardie reali Jack mi ha detto di esaminare gli ultimi arrivati, dato che lui si è allontanato un attimo.",
+            "presentazione_4": "Di solito non rispondo a lui, ma per oggi sto facendo un'eccezione in vista del matrimonio della Principessa.",
             "invito": "Entra nella stanza qui accanto, è la mia cripta, devo studiarti con la mia sfera di cristallo.",
-            "visione": "Vedo con la mia sfera che sei un uomo... DISONESTO, vuoi entrare nelle braghe di sua maestà solo per arricchirti di più ed ottenere un titolo nobiliare.\nChe razza di uomo di valore vorrebbe arrivare a ciò.\nChe disgusto vai via dal castello prima che ti incenerisca seduta stante.",
-            "sfida": "Non provare a comprarmi insolente. Se sei davvero determinato e credi di meritarti un titolo nobiliare te lo dovrai sudare.",
-            "indizio": "Uff, sei proprio ostinato. E va bene allora. Torna dove la tua avventura è cominciata.\nVedo nella sfera una zona piena di blu salato con un signore che ti può dare una mano, di il mio nome e sarai ricompensato.\nQuesto posso dirti, ora sparisci e torna quando avrai trovato qualcosa che ne vale davvero la pena di essere accettato.",
-            "ringraziamento": "Ti ho visto dalla mia sfera. Ho visto tutto. Grazie del tuo gesto puoi proseguire.\nVoglio restare un po' da sola a riflettere ora. Comprendimi.",
-            "congedo": "... Vai"
+            "visione_1": "Vedo con la mia sfera che sei un uomo... DISONESTO, vuoi entrare nelle braghe di sua maestà solo per arricchirti di più ed ottenere un titolo nobiliare.",
+            "visione_2": "Che razza di uomo di valore vorrebbe arrivare a ciò. Che disgusto, vai via dal castello prima che ti incenerisca seduta stante.",
+            "sfida": "Non provare a comprarmi, insolente. Se sei davvero determinato e credi di meritarti un titolo nobiliare, te lo dovrai sudare.",
+            "indizio_1": "Uff, sei proprio ostinato. E va bene allora. Torna dove la tua avventura è cominciata.",
+            "indizio_2": "Vedo nella sfera una zona piena di blu salato con un signore che ti può dare una mano, di' il mio nome e sarai ricompensato.",
+            "indizio_3": "Questo posso dirti, ora sparisci e torna quando avrai trovato qualcosa che ne vale davvero la pena di essere accettato.",
+            "ringraziamento_1": "Ti ho visto dalla mia sfera. Ho visto tutto. Grazie del tuo gesto puoi proseguire.",
+            "ringraziamento_2": "Voglio restare un po' da sola a riflettere ora. Comprendimi.",
+            "congedo": "... Vai",
+            "rifiuto": "Non sei degno di proseguire. Risolvi prima il mio enigma.",
+            "consenso": "Hai dimostrato il tuo valore. Puoi procedere.",
+            "errore": "La tua risposta è errata. Torna quando sarai più saggio."
         },
         "Marien": {
-            "presentazione_enigma": "Viandante, vorresti risolvere tu, come tutti i qui presenti il problema che io stessa ho ideato.\nDovete sapere tutti che fino ad ora nessuno è mai riuscito a risolverlo e io sono una grande amante delle sfide che richiedono cervello.\nNemmeno il mio promesso sposo Jack è mai riuscito a risolverlo. A tal punto, non diteglielo quando arriverà qui in stanza o andrà su tutte le furie.",
-            "enigma_leggi": "Il mio abito racconterà il mio cammino attraverso cinque tappe cerimoniali. Ascoltate le nuove leggi restrittive di Shambhala:\n- Il primo manichino, dedicato all'Origine della mia stirpe, rifiuta la superbia dell'oro e la grezza umiltà del lino; il suo peso, inoltre, supera sia quello del tessuto legato al porto, sia quello del tessuto che custodisce il ricordo del bosco.\n- Il tessuto del porto, simbolo del mio Amore con il capitano Jack, non potrà mai occupare l'ultimo manichino, ed è legato al Broccato Dorato da un vincolo aritmetico inderogabile: il Broccato dovrà trovarsi esattamente tre posizioni dopo di esso.\n- Il Lino Candido, simbolo dell'Umiltà, dovrà occupare una posizione dispari, ma mai prima del tessuto del porto.\n- Il Damasco Verde Smeraldo, custode del ricordo del bosco, dovrà occupare una posizione pari, e non potrà mai trovarsi accanto al tessuto più pesante del tavolo.",
-            "enigma_opzioni": "Dovete scegliere tra le seguenti opzioni:\n- Opzione 1: 1. Velluto Cremisi, 2. Seta Celeste, 3. Damasco Verde Smeraldo, 4. Lino Candido, 5. Broccato Dorato.\n- Opzione 2: 1. Velluto Cremisi, 2. Broccato Dorato, 3. Lino Candido, 4. Damasco Verde Smeraldo, 5. Seta Celeste.\n- Opzione 3: 1. Damasco Verde Smeraldo, 2. Seta Celeste, 3. Lino Candido, 4. Velluto Cremisi, 5. Broccato Dorato.\n- Opzione 4: 1. Velluto Cremisi, 2. Seta Celeste, 3. Lino Candido, 4. Damasco Verde Smeraldo, 5. Broccato Dorato.",
+            "presentazione_enigma": "Viandante, vorresti risolvere tu, come tutti i qui presenti, il problema che io stessa ho ideato.\nDovete sapere tutti che fino ad ora nessuno è mai riuscito a risolverlo e io sono una grande amante delle sfide che richiedono cervello.\nNemmeno il mio promesso sposo Jack è mai riuscito a risolverlo. A tal punto, non diteglielo quando arriverà qui in stanza o andrà su tutte le furie.",
+            "enigma_tessuto_1": "Dovete mettere in ordine i seguenti vestiti in base alla loro descrizione:\nSeta Celeste: lucente, leggerissima, evoca l'acqua del porto.",
+            "enigma_tessuto_2": "Velluto Cremisi: rosso profondo, il più pesante di tutti, tessuto storicamente regale.",
+            "enigma_tessuto_3": "Broccato Dorato: rigido, intessuto con fili d'oro zecchino, il più costoso del regno.",
+            "enigma_tessuto_4": "Lino Candido: opaco, grezzo, il più umile, privo di qualsiasi riflesso.",
+            "enigma_tessuto_5": "Damasco Verde Smeraldo: ricamato con motivi di foglie e rami, custodisce il ricordo del bosco attraversato da Eryndor prima di arrivare al castello.",
+            "enigma_leggi_intro": "Il mio abito racconterà il mio cammino attraverso cinque tappe cerimoniali. Ascoltate le nuove leggi restrittive di Shambhala:",
+            "enigma_leggi_1": "Il primo manichino, dedicato all'Origine della mia stirpe, rifiuta la superbia dell'oro e la grezza umiltà del lino; il suo peso, inoltre, supera sia quello del tessuto legato al porto, sia quello del tessuto che custodisce il ricordo del bosco.",
+            "enigma_leggi_2": "Il tessuto del porto, simbolo del mio Amore con il capitano Jack, non potrà mai occupare l'ultimo manichino, ed è legato al Broccato Dorato da un vincolo aritmetico inderogabile: il Broccato dovrà trovarsi esattamente tre posizioni dopo di esso.",
+            "enigma_leggi_3": "Il Lino Candido, simbolo dell'Umiltà, dovrà occupare una posizione dispari, ma mai prima del tessuto del porto.",
+            "enigma_leggi_4": "Il Damasco Verde Smeraldo, custode del ricordo del bosco, dovrà occupare una posizione pari, e non potrà mai trovarsi accanto al tessuto più pesante del tavolo.",
             "errore_enigma": "Fermo! Avete spezzato l'ordine matematico. Guardie, fuori di qui!",
             "successo_enigma": "Non ho mai assistito a così tanta astuzia... Sono commossa, posso sapere lei chi è buon uomo?",
             "ammirazione_1": "Eryndor... Un nome che non scorderò facilmente. Dimmi, come può un mercante possedere una mente così affilata e un'anima così caparbia?\nQuesto enigma era stato concepito per respingere i presuntuosi e rivelare chi sa guardare oltre la mera apparenza.",
             "ammirazione_2": "Hai affrontato tutto questo... contando solo sul tuo ingegno? I nobili di questa corte non farebbero un singolo passo senza la scorta delle guardie.\nJack... il mio promesso sposo, avrebbe semplicemente sguainato la spada contro ogni ostacolo, cieco di fronte alla bellezza della logica e dell'intelletto.",
             "ammirazione_3": "Eryndor. Per tutta la vita mi hanno circondata di sfarzo vuoto, impavidi guerrieri e forza bruta.\nMa tu... tu sei diverso. La tua mente ha danzato con la mia attraverso i fili di questo enigma. Sento che tu riesci a comprendermi come nessuno ha mai fatto.",
             "rivelazione": "Eryndor... io credo che il mio enigma non servisse solamente a scegliere un artigiano. In cuor mio, sapevo che serviva a trovare...",
-            "finale": "Mio salvatore, Jack ci avrebbe decapitato entrambi. Hai salvato la vita del nostro amore.\nPer le leggi di Shambala editate da mio padre in persona chi uccide il promesso sposso della principessa è destinato ad essere il nuovo sposo. E sono molto contenta che sia tu"
+            "finale": "Mio salvatore, Jack ci avrebbe decapitato entrambi. Hai salvato la vita del nostro amore.\nPer le leggi di Shambhala editate da mio padre in persona, chi uccide il promesso sposo della principessa è destinato ad essere il nuovo sposo. E sono molto contenta che sia tu",
+            "sfida": "Risolvi il mio enigma per vincere.",
+            "vittoria_finale": "Non ho mai assistito a così tanta astuzia... Sei il prescelto! Sarai il mio sposo!",
+            "errore_cacciata": "Fermo! Avete spezzato l'ordine matematico. Guardie, fuori di qui!"
         },
         "Jack": {
             "ingresso": "MARIEN! Che significa tutto questo?! Chi è questo pezzente di un bottegaio che osa avvicinarsi a te?!",
-            "sfida": "Ti presento Daniel la mia sciabola più fidata. Preparati a sguainare la tua misera spada e a pregare Tiamat di restare in vita.",
+            "sfida": "Ti presento Daniel, la mia sciabola più fidata. Preparati a sguainare la tua misera spada e a pregare Tiamat di restare in vita.",
             "sconfitta": "Impossibile! Chi ti ha concesso di impugnare la Spada Sincro?! La sua lama è già illuminata... dovete aver condiviso un intero viaggio.\nQuesta spada accresce la sua potenza risuonando con chi la brandisce, fondendo l'arma e il suo padrone in un'unica, devastante forza!",
-            "bevuta": "Gran bella bevuta, sei carismatico mi piaci. Non mi hai nemmeno detto chi sei"
+            "bevuta": "Gran bella bevuta, sei carismatico, mi piaci. Non mi hai nemmeno detto chi sei"
         },
         "Mercante_Piumato": {
             "presunzione": "Fatti da parte, bottegaio! Con cinque manichini ci vuole un occhio allenato come il mio, non quello di un dilettante di provincia!",

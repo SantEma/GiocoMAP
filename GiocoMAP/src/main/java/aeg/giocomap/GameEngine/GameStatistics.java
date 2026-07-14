@@ -10,7 +10,6 @@ import java.util.List;
 
 public class GameStatistics {
 
-    private long tempoInizioEnigma = 0;
     private int punteggioTotale = 0;
     private TimerEnigma timerEnigma;
     private String enigmaCorrenteId;   // id dell'enigma attualmente cronometrato
@@ -85,7 +84,7 @@ public class GameStatistics {
         };
     }
 
-    public void Statistiche(boolean fineGioco) {
+    public void statistiche(boolean fineGioco) {
         String nome = "";
         int punteggio = 0;
 

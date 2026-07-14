@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.View;
 
 import aeg.giocomap.Model.Giocatore.Inventario;
@@ -18,7 +14,7 @@ import java.io.InputStream;
 
 /**
  *
- * @author Andrea
+ * @author andrea
  */
 public class InventarioPanel extends JPanel {
     private final Inventario<Oggetto> inventario; // Estensione della Generics Oggetto
@@ -115,8 +111,9 @@ public class InventarioPanel extends JPanel {
                .append("<i>").append(obj.getDescrizioneOggetto()).append("</i>");
         
         // Controllo se sto analizzando la spada col cursore
-        if(obj instanceof Spada spada){ //Casting
-            tooltip.append("<br><br><b style='color: #00FFFF;'>Carica Sincro: ")
+        if(obj instanceof Spada){ //Casting
+            Spada spada = (Spada) obj;
+            tooltip.append("<br><br><b style='color: #FF3333;'>Carica Sincro: ")
                    .append(spada.getCaricaSincro())
                    .append("%</b>");
         }

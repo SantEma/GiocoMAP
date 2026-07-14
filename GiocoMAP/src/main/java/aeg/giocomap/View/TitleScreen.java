@@ -1,3 +1,4 @@
+
 package aeg.giocomap.View;
 
 import javax.swing.*;
@@ -9,12 +10,16 @@ import java.io.IOException;
 import java.awt.Graphics;
 import aeg.giocomap.Util.CursorUtil;
 
+/**
+ *
+ * @author andrea
+ */
 public class TitleScreen extends JPanel {
 
-    private JButton btn_nuova_partita;
-    private JButton btn_carica_partita;
-    private JButton btn_record;
-    private JButton btn_connetti;    // ← aggiunto
+    private final JButton btn_nuova_partita;
+    private final JButton btn_carica_partita;
+    private final JButton btn_record;
+    private final JButton btn_connetti;
     private BufferedImage sfondo;
 
     public TitleScreen() {

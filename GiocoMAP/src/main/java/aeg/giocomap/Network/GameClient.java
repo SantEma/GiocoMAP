@@ -1,16 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.Network;
 
 import java.io.*;
 import java.net.*;
+
 /**
  *
- * @author murgo
+ * @author giulio
  */
-
 public class GameClient {
 
     private Socket socket;
@@ -44,10 +40,10 @@ public class GameClient {
 
             // avvia thread ricezione
             threadRicezione = new ThreadRicezione(socket);
-            new Thread(threadRicezione).start();
+            new Thread(getThreadRicezione()).start();
 
             // manda JOIN
-            invia(new Message(TipoMessaggio.JOIN, nomeGiocatore, "entrato"));
+            invia(new Message(TipoMessaggio.JOIN, getNomeGiocatore(), "entrato"));
             System.out.println("DEBUG: Connesso al server " + host);
             return true;
         } catch (IOException e) {
@@ -58,14 +54,14 @@ public class GameClient {
     }
 
     public void invia(Message messaggio) {
-        if (output != null && connesso) {
+        if (output != null && isConnesso()) {
             output.println(MessageParser.serializza(messaggio));
         }
     }
 
     public void disconnetti() {
         connesso = false;
-        invia(new Message(TipoMessaggio.LEAVE, nomeGiocatore, "uscito"));
+        invia(new Message(TipoMessaggio.LEAVE, getNomeGiocatore(), "uscito"));
         try {
             if (socket != null) socket.close();
         } catch (IOException e) {

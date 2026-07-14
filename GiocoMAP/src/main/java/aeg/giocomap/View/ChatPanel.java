@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package aeg.giocomap.View;
 
 import aeg.giocomap.Network.GameClient;
@@ -9,14 +5,12 @@ import aeg.giocomap.Network.Message;
 import aeg.giocomap.Network.TipoMessaggio;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.List;
 
 /**
  *
- * @author murgo
+ * @author giulio
  */
-
 public class ChatPanel extends JComponent {
 
     @Override
@@ -130,10 +124,5 @@ public class ChatPanel extends JComponent {
             testo
         ));
         campoTesto.setText("");
-    }
-
-    public void aggiungiMessaggio(String msg) {
-        areaMessaggi.append(msg + "\n");
-        areaMessaggi.setCaretPosition(areaMessaggi.getDocument().getLength());
     }
 }
