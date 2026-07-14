@@ -95,14 +95,14 @@ public class ModelDB {
             rs.close();
             pstm.close();
 
-            // non esiste → salva
+            // non esiste, quindi lo salva
             String insert = "INSERT INTO records (nome, punteggio) VALUES (?, ?)";
             PreparedStatement pstmInsert = conn.prepareStatement(insert);
             pstmInsert.setString(1, nome);
             pstmInsert.setInt(2, punteggio);
             pstmInsert.executeUpdate();
             pstmInsert.close();
-            System.out.println("TEST: Record salvato → " + nome + " " + punteggio);
+            System.out.println("TEST: Record salvato : " + nome + " " + punteggio);
 
         } 
         catch (SQLException e) {
@@ -221,7 +221,7 @@ public class ModelDB {
             pstm.setInt(7, caricaSpada);
             pstm.executeUpdate();
             pstm.close();
-            System.out.println("TEST: Partita salvata → " + stanzaAttuale
+            System.out.println("TEST: Partita salvata : " + stanzaAttuale
                     + " (statoCity=" + statoCity + ", enigmi=[" + enigmiRisolti + "], inventario=[" + inventario + "], primoAccessoPalazzo=" + primoAccessoPalazzo + ", caricaSpada=" + caricaSpada + ")");
         } catch (SQLException e) {
             System.err.println(e.getMessage());
