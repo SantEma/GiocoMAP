@@ -14,9 +14,10 @@ import java.util.List;
 import java.util.ArrayList;
 
 import aeg.giocomap.View.CoordinateDebuggable;
+
 /**
  *
- * @author Andrea
+ * @author andrea
  */
 public class CursorUtil {
 

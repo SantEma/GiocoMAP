@@ -1,10 +1,6 @@
 package aeg.giocomap.GameEngine;
 
 
-/*
- * @author emanuele
-*/
-
 import aeg.giocomap.View.MappaPanel;
 import aeg.giocomap.View.InventarioPanel;
 import aeg.giocomap.View.TitleScreen;
@@ -33,6 +29,10 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Arrays;
 
+/**
+ *
+ * @author emanuele
+ */
 public class GameEngine {
 
     // Variabili per immagazzinare i dialoghi dei file JSON già da subito

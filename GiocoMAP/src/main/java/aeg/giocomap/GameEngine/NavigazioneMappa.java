@@ -15,20 +15,8 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * Logica di navigazione della mappa (routing delle frecce).
  *
- * Estratta da {@link ProgressioneStoria}: gestisce la tabella dei collegamenti
- * fra scene (uscite condizionali custom e routing standard tramite {@link Stanza})
- * e l'esecuzione del movimento nelle quattro direzioni.
- *
- * I "ganci" runtime (interazioni di Mr. Cooper/Fox/Eripeta, NPC di Karundis) e
- * la sequenza di intercettazione di Eripeta sono creati/gestiti dai costruttori
- * di scena, quindi vengono letti in modo lazy da {@link ProgressioneStoria} al
- * momento dell'esecuzione delle lambda (click sulle frecce), non alla
- * costruzione della tabella.
- * 
- * @author Giulio
- * 
+ * @author giulio
  */
 public class NavigazioneMappa {
 

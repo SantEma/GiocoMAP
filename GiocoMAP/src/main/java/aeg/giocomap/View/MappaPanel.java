@@ -12,7 +12,7 @@ import java.awt.Rectangle;
 
 /**
  *
- * @author Andrea
+ * @author andrea
  */
 public final class MappaPanel extends JPanel implements CoordinateDebuggable {
     private BufferedImage immagineMappa;

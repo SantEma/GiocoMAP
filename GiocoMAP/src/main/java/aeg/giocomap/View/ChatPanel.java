@@ -9,9 +9,8 @@ import java.util.List;
 
 /**
  *
- * @author murgo
+ * @author giulio
  */
-
 public class ChatPanel extends JComponent {
 
     @Override

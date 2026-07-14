@@ -4,11 +4,11 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+
 /**
  *
- * @author murgo
+ * @author giulio
  */
-
 public class ThreadRicezione implements Runnable {
 
     private final Socket socket;

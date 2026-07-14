@@ -6,9 +6,7 @@ import java.util.List;
 /**
  *
  * @author emanuele
- * @param <T>
  */
-
 // Classe con lista già tipizzata (Generics), come descritto nelle idee implementative
 public class Inventario<T extends Oggetto> {
     

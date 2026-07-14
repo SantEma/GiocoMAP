@@ -1,14 +1,10 @@
 package aeg.giocomap.GameEngine;
 
-/*
- * Classe per poter avere le variabili delle hitbox statiche.
- * Onestamente Java Swing è già difficile di suo, se poi uno deve calcolarle ogni 
- * volta per grandezza di finestra...
- * @author Andrea
+/**
+ *
+ * @author andrea
  */
-
 public final class CostantiHitbox {
-    private CostantiHitbox() {} //Inizializzazione vuota
 
     // Hitbox menù di pausa
     public static final double[] PAUSA_RIPRENDI = {0.085, 0.375, 0.28, 0.105};
@@ -28,7 +24,7 @@ public final class CostantiHitbox {
     // Hitbox stalla
     public static final double[] STALLA_MR_COOPER = {0.3, 0.3, 0.4, 0.5};
 
-    // Hitbox bosco deep
+    // Hitbox bosco deep (fiori)
     public static final double[] BOSCODEEP_FIORE_BLU = {0.28, 0.43, 0.06, 0.06};
     public static final double[] BOSCODEEP_FIORE_ROSSO = {0.84, 0.48, 0.06, 0.09};
     public static final double[] BOSCODEEP_FIORE_VIOLA = {0.61, 0.44, 0.06, 0.06};

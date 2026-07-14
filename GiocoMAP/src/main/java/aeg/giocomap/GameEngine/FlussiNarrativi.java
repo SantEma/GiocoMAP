@@ -13,18 +13,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 /**
- * Sequenze narrative della fase finale della storia.
  *
- * Estratte da {@link CostruttoreScene}: raccolgono i dialoghi a catena
- * dell'intercettazione e dell'accusa di Eripeta, e il flusso di David legato
- * all'Enigma del Vincolo (Enigma 5). I metodi sono per lo più auto-contenuti
- * (recuperano gli schermi via SceneManager o li ricevono come parametro); i
- * "ganci" sulle hitbox degli abitanti/di David sono creati dai costruttori di
- * scena e letti in modo lazy da {@link CostruttoreScene} al momento
- * dell'esecuzione del flusso.
- * 
  * @author emanuele
- * 
  */
 public class FlussiNarrativi {
 

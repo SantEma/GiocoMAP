@@ -4,8 +4,7 @@ import javax.swing.Timer;
 
 /**
  *
- * @author murgo
- *
+ * @author giulio
  */
 public class TimerEnigma {
 

@@ -2,8 +2,7 @@ package aeg.giocomap.Network;
 
 /**
  *
- * @author murgo
- *
+ * @author giulio
  */
 public enum TipoMessaggio {
     JOIN,    // giocatore entrato

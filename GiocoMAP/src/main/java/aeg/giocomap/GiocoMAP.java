@@ -4,7 +4,6 @@ import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.GameEngine.GameEngine;
 import aeg.giocomap.Model.Storage.*;
 
-
 /**
  *
  * @author emanuele

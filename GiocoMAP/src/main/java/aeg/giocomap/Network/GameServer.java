@@ -3,11 +3,11 @@ package aeg.giocomap.Network;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
 /**
  *
- * @author murgo
+ * @author giulio
  */
-
 public class GameServer implements Runnable {
 
     public static final int PORTA = 12345;

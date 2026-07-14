@@ -2,7 +2,7 @@ package aeg.giocomap.Network;
 
 /**
  *
- * @author murgo
+ * @author giulio
  */
 public class Message {
     private final TipoMessaggio tipo;

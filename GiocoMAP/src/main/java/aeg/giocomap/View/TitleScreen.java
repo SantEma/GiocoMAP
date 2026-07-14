@@ -12,9 +12,8 @@ import aeg.giocomap.Util.CursorUtil;
 
 /**
  *
- * @author Andrea
+ * @author andrea
  */
-
 public class TitleScreen extends JPanel {
 
     private final JButton btn_nuova_partita;

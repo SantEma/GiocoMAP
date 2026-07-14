@@ -5,9 +5,10 @@ import com.google.gson.*;
 import java.io.*;
 import java.util.List;
 import java.util.ArrayList;
+
 /**
  *
- * @author Andrea
+ * @author andrea
  */
 public class JsonLoader {
     

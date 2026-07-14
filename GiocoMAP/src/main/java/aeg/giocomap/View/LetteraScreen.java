@@ -7,11 +7,11 @@ import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.util.List;
+
 /**
  *
- * @author Andrea e Giulio
+ * @author andrea e giulio
  */
-
 public class LetteraScreen extends JPanel {
     private BufferedImage sfondo;
     private final String testo;

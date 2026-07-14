@@ -2,12 +2,11 @@ package aeg.giocomap.Network;
 
 import java.io.*;
 import java.net.*;
+
 /**
  *
- * @author murgo
+ * @author giulio
  */
-
-
 public class ClientHandler implements Runnable {
 
     private final Socket socket;

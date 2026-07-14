@@ -1,4 +1,5 @@
 package aeg.giocomap.Model.Oggetti;
+
 /**
  *
  * @author emanuele

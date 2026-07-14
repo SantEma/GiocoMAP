@@ -8,9 +8,8 @@ import javax.swing.JButton;
 
 /**
  *
- * @author Andrea
+ * @author andrea
  */
-
 public class BottoneAvanti extends JButton {
     public BottoneAvanti(ActionListener listener) {
         super("Avanti \u2192");

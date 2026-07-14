@@ -6,7 +6,7 @@ import java.io.IOException;
 
 /**
  *
- * @author Andrea
+ * @author andrea
  */
 public class MusicPlayer {
     /*È un oggetto della libreria javax.sound.sampled 

@@ -30,14 +30,6 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
- * Costruttore delle scene di gioco e delle sequenze narrative.
- *
- * Estratto da {@link ProgressioneStoria}: raccoglie l'assemblaggio di tutte le
- * scene (Piazza, Porto, Stalla, Bosco, Karundis, Grotta, Ingresso, Cripta,
- * Palazzo, Lettere) e i flussi narrativi (intercettazione/accusa di Eripeta,
- * David/Enigma del Vincolo). Condivide stato e registro NPC con il coordinatore
- * {@link ProgressioneStoria}; espone alla {@link NavigazioneMappa} i ganci
- * runtime letti al click sulle frecce.
  *
  * @author emanuele
  */

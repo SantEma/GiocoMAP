@@ -1,18 +1,6 @@
 package aeg.giocomap.GameEngine;
 
 /**
- * Coordinatore della progressione della storia.
- *
- * Dopo lo scorporamento della god class originale, questa classe si limita a
- * orchestrare i collaboratori specializzati e a mantenere la superficie
- * pubblica usata da {@link GameEngine} (routing frecce, costruzione scene,
- * stato di salvataggio/caricamento). La logica vera vive in:
- * <ul>
- *   <li>{@link StatoProgressione} — stato e flag di save/load</li>
- *   <li>{@link RegistroNpc} — registro dei personaggi</li>
- *   <li>{@link NavigazioneMappa} — routing delle frecce</li>
- *   <li>{@link CostruttoreScene} — assemblaggio scene e sequenze narrative</li>
- * </ul>
  *
  * @author emanuele
  */

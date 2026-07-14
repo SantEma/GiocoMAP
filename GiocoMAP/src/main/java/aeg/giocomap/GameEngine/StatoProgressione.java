@@ -1,18 +1,8 @@
 package aeg.giocomap.GameEngine;
 
 /**
- * Stato di avanzamento della storia (fase "Città con il porto").
  *
- * Estratto da {@link ProgressioneStoria}: raccoglie i dati che descrivono
- * a che punto è la partita e che costituiscono la superficie di
- * salvataggio/caricamento. Nessuna logica di gioco: solo lo stato e i suoi
- * accessori, con lo stesso comportamento che avevano come campi della god
- * class.
- */
-
-/**
- *
- * @author Emanuele
+ * @author emanuele
  */
 public class StatoProgressione {
 

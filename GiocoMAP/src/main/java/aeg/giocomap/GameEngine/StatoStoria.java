@@ -2,9 +2,8 @@ package aeg.giocomap.GameEngine;
 
 /**
  *
- * @author Andrea
+ * @author andrea
  */
-
 public enum StatoStoria {
     INIZIO(0),
     MISSIONE_COOPER_ACCETTATA(1),

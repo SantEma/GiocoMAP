@@ -12,7 +12,7 @@ import java.util.Map;
 
 /**
  *
- * @author Andrea
+ * @author andrea
  */
 public class SceneManager {
     // variabili scene

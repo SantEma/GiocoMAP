@@ -7,7 +7,6 @@ import java.util.List;
  *
  * @author emanuele
  */
-
 public class EnigmaOrdinamento extends Enigma {
 
     private final List<String> vestiti;

@@ -2,9 +2,8 @@ package aeg.giocomap.Network;
 
 /**
  *
- * @author murgo
+ * @author giulio
  */
-
 public class MessageParser {
     // definisco un separatore
     private static final String SEP = "|";

@@ -2,11 +2,11 @@ package aeg.giocomap.Network;
 
 import java.io.*;
 import java.net.*;
+
 /**
  *
- * @author murgo
+ * @author giulio
  */
-
 public class GameClient {
 
     private Socket socket;

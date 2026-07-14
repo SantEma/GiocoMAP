@@ -8,13 +8,8 @@ import java.util.Map;
 import java.util.HashMap;
 
 /**
- * Registro dei personaggi attivi nella partita.
  *
- * Estratto da {@link ProgressioneStoria} come primo passo di scorporamento
- * della god class: raccoglie la creazione/registrazione degli NPC e dei
- * Fantocci, senza alterarne il comportamento.
- * 
- * @author Giulio
+ * @author giulio
  */
 public class RegistroNPC {
 

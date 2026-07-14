@@ -14,7 +14,7 @@ import java.io.InputStream;
 
 /**
  *
- * @author Andrea
+ * @author andrea
  */
 public class InventarioPanel extends JPanel {
     private final Inventario<Oggetto> inventario; // Estensione della Generics Oggetto

@@ -23,15 +23,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 /**
- * Popup dell'enigma finale della Principessa: Eryndor sceglie i vestiti uno
- * alla volta cliccandoli e li dispone lui stesso, in ordine, sui manichini.
- * Ogni click viene notificato immediatamente al chiamante tramite {@code alClick},
- * che decide se il vestito va bene nella posizione corrente (e quindi lo fissa
- * chiamando {@link #posizionaVestito} e {@link #disabilitaVestito}) oppure se
- * l'ordine è sbagliato (e quindi chiude il popup con {@link #dispose()}).
- * Come gli altri popup del gioco, non è obbligatorio completarlo: si può
- * chiudere in qualsiasi momento (bottone di chiusura o tasto ESC) per tornare
- * a muoversi e interagire con la scena.
  *
  * @author emanuele
  */

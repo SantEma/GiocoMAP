@@ -16,11 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 /**
- * Scena muta di chiusura del gioco: nessun tasto (ESC, mappa, inventario,
- * chat) e nessuna icona di movimento è disponibile qui, la scena avanza da
- * sola. Il testo finale appare e scompare in dissolvenza su sfondo nero,
- * poi si intravede per qualche secondo la sagoma del Saggio Clock prima di
- * richiamare {@code alTermine} (che avvia i titoli di coda).
  *
  * @author emanuele
  */

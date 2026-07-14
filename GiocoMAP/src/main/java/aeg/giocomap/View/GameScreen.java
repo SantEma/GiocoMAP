@@ -1,7 +1,3 @@
-/**
- * @author Andrea
- */
-
 package aeg.giocomap.View;
 
 import aeg.giocomap.Util.CursorUtil;
@@ -10,6 +6,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Map;
 
+/**
+ *
+ * @author andrea
+ */
 public class GameScreen extends JPanel implements CoordinateDebuggable {
     private BufferedImage immagine;
 

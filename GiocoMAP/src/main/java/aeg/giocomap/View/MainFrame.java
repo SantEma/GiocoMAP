@@ -25,9 +25,10 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import javax.swing.UnsupportedLookAndFeelException;
+
 /**
  *
- * @author Andrea
+ * @author andrea
  */
 public class MainFrame extends javax.swing.JFrame {
 

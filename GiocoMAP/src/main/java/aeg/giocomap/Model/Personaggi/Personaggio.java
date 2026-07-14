@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ *
  * @author emanuele
  */
 public class Personaggio extends Entity {
@@ -32,7 +33,7 @@ public class Personaggio extends Entity {
         return battuta;
     }
     
-    // Utile se l'NPC deve cambiare argomento (da vedere se verrà utilizzato)
+    // Utile se l'NPC deve cambiare argomento
     public void resetDialogo() {
         this.indiceDialogoAttuale=0;
     }

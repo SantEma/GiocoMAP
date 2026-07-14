@@ -2,11 +2,9 @@ package aeg.giocomap.GameEngine;
 
 /**
  *
- * @author Andrea
+ * @author andrea
  */
-
 public final class CostantiMappa {
-    private CostantiMappa() {} // Impedisce l'istanziazione
 
     // Direzioni
     public static final String NORD = "NORD";

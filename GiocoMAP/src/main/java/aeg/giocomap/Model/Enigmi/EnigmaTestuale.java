@@ -5,9 +5,8 @@ import java.util.List;
 
 /**
  *
- * @author murgo
+ * @author giulio
  */
-
 public class EnigmaTestuale extends Enigma {
 
     private final String soluzione;

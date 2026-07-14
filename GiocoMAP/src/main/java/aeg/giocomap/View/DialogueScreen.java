@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 /**
  *
- * @author Andrea
+ * @author andrea
  */
 public class DialogueScreen extends JLayeredPane {
     // Regex: intercetta il simbolo di grado (es. negli elenchi "1° Giorno") per

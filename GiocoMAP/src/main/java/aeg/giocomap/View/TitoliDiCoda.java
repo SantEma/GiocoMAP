@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  *
- * @author murgo
+ * @author giulio
  */
 public class TitoliDiCoda extends JPanel {
      
