@@ -4,15 +4,24 @@ package aeg.giocomap.GameEngine;
  *
  * @author andrea
  */
+
+/*
+    Queste costanti sono (ovviamente) utili per 2 motivi:
+    1. Non bisogna ricordarsi come abbiamo chiamato le variabili tra tutte 
+    le varie classi, semplificandoci il lavoro di un sacco
+    2. Se si volesse espandere il codice rende MOLTO tutto più facile.
+    
+    Si poteva fare di meglio? Assolutamente. Avevamo voglia? No
+*/
 public final class CostantiMappa {
 
-    // Direzioni
+    // Direzioni frecce
     public static final String NORD = "NORD";
     public static final String SUD = "SUD";
     public static final String EST = "EST";
     public static final String OVEST = "OVEST";
 
-    // Nomi Stanze
+    // Nomi stanze
     public static final String MENU_PRINCIPALE = "MENU_PRINCIPALE";
     public static final String MAPPA = "MAPPA";
     public static final String INVENTARIO = "INVENTARIO";
