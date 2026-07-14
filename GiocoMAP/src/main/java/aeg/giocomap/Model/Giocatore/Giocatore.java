@@ -30,7 +30,7 @@ public class Giocatore {
     // ---- gestione enigmi risolti ----
     public void aggiungiEnigmaRisolto(String idEnigma){
         if (idEnigma != null) {
-            enigmiRisolti.add(idEnigma);
+            getEnigmiRisolti().add(idEnigma);
         }
     }
 
@@ -46,7 +46,7 @@ public class Giocatore {
     }
 
     public boolean isEnigmaRisolto(String idEnigma){
-        return enigmiRisolti.contains(idEnigma);
+        return getEnigmiRisolti().contains(idEnigma);
     }
 
     public Set<String> getEnigmiRisolti(){

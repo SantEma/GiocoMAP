@@ -151,12 +151,12 @@ public class GameEngine {
 
         title_screen.addRecordListener(e -> {
             music_player.stopMusic();
-            statistics.statistiche(false);
+            getStatistics().statistiche(false);
         });
        
         title_screen.addConnettiListener(e -> {
             String ip = JOptionPane.showInputDialog(
-                frame,
+                getFrame(),
                 "Inserisci l'IP dell'host:",
                 "Partecipa alla Chat",
                 JOptionPane.PLAIN_MESSAGE
@@ -172,7 +172,7 @@ public class GameEngine {
 
         if (carica) {
             if (salvataggio == null) {
-                JOptionPane.showMessageDialog(frame,
+                JOptionPane.showMessageDialog(getFrame(),
                     "Nessuna partita salvata trovata!", "Attenzione",
                     JOptionPane.WARNING_MESSAGE);
                 return;
@@ -187,22 +187,22 @@ public class GameEngine {
             // ripristino lo stato PRIMA di costruire le scene, cosi vengono
             // ricreate coerenti con l'avanzamento (enigmi gia' risolti compresi)
             progression.setStatoCity(statoCitySalvato);
-            giocatore.setPossiedeInventario(true);
-            giocatore.setPossiedeMappa(possiedeMappa);
+            getGiocatore().setPossiedeInventario(true);
+            getGiocatore().setPossiedeMappa(possiedeMappa);
             if (enigmiStr != null && !enigmiStr.isEmpty()) {
-                giocatore.setEnigmiRisolti(Arrays.asList(enigmiStr.split(",")));
+                getGiocatore().setEnigmiRisolti(Arrays.asList(enigmiStr.split(",")));
             }
 
             // Ricostruzione Dinamica dell'Inventario
-            giocatore.getInventario().getListaOggetti().clear(); // Svuoto l'inventario dai default
+            getGiocatore().getInventario().getListaOggetti().clear(); // Svuoto l'inventario dai default
             if (salvataggio.length > 4 && salvataggio[4] != null && !salvataggio[4].isEmpty()) {
                 String inventarioStr = salvataggio[4];
                 for (String idStr : inventarioStr.split(",")) {
                     try {
                         int id = Integer.parseInt(idStr.trim());
-                        Oggetto obj = txt.getOggettoDaCatalogo(id);
+                        Oggetto obj = getTxt().getOggettoDaCatalogo(id);
                         if (obj != null) {
-                            giocatore.getInventario().aggiungiOggetto(obj);
+                            getGiocatore().getInventario().aggiungiOggetto(obj);
                         }
                     } catch (NumberFormatException e) {
                         System.err.println("Errore parsing ID oggetto salvato: " + idStr);
@@ -215,7 +215,7 @@ public class GameEngine {
             if (salvataggio.length > 6 && salvataggio[6] != null) {
                 try {
                     int caricaSpada = Integer.parseInt(salvataggio[6].trim());
-                    Oggetto spadaObj = giocatore.getInventario().cercaOggetto("Spada Sincro");
+                    Oggetto spadaObj = getGiocatore().getInventario().cercaOggetto("Spada Sincro");
                     if (spadaObj instanceof Spada spada) {
                         spada.setCaricaSincro(caricaSpada);
                     }
@@ -234,7 +234,7 @@ public class GameEngine {
             progression.setParlatoConGuardia(false);
 
             progression.costruisciScene();
-            sceneManager.mostraScena(stanza);
+            getSceneManager().mostraScena(stanza);
             return;
         }
 
@@ -242,23 +242,23 @@ public class GameEngine {
         progression.setStatoCity(0);
         progression.setPrimoAccessoPalazzo(true);
         progression.setParlatoConGuardia(false);
-        giocatore.setPossiedeInventario(false);
-        giocatore.setPossiedeMappa(false);
-        giocatore.setEnigmiRisolti(new ArrayList<>());
-        giocatore.getInventario().getListaOggetti().clear();
+        getGiocatore().setPossiedeInventario(false);
+        getGiocatore().setPossiedeMappa(false);
+        getGiocatore().setEnigmiRisolti(new ArrayList<>());
+        getGiocatore().getInventario().getListaOggetti().clear();
         // Azzero la carica della Spada Sincro nel catalogo (istanza condivisa): evita
         // che una partita precedente nella stessa sessione lasci una carica residua
-        Oggetto spadaCatalogo = txt.getOggettoDaCatalogo(10);
+        Oggetto spadaCatalogo = getTxt().getOggettoDaCatalogo(10);
         if (spadaCatalogo instanceof Spada spada) {
             spada.setCaricaSincro(0);
         }
-        Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
+        Oggetto tessutoIniziale_temp = getTxt().getOggettoDaCatalogo(1);
         if (tessutoIniziale_temp != null) {
-            giocatore.getInventario().aggiungiOggetto(tessutoIniziale_temp);
+            getGiocatore().getInventario().aggiungiOggetto(tessutoIniziale_temp);
         }
 
         progression.costruisciScene();
-        sceneManager.mostraScena("LETTERA");
+        getSceneManager().mostraScena("LETTERA");
     }
 
     public void setDialogueActive(boolean active) {
@@ -269,7 +269,7 @@ public class GameEngine {
     // la Spada Sincro raggiunge la sincronia massima (finale della Principessa),
     // il giocatore può controllarla anche a dialogo attivo.
     private boolean spadaSincroAlMassimo() {
-        Oggetto spadaObj = giocatore.getInventario().cercaOggetto("Spada Sincro");
+        Oggetto spadaObj = getGiocatore().getInventario().cercaOggetto("Spada Sincro");
         return spadaObj instanceof Spada spada && spada.isCaricaMassima();
     }
 
@@ -278,11 +278,11 @@ public class GameEngine {
         setDialogueActive(true);
         DialogueScreen ds = new DialogueScreen(scenaSfondo, () -> {
             setDialogueActive(false);
-            sceneManager.mostraScena(idScenaSfondo);
+            getSceneManager().mostraScena(idScenaSfondo);
         });
         ds.aggiornaSchermata(nome, battuta, sprite);
-        sceneManager.registraScena("DIALOGO_CORRENTE", ds);
-        sceneManager.mostraScena("DIALOGO_CORRENTE");
+        getSceneManager().registraScena("DIALOGO_CORRENTE", ds);
+        getSceneManager().mostraScena("DIALOGO_CORRENTE");
     }
 
     public void mostraDialogoNPC(GameScreen scenaSfondo, String idScenaSfondo,
@@ -302,12 +302,12 @@ public class GameEngine {
         setDialogueActive(true);
         DialogueScreen ds = new DialogueScreen(scenaSfondo, () -> {
             setDialogueActive(false);
-            sceneManager.mostraScena(idScenaSfondo);
+            getSceneManager().mostraScena(idScenaSfondo);
             if (callback != null) callback.run();
         });
         ds.aggiornaSchermata(nome, battuta, sprite);
-        sceneManager.registraScena("DIALOGO_CORRENTE", ds);
-        sceneManager.mostraScena("DIALOGO_CORRENTE");
+        getSceneManager().registraScena("DIALOGO_CORRENTE", ds);
+        getSceneManager().mostraScena("DIALOGO_CORRENTE");
     }
 
     public void mostraDialogoNPCCallback(GameScreen scenaSfondo, String idScenaSfondo,
@@ -325,7 +325,7 @@ public class GameEngine {
     }
 
     private void impostaKeyBindingMappa() {
-        JRootPane rootPane = frame.getRootPane();
+        JRootPane rootPane = getFrame().getRootPane();
         InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = rootPane.getActionMap();
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_M, 0), "toggle_mappa");
@@ -339,9 +339,9 @@ public class GameEngine {
     }
 
     private void toggleMappa() {
-        if (sceneManager.isChatOpen()) return;
+        if (getSceneManager().isChatOpen()) return;
         if (overlayNonApribileQui()) return;
-        if (!giocatore.isPossiedeMappa()) {
+        if (!getGiocatore().isPossiedeMappa()) {
             System.out.println("DEBUG: Il giocatore non possiede ancora la Mappa");
             return;
         }
@@ -349,13 +349,13 @@ public class GameEngine {
             System.out.println("DEBUG: Testo in corso mappa non apribile");
             return;
         }
-        if (sceneManager.isOpenInventario()) sceneManager.chiudiInventario();
-        if (!sceneManager.isMapOpen()) sceneManager.apriMappa();
-        else sceneManager.chiudiMappa();
+        if (getSceneManager().isOpenInventario()) getSceneManager().chiudiInventario();
+        if (!getSceneManager().isMapOpen()) getSceneManager().apriMappa();
+        else getSceneManager().chiudiMappa();
     }
 
     private void impostaKeyBindingChat() {
-        JRootPane rootPane = frame.getRootPane();
+        JRootPane rootPane = getFrame().getRootPane();
         InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = rootPane.getActionMap();
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, 0), "toggle_chat");
@@ -369,37 +369,37 @@ public class GameEngine {
     }
 
     private void apriChatDaTastiera() {
-        if (sceneManager.isChatOpen()) return;
+        if (getSceneManager().isChatOpen()) return;
         if (overlayNonApribileQui()) return;
         if (isDialogoActive) {
             System.out.println("DEBUG: Testo in corso, chat non apribile");
             return;
         }
-        if (sceneManager.isMapOpen()) sceneManager.chiudiMappa();
-        if (sceneManager.isOpenInventario()) sceneManager.chiudiInventario();
+        if (getSceneManager().isMapOpen()) getSceneManager().chiudiMappa();
+        if (getSceneManager().isOpenInventario()) getSceneManager().chiudiInventario();
         network.toggleChat();
     }
 
     private void chatButtonClick() {
-        if (!sceneManager.isChatOpen()) {
+        if (!getSceneManager().isChatOpen()) {
             if (overlayNonApribileQui()) return;
             if (isDialogoActive) {
                 System.out.println("DEBUG: Testo in corso, chat non apribile");
                 return;
             }
-            if (sceneManager.isMapOpen()) sceneManager.chiudiMappa();
-            if (sceneManager.isOpenInventario()) sceneManager.chiudiInventario();
+            if (getSceneManager().isMapOpen()) getSceneManager().chiudiMappa();
+            if (getSceneManager().isOpenInventario()) getSceneManager().chiudiInventario();
         }
         network.toggleChat();
     }
 
     // chat/mappa/inventario non si aprono nei titoli di coda / statistiche
     private boolean overlayNonApribileQui() {
-        return "TITOLI_CODA".equals(sceneManager.getScenaCorrente());
+        return "TITOLI_CODA".equals(getSceneManager().getScenaCorrente());
     }
 
     private void impostaKeyBindingInventario() {
-        JRootPane rootPane = frame.getRootPane();
+        JRootPane rootPane = getFrame().getRootPane();
         InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = rootPane.getActionMap();
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_I, 0), "toggle_inventario");
@@ -413,23 +413,23 @@ public class GameEngine {
     }
 
     private void toggleInventario() {
-        if (sceneManager.isChatOpen()) return;
+        if (getSceneManager().isChatOpen()) return;
         if (overlayNonApribileQui()) return;
         if (isDialogoActive && !spadaSincroAlMassimo()) {
             System.out.println("DEBUG: Testo in corso, inventario non apribile");
             return;
         }
-        if (!giocatore.isPossiedeInventario()) {
+        if (!getGiocatore().isPossiedeInventario()) {
             System.out.println("DEBUG: Inventario non ancora disponibile");
             return;
         }
-        if (sceneManager.isMapOpen()) sceneManager.chiudiMappa();
-        if (!sceneManager.isOpenInventario()) sceneManager.apriInventario();
-        else sceneManager.chiudiInventario();
+        if (getSceneManager().isMapOpen()) getSceneManager().chiudiMappa();
+        if (!getSceneManager().isOpenInventario()) getSceneManager().apriInventario();
+        else getSceneManager().chiudiInventario();
     }
 
     private void impostaKeyBindingEsc() {
-        JRootPane rootPane = frame.getRootPane();
+        JRootPane rootPane = getFrame().getRootPane();
         InputMap im = rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = rootPane.getActionMap();
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "esc");
@@ -445,23 +445,23 @@ public class GameEngine {
     private void gestisciEsc() {
         if (isDialogoActive) return;
 
-        if (sceneManager.isChatOpen()) { network.toggleChat(); return; }
-        if (sceneManager.isMapOpen()) { sceneManager.chiudiMappa(); return; }
-        if (sceneManager.isOpenInventario()) { sceneManager.chiudiInventario(); return; }
+        if (getSceneManager().isChatOpen()) { network.toggleChat(); return; }
+        if (getSceneManager().isMapOpen()) { getSceneManager().chiudiMappa(); return; }
+        if (getSceneManager().isOpenInventario()) { getSceneManager().chiudiInventario(); return; }
 
-        switch (sceneManager.getScenaCorrente()) {
+        switch (getSceneManager().getScenaCorrente()) {
             case "MENU_PRINCIPALE":
             case "TITOLI_CODA":
                 return;
             case "MENU_PAUSA":
-                sceneManager.mostraScena(scenaDaSalvare);
+                getSceneManager().mostraScena(scenaDaSalvare);
                 return;
             case "COMANDI":
-                sceneManager.mostraScena("MENU_PAUSA");
+                getSceneManager().mostraScena("MENU_PAUSA");
                 return;
             default:
-                scenaDaSalvare = sceneManager.getScenaCorrente();
-                sceneManager.mostraScena("MENU_PAUSA");
+                scenaDaSalvare = getSceneManager().getScenaCorrente();
+                getSceneManager().mostraScena("MENU_PAUSA");
                 break;
         }
     }
@@ -476,12 +476,12 @@ public class GameEngine {
         }
 
         Map<double[], Runnable> zone = new HashMap<>();
-        zone.put(CostantiHitbox.PAUSA_RIPRENDI,()->sceneManager.mostraScena(scenaDaSalvare));
-        zone.put(CostantiHitbox.PAUSA_COMANDI, ()->sceneManager.mostraScena("COMANDI"));
+        zone.put(CostantiHitbox.PAUSA_RIPRENDI,()->getSceneManager().mostraScena(scenaDaSalvare));
+        zone.put(CostantiHitbox.PAUSA_COMANDI, ()->getSceneManager().mostraScena("COMANDI"));
         zone.put(CostantiHitbox.PAUSA_ESCI, () -> this.salvaEdEsci());
         
         GameScreen menuPausa = new GameScreen(sfondoMenu, zone);
-        sceneManager.registraScena("MENU_PAUSA", menuPausa);
+        getSceneManager().registraScena("MENU_PAUSA", menuPausa);
     }
 
     private void registraComandi() {
@@ -512,7 +512,7 @@ public class GameEngine {
 
         JButton indietro = new JButton("Indietro");
         indietro.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        indietro.addActionListener(e -> sceneManager.mostraScena("MENU_PAUSA"));
+        indietro.addActionListener(e -> getSceneManager().mostraScena("MENU_PAUSA"));
         JPanel sud = new JPanel();
         sud.setOpaque(false);
         sud.setBackground(new Color(30, 20, 20));
@@ -536,16 +536,16 @@ public class GameEngine {
             }
         });
 
-        sceneManager.registraScena("COMANDI", comandi);
+        getSceneManager().registraScena("COMANDI", comandi);
     }
 
     private void salvaEdEsci() {
         db.newStart();
-        String enigmi = String.join(",", giocatore.getEnigmiRisolti());
+        String enigmi = String.join(",", getGiocatore().getEnigmiRisolti());
         
         ArrayList<String> invIds = new ArrayList<>();
         int caricaSpada = 0;
-        for (Oggetto o : giocatore.getInventario().getListaOggetti()) {
+        for (Oggetto o : getGiocatore().getInventario().getListaOggetti()) {
             invIds.add(String.valueOf(o.getIdOggetto()));
             // Gli oggetti sono serializzati solo per ID: salvo a parte lo stato
             // interno della Spada Sincro (la sua carica), altrimenti andrebbe perso
@@ -556,7 +556,7 @@ public class GameEngine {
         String inventario = String.join(",", invIds);
 
         db.salvaPartita(scenaDaSalvare, progression.getStatoCity(),
-                        giocatore.isPossiedeMappa(), enigmi, inventario, progression.isPrimoAccessoPalazzo(),
+                        getGiocatore().isPossiedeMappa(), enigmi, inventario, progression.isPrimoAccessoPalazzo(),
                         caricaSpada);
         exitGame();
     }

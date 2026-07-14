@@ -21,29 +21,25 @@ package aeg.giocomap.Model.Oggetti;
         
         // Metodo per ricaricare la spada dopo un enigma
         private void ricaricaSpada(int percentuale) {
-            this.caricaSincro+=percentuale;
-            
-            /*
-            Controllo della ricarica, il massimo è 99 perchè ci sono solo 3
-            enigmi che includono la spada
-            */
-            if (this.caricaSincro>CARICA_MASSIMA) {
-                this.caricaSincro=CARICA_MASSIMA;
-            }
-            System.out.println("DEBUG: La " + getNomeOggetto() + " ha come carica attuale: " + this.caricaSincro + "%");
+            setCaricaSincro(getCaricaSincro() + percentuale);
+            System.out.println("DEBUG: La " + getNomeOggetto() + " ha come carica attuale: " + getCaricaSincro() + "%");
         }
 
         public int getCaricaSincro() {
             return caricaSincro;
         }
 
+        /*
+        Controllo della ricarica, il massimo è 99 perchè ci sono solo 3
+        enigmi che includono la spada
+        */
         public void setCaricaSincro(int caricaSincro) {
-            this.caricaSincro = caricaSincro;
+            this.caricaSincro = Math.min(caricaSincro, CARICA_MASSIMA);
         }
 
         // La spada è al massimo della sincronia: usato per sbloccare momenti
         // narrativi legati al suo pieno potenziamento (es. finale della Principessa).
         public boolean isCaricaMassima() {
-            return caricaSincro >= CARICA_MASSIMA;
+            return getCaricaSincro() >= CARICA_MASSIMA;
         }
 }

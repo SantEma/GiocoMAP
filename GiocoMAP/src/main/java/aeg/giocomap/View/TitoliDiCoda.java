@@ -13,9 +13,11 @@ import java.util.List;
  * @author murgo
  */
 public class TitoliDiCoda extends JPanel {
-
-    private JButton btn_indietro;          // presente solo nelle Statistiche
-    private PannelloScorrimento scroll;    // presente solo nei titoli di coda
+     
+    // Presente solo nelle Statistiche
+    private JButton btn_indietro;   
+    // Presente solo nei titoli di coda
+    private PannelloScorrimento scroll;
 
     /**
      * @param records

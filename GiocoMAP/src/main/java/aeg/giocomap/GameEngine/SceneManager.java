@@ -85,7 +85,7 @@ public class SceneManager {
             nomeScena.equals("DIALOGO_CORRENTE") ||
             nomeScena.equals("MENU_PAUSA") ||
             nomeScena.equals("COMANDI") ||
-            chatOpen) {
+            isChatOpen()) {
             frame.setFrecceVisibili(false);
         } else {
             frame.setFrecceVisibili(true);
@@ -97,11 +97,11 @@ public class SceneManager {
     
     // Logiche della Mappa
     public void apriMappa(){
-        if(!mapOpen){
+        if(!isMapOpen()){
             // salvo il contenuto della scena precedente
             if (frame.getContentPane().getComponentCount() > 0)
                 scenario_precedente = (JComponent) frame.getContentPane().getComponent(0);
-            scenaPrecedente = scenaCorrente;
+            scenaPrecedente = getScenaCorrente();
 
             mostraScena("MAPPA");
 
@@ -111,12 +111,12 @@ public class SceneManager {
     }
 
     public void chiudiMappa(){
-        if(mapOpen && scenaPrecedente != null){
+        if(isMapOpen() && getScenaPrecedente() != null){
             //Rinserimento scena precedente
             frame.mostraPannello(scenario_precedente);
-            scenaCorrente = scenaPrecedente;
+            scenaCorrente = getScenaPrecedente();
             mapOpen=false;
-            aggiornaVisibilitaFrecce(scenaCorrente);
+            aggiornaVisibilitaFrecce(getScenaCorrente());
             System.out.println("DEBUG: Chisura Mappa");
         }
     }
@@ -127,12 +127,12 @@ public class SceneManager {
     
     // Logiche dell'Inventario
     public void apriInventario(){
-        if(!inventarioOpen){
+        if(!isOpenInventario()){
             // Salvo la scena precedente di gioco
             if(frame.getContentPane().getComponentCount()>0) {
                 scenario_precedente=(JComponent) frame.getContentPane().getComponent(0);
             }
-            scenaPrecedente = scenaCorrente;
+            scenaPrecedente = getScenaCorrente();
 
             // Recupero dalla cache l'inventario
             JComponent invP = sceneCache.get("INVENTARIO");
@@ -150,16 +150,16 @@ public class SceneManager {
     }
     
     public void chiudiInventario(){
-        if(inventarioOpen && scenario_precedente!=null){
+        if(isOpenInventario() && scenario_precedente!=null){
             frame.mostraPannello(scenario_precedente);
-            scenaCorrente = scenaPrecedente;
+            scenaCorrente = getScenaPrecedente();
             inventarioOpen = false;
-            
+
             // Forza la rimozione del fumetto in sovraimpressione chiudendo
             ToolTipManager.sharedInstance().setEnabled(false);
             ToolTipManager.sharedInstance().setEnabled(true);
-            
-            aggiornaVisibilitaFrecce(scenaCorrente);
+
+            aggiornaVisibilitaFrecce(getScenaCorrente());
             System.out.println("DEBUG: Chisura inventario");
         }
     }
@@ -170,9 +170,9 @@ public class SceneManager {
     
     // Logiche della Chat
     public void toggleChat(JComponent chat) {
-        if (!chatOpen) {
+        if (!isChatOpen()) {
             // salvo la scena precedente
-            scenaPrecedente = scenaCorrente;
+            scenaPrecedente = getScenaCorrente();
 
             frame.mostraPannello(chat);
             chatOpen = true;
@@ -181,8 +181,8 @@ public class SceneManager {
         } else {
             // torno alla scena precedente
             chatOpen = false;
-            if (scenaPrecedente != null) {
-                mostraScena(scenaPrecedente);
+            if (getScenaPrecedente() != null) {
+                mostraScena(getScenaPrecedente());
             }
             System.out.println("DEBUG: Chat chiusa");
         }

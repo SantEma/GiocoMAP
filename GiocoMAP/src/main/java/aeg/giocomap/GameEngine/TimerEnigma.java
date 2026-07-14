@@ -31,7 +31,7 @@ public class TimerEnigma {
     // Secondi trascorsi: calcolati in tempo reale mentre e' attivo,
     // oppure il valore finale congelato dopo ferma()
     public int getSecondi() {
-        if (attivo) {
+        if (isAttivo()) {
             return (int) ((System.currentTimeMillis() - inizioMs) / 1000);
         }
         return secondiFinali;
@@ -48,7 +48,7 @@ public class TimerEnigma {
 
     // Ferma il timer e congela i secondi trascorsi
     public void ferma() {
-        if (attivo) {
+        if (isAttivo()) {
             secondiFinali = (int) ((System.currentTimeMillis() - inizioMs) / 1000);
             attivo = false;
         }

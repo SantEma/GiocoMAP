@@ -126,9 +126,4 @@ public class ChatPanel extends JComponent {
         ));
         campoTesto.setText("");
     }
-
-    public void aggiungiMessaggio(String msg) {
-        areaMessaggi.append(msg + "\n");
-        areaMessaggi.setCaretPosition(areaMessaggi.getDocument().getLength());
-    }
 }
