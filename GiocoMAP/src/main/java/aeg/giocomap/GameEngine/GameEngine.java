@@ -265,6 +265,14 @@ public class GameEngine {
         this.isDialogoActive = active;
     }
 
+    // Eccezione mirata al blocco dell'inventario durante i dialoghi: una volta che
+    // la Spada Sincro raggiunge la sincronia massima (finale della Principessa),
+    // il giocatore può controllarla anche a dialogo attivo.
+    private boolean spadaSincroAlMassimo() {
+        Oggetto spadaObj = giocatore.getInventario().cercaOggetto("Spada Sincro");
+        return spadaObj instanceof Spada spada && spada.isCaricaMassima();
+    }
+
     public void mostraDialogo(GameScreen scenaSfondo, String idScenaSfondo, String nome, String battuta, ImageIcon sprite) {
         if (isDialogoActive) return;
         setDialogueActive(true);
@@ -332,6 +340,7 @@ public class GameEngine {
 
     private void toggleMappa() {
         if (sceneManager.isChatOpen()) return;
+        if (overlayNonApribileQui()) return;
         if (!giocatore.isPossiedeMappa()) {
             System.out.println("DEBUG: Il giocatore non possiede ancora la Mappa");
             return;
@@ -361,7 +370,7 @@ public class GameEngine {
 
     private void apriChatDaTastiera() {
         if (sceneManager.isChatOpen()) return;
-        if (chatNonApribileQui()) return;
+        if (overlayNonApribileQui()) return;
         if (isDialogoActive) {
             System.out.println("DEBUG: Testo in corso, chat non apribile");
             return;
@@ -373,7 +382,7 @@ public class GameEngine {
 
     private void chatButtonClick() {
         if (!sceneManager.isChatOpen()) {
-            if (chatNonApribileQui()) return;
+            if (overlayNonApribileQui()) return;
             if (isDialogoActive) {
                 System.out.println("DEBUG: Testo in corso, chat non apribile");
                 return;
@@ -384,8 +393,8 @@ public class GameEngine {
         network.toggleChat();
     }
 
-    // la chat non si apre nei titoli di coda / statistiche
-    private boolean chatNonApribileQui() {
+    // chat/mappa/inventario non si aprono nei titoli di coda / statistiche
+    private boolean overlayNonApribileQui() {
         return "TITOLI_CODA".equals(sceneManager.getScenaCorrente());
     }
 
@@ -405,7 +414,8 @@ public class GameEngine {
 
     private void toggleInventario() {
         if (sceneManager.isChatOpen()) return;
-        if (isDialogoActive) {
+        if (overlayNonApribileQui()) return;
+        if (isDialogoActive && !spadaSincroAlMassimo()) {
             System.out.println("DEBUG: Testo in corso, inventario non apribile");
             return;
         }

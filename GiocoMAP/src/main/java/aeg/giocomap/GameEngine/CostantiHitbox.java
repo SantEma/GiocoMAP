@@ -48,6 +48,9 @@ public final class CostantiHitbox {
     // Hitbox Cripta Eripeta
     public static final double[] CRIPTA_ERIPETA = {0.4, 0.4, 0.2, 0.2};
 
-    // Hitbox Palazzo Principessa
-    public static final double[] PALAZZO_MARIEN = {0.4, 0.4, 0.2, 0.2};
+    // Hitbox Palazzo Principessa (coordinate spostate in alto a sinistra, considerando le x/y fornite come centro)
+    public static final double[] PALAZZO_MARIEN = {0.42, 0.63, 0.15, 0.25};
+    public static final double[] PALAZZO_MERCANTE_1 = {0.18, 0.66, 0.15, 0.25};
+    public static final double[] PALAZZO_MERCANTE_2 = {0.68, 0.64, 0.15, 0.25};
+    public static final double[] PALAZZO_MERCANTE_3 = {0.00, 0.73, 0.15, 0.25};
 }

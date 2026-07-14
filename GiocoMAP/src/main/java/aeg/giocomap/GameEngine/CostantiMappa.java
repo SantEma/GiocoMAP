@@ -25,6 +25,7 @@ public final class CostantiMappa {
     
     public static final String LETTERA = "LETTERA";
     public static final String LETTERA_RETRO = "LETTERA_RETRO";
+    public static final String LETTERA_FINALE = "LETTERA_FINALE";
     public static final String PIAZZA_CENTRALE = "PIAZZA_CENTRALE";
     public static final String PORTO = "PORTO";
     public static final String STALLA = "STALLA";

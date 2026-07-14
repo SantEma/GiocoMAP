@@ -39,13 +39,30 @@ public class IstanzaEnigma {
         if (root == null) return Collections.emptyList();
         JsonObject opzioni = root.getAsJsonObject("Opzioni_Enigmi");
         if (opzioni == null || !opzioni.has(enigmaId)) return Collections.emptyList();
-        
+
         com.google.gson.JsonArray arr = opzioni.getAsJsonArray(enigmaId);
         String[] ops = new String[arr.size()];
         for(int i=0; i<arr.size(); i++){
             ops[i] = arr.get(i).getAsString();
         }
         return Arrays.asList(ops);
+    }
+
+    // Metodo privato per caricare la lista dei vestiti (o l'ordine corretto) dell'enigma ad ordinamento
+    private static List<String> caricaListaVestiti(String enigmaId, String campo) {
+        JsonObject root = JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
+        if (root == null) return Collections.emptyList();
+        JsonObject vestitiEnigmi = root.getAsJsonObject("Vestiti_Enigmi");
+        if (vestitiEnigmi == null || !vestitiEnigmi.has(enigmaId)) return Collections.emptyList();
+        JsonObject enigmaVestiti = vestitiEnigmi.getAsJsonObject(enigmaId);
+        if (enigmaVestiti == null || !enigmaVestiti.has(campo)) return Collections.emptyList();
+
+        com.google.gson.JsonArray arr = enigmaVestiti.getAsJsonArray(campo);
+        String[] valori = new String[arr.size()];
+        for (int i = 0; i < arr.size(); i++) {
+            valori[i] = arr.get(i).getAsString();
+        }
+        return Arrays.asList(valori);
     }
 
     // Metodo privato per caricare il testo dal file walloftext
@@ -111,15 +128,16 @@ public class IstanzaEnigma {
         );
     }
 
-    public static EnigmaSceltaMultipla creaEnigmaFinale(Oggetto reward) {
-        List<String> opzioni = caricaOpzioni("Enigma_Finale_Principessa");
-        return new EnigmaSceltaMultipla(
+    public static EnigmaOrdinamento creaEnigmaFinale(Oggetto reward) {
+        List<String> vestiti = caricaListaVestiti("Enigma_Finale_Principessa", "vestiti");
+        List<String> ordineCorretto = caricaListaVestiti("Enigma_Finale_Principessa", "ordine_corretto");
+        return new EnigmaOrdinamento(
             "Enigma_Finale_Principessa",
             caricaTesto("Enigma_Finale_Principessa"),
             caricaAiuti("Enigma_Finale_Mercanti_Collaborano"),
             reward,
-            opzioni,
-            3
+            vestiti,
+            ordineCorretto
         );
     }
 }

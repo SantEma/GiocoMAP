@@ -4,12 +4,15 @@ import aeg.giocomap.Model.Oggetti.Oggetto;
 import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.View.LetteraScreen;
+import aeg.giocomap.View.SchermataFinale;
 import aeg.giocomap.Util.JsonLoader;
 import aeg.giocomap.Util.Parser;
 
 import aeg.giocomap.Model.Enigmi.Enigma;
 import aeg.giocomap.Model.Enigmi.EnigmaSceltaMultipla;
+import aeg.giocomap.Model.Enigmi.EnigmaOrdinamento;
 import aeg.giocomap.Model.Enigmi.IstanzaEnigma;
+import aeg.giocomap.View.DialogoOrdinamentoVestiti;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
@@ -41,7 +44,7 @@ import java.util.function.Consumer;
 public class CostruttoreScene {
 
     private final GameEngine engine;
-    private final RegistroNpc registroNPC;
+    private final RegistroNPC registroNPC;
     private final StatoProgressione stato;
 
     // Sequenze narrative della fase finale (Eripeta, David/Enigma del Vincolo)
@@ -72,6 +75,7 @@ public class CostruttoreScene {
     private GameScreen stallaScreen;
     private GameScreen portoScreen;
     private GameScreen piazzaCentrale;
+    private SchermataFinale schermataFinale;
 
     // Variabili condivise tra i metodi costruisciPiazzaCentrale / costruisciPorto / costruisciStalla / ecc.
     private Map<double[], Runnable> zonePiazza;
@@ -106,7 +110,7 @@ public class CostruttoreScene {
     private Personaggio npcKarundis1;
     private Personaggio npcKarundis2;
 
-    public CostruttoreScene(GameEngine engine, StatoProgressione stato, RegistroNpc registroNPC) {
+    public CostruttoreScene(GameEngine engine, StatoProgressione stato, RegistroNPC registroNPC) {
         this.engine = engine;
         this.stato = stato;
         this.registroNPC = registroNPC;
@@ -1007,39 +1011,225 @@ public class CostruttoreScene {
         Map<double[], Runnable> zonePalazzo = new HashMap<>();
         JsonObject marienDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Marien");
         marien = registraNPC("Principessa Marien", Arrays.asList(marienDb.get("sfida").getAsString()));
+        
+        ImageIcon spriteMarien = new ImageIcon(getClass().getResource("/sprites/Personaggi/Marien.png"));
+        ImageIcon spriteJack = new ImageIcon(getClass().getResource("/sprites/Personaggi/SirJack.png"));
+
+        final boolean[] enigmaGiaVisto = {false};
+        final String[] aiuti = new String[3];
+        try {
+            JsonObject hintRoot = aeg.giocomap.Util.JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
+            if(hintRoot != null && hintRoot.has("Aiuti_Enigmi")) {
+                JsonObject aiutiEnigmi = hintRoot.getAsJsonObject("Aiuti_Enigmi");
+                if (aiutiEnigmi.has("Enigma_Finale_Mercanti_Collaborano")) {
+                    com.google.gson.JsonArray aiutiPrincipessa = aiutiEnigmi.getAsJsonArray("Enigma_Finale_Mercanti_Collaborano");
+                    if (aiutiPrincipessa.size() >= 3) {
+                        aiuti[0] = aiutiPrincipessa.get(0).getAsString();
+                        aiuti[1] = aiutiPrincipessa.get(1).getAsString();
+                        aiuti[2] = aiutiPrincipessa.get(2).getAsString();
+                    }
+                }
+            }
+        } catch(Exception e) {}
+
         zonePalazzo.put(CostantiHitbox.PALAZZO_MARIEN, () -> {
             if (engine.getGiocatore().isEnigmaRisolto("Enigma_Finale_Principessa")) {
                 marien.setDialoghi(Arrays.asList("Sei già il mio sposo! Il regno è salvo."));
-                engine.mostraDialogoNPC(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, marien, null);
+                engine.mostraDialogoNPC(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, marien, spriteMarien);
                 return;
             }
-            EnigmaSceltaMultipla enigmaFinale = IstanzaEnigma.creaEnigmaFinale(new Oggetto(8, "Titolo Nobile", "Hai vinto il cuore della principessa e il titolo."));
+            
+            // Il titolo nobiliare e' un premio narrativo, non un oggetto del catalogo:
+            // nessuna reward da caricare o aggiungere all'inventario per questo enigma.
+            EnigmaOrdinamento enigmaFinale = IstanzaEnigma.creaEnigmaFinale(null);
             engine.getStatistics().iniziaEnigma(enigmaFinale);
-            Runnable loopEnigma = new Runnable() {
-                @Override
-                public void run() {
-                    String[] opzioni = enigmaFinale.getOpzioni().toArray(new String[0]);
-                    int scelta = JOptionPane.showOptionDialog(engine.getFrame(), "Scegli l'ordine:", "Enigma della Principessa", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opzioni, opzioni[0]);
-                    if (scelta < 0) return;
-                    if (enigmaFinale.verifica(String.valueOf(scelta))) {
-                        engine.getStatistics().enigmaRisolto(enigmaFinale);
-                        // Enigma finale: ultima ricarica della Spada Sincro (99%)
-                        engine.getGiocatore().ricaricaSpadaSincro();
-                        marien.setDialoghi(Arrays.asList(marienDb.get("vittoria_finale").getAsString()));
-                        engine.mostraDialogoNPC(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, marien, null);
-                    } else {
-                        engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienDb.get("errore_cacciata").getAsString(), null, () -> {
-                            engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Marien").get("errore_ordine").getAsString(), null, this);
-                        });
-                    }
-                }
+            
+            // Testi
+            String altriMercanti = engine.getDbWallOfText().getAsJsonObject("Schermo").get("altri_mercanti").getAsString();
+            String mercantePiumatoNarrazione = engine.getDbWallOfText().getAsJsonObject("Schermo").get("mercante_piumato").getAsString();
+            JsonObject piumatoDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Mercante_Piumato");
+            String piumatoPresunzione = piumatoDb.get("presunzione").getAsString();
+            String piumatoDisposizione = engine.getDbWallOfText().getAsJsonObject("Schermo").get("disposizione_mercante").getAsString();
+            String marienErrore = marienDb.get("errore_enigma").getAsString();
+            String piumatoDisperazione = piumatoDb.get("disperazione").getAsString();
+            String catturaPiumato = engine.getDbWallOfText().getAsJsonObject("Schermo").get("cattura_piumato").getAsString();
+            String marienPresentazione = marienDb.get("presentazione_enigma").getAsString();
+            String marienTessuto1 = marienDb.get("enigma_tessuto_1").getAsString();
+            String marienTessuto2 = marienDb.get("enigma_tessuto_2").getAsString();
+            String marienTessuto3 = marienDb.get("enigma_tessuto_3").getAsString();
+            String marienTessuto4 = marienDb.get("enigma_tessuto_4").getAsString();
+            String marienTessuto5 = marienDb.get("enigma_tessuto_5").getAsString();
+            String marienLeggiIntro = marienDb.get("enigma_leggi_intro").getAsString();
+            String marienLeggi1 = marienDb.get("enigma_leggi_1").getAsString();
+            String marienLeggi2 = marienDb.get("enigma_leggi_2").getAsString();
+            String marienLeggi3 = marienDb.get("enigma_leggi_3").getAsString();
+            String marienLeggi4 = marienDb.get("enigma_leggi_4").getAsString();
+            JsonObject eryndorMarienDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Marien");
+
+            // Sequenza Errore (Mercante Piumato interviene e viene cacciato)
+            Runnable stepErroreEryndor = () -> {
+                engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", eryndorMarienDb.get("errore_ordine").getAsString(), null, null);
             };
-            engine.mostraDialogoCallback(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienDb.get("enigma_leggi").getAsString(), null, loopEnigma);
+            Runnable stepCattura = () -> {
+                engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Fantoccio", catturaPiumato, null, stepErroreEryndor);
+            };
+            Runnable stepDisperazione = () -> {
+                engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Mercante Piumato", piumatoDisperazione, null, stepCattura);
+            };
+            Runnable stepMarienErrore = () -> {
+                engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienErrore, spriteMarien, stepDisperazione);
+            };
+            Runnable stepDisposizione = () -> {
+                engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Fantoccio", piumatoDisposizione, null, stepMarienErrore);
+            };
+            Runnable stepPresunzione = () -> {
+                engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Mercante Piumato", piumatoPresunzione, null, stepDisposizione);
+            };
+            Runnable stepPiumatoNarrazione = () -> {
+                engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Fantoccio", mercantePiumatoNarrazione, null, stepPresunzione);
+            };
+
+            // Popup interattivo: Eryndor sceglie e dispone i vestiti sui manichini uno alla volta.
+            // Al primo vestito fuori posto l'enigma si interrompe subito e riparte la scena dell'errore.
+            final int[] posizioneCorrente = {0};
+            final DialogoOrdinamentoVestiti[] popupCorrente = new DialogoOrdinamentoVestiti[1];
+
+            Runnable avviaPopupVestiti = () -> {
+                posizioneCorrente[0] = 0;
+                DialogoOrdinamentoVestiti popup = new DialogoOrdinamentoVestiti(engine.getFrame(), enigmaFinale.getVestiti(), vestitoScelto -> {
+                    int posizione = posizioneCorrente[0];
+
+                    if (enigmaFinale.verificaPosizione(posizione, vestitoScelto)) {
+                        popupCorrente[0].posizionaVestito(posizione, vestitoScelto);
+                        popupCorrente[0].disabilitaVestito(vestitoScelto);
+                        posizioneCorrente[0]++;
+
+                        if (posizioneCorrente[0] == enigmaFinale.getVestiti().size()) {
+                            popupCorrente[0].dispose();
+                            engine.getStatistics().enigmaRisolto(enigmaFinale);
+
+                            // Vittoria
+                            String successo = marienDb.get("successo_enigma").getAsString();
+                            String ammirazione1 = marienDb.get("ammirazione_1").getAsString();
+                            String ammirazione2 = marienDb.get("ammirazione_2").getAsString();
+                            String ammirazione3 = marienDb.get("ammirazione_3").getAsString();
+                            String rivelazione = marienDb.get("rivelazione").getAsString();
+                            String finale = marienDb.get("finale").getAsString();
+
+                            String eryndorPresentazione = eryndorMarienDb.get("presentazione").getAsString();
+                            String eryndorRacconto = eryndorMarienDb.get("racconto").getAsString();
+                            String eryndorPensieroSeduzione1 = eryndorMarienDb.get("pensiero_seduzione_1").getAsString();
+                            String eryndorParlatoSeduzione1 = eryndorMarienDb.get("parlato_seduzione_1").getAsString();
+                            String eryndorPensieroSeduzione2 = eryndorMarienDb.get("pensiero_seduzione_2").getAsString();
+                            String eryndorParlatoSeduzione2 = eryndorMarienDb.get("parlato_seduzione_2").getAsString();
+
+                            JsonObject jackDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Jack");
+                            JsonObject eryndorJackDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Jack");
+                            String interruzioneJack = engine.getDbWallOfText().getAsJsonObject("Schermo").get("interruzione_jack").getAsString();
+                            String jackIngresso = jackDb.get("ingresso").getAsString();
+                            String jackSfida = jackDb.get("sfida").getAsString();
+                            String potereSpada = engine.getDbWallOfText().getAsJsonObject("Schermo").get("potere_spada").getAsString();
+                            String jackSconfitta = jackDb.get("sconfitta").getAsString();
+                            String eryndorPensieroSfida = eryndorJackDb.get("pensiero_sfida").getAsString();
+                            String eryndorPensieroSpada = eryndorJackDb.get("pensiero_spada").getAsString();
+                            String eryndorPensieroVittoria = eryndorJackDb.get("pensiero_vittoria").getAsString();
+                            String eryndorParlatoVittoria = eryndorJackDb.get("parlato_vittoria").getAsString();
+
+                            // Avvia la scena muta di chiusura (nessun ESC/mappa/inventario/chat), poi i titoli di coda
+                            Runnable stepAvvioFinale = () -> {
+                                engine.setDialogueActive(true);
+                                engine.getSceneManager().mostraScena(CostantiMappa.LETTERA_FINALE);
+                                CostruttoreScene.this.schermataFinale.avviaSequenza();
+                            };
+                            Runnable stepFinale = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", finale, spriteMarien, stepAvvioFinale); };
+                            // La Spada Sincro e' ormai al MAX (vedi stepPensieroSpada): l'inventario si
+                            // sblocca da solo anche a dialogo attivo. Qui aggiungiamo solo il lampo
+                            // arcobaleno a tutto schermo per dare enfasi a questo momento.
+                            Runnable stepPotereSpada = () -> {
+                                engine.getFrame().mostraLampoArcobaleno();
+                                engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Fantoccio", potereSpada, null, stepFinale);
+                            };
+                            Runnable stepParlatoVittoria = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", eryndorParlatoVittoria, null, stepPotereSpada); };
+                            Runnable stepPensieroVittoria = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", eryndorPensieroVittoria, null, stepParlatoVittoria); };
+                            Runnable stepSconfittaJack = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Jack", jackSconfitta, spriteJack, stepPensieroVittoria); };
+                            Runnable stepPensieroSpada = () -> {
+                                engine.getGiocatore().ricaricaSpadaSincro();
+                                engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", eryndorPensieroSpada, null, stepSconfittaJack);
+                            };
+                            Runnable stepPensieroSfida = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", eryndorPensieroSfida, null, stepPensieroSpada); };
+                            Runnable stepJackSfida = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Jack", jackSfida, spriteJack, stepPensieroSfida); };
+                            Runnable stepJackIngresso = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Jack", jackIngresso, spriteJack, stepJackSfida); };
+                            Runnable stepInterruzioneJack = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Fantoccio", interruzioneJack, null, stepJackIngresso); };
+                            Runnable stepRivelazione = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", rivelazione, spriteMarien, stepInterruzioneJack); };
+                            Runnable stepParlatoSeduzione2 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", eryndorParlatoSeduzione2, null, stepRivelazione); };
+                            Runnable stepPensieroSeduzione2 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", eryndorPensieroSeduzione2, null, stepParlatoSeduzione2); };
+                            Runnable stepAmmirazione3 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", ammirazione3, spriteMarien, stepPensieroSeduzione2); };
+                            Runnable stepParlatoSeduzione1 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", eryndorParlatoSeduzione1, null, stepAmmirazione3); };
+                            Runnable stepPensieroSeduzione1 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", eryndorPensieroSeduzione1, null, stepParlatoSeduzione1); };
+                            Runnable stepAmmirazione2 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", ammirazione2, spriteMarien, stepPensieroSeduzione1); };
+                            Runnable stepRaccontoEryndor = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", eryndorRacconto, null, stepAmmirazione2); };
+                            Runnable stepAmmirazione1 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", ammirazione1, spriteMarien, stepRaccontoEryndor); };
+                            Runnable stepPresentazioneEryndor = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Eryndor", eryndorPresentazione, null, stepAmmirazione1); };
+
+                            engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", successo, spriteMarien, stepPresentazioneEryndor);
+                        }
+                    } else {
+                        // Vestito fuori posto -> parte subito la scena dell'errore, l'enigma andrà ripetuto
+                        popupCorrente[0].dispose();
+                        stepPiumatoNarrazione.run();
+                    }
+                });
+                popupCorrente[0] = popup;
+                popup.setVisible(true);
+            };
+            
+            // Lettura Enigma e attivazione hitbox
+            Runnable stepLeggi = () -> {
+                enigmaGiaVisto[0] = true;
+                if (aiuti[0] != null) {
+                    zonePalazzo.put(CostantiHitbox.PALAZZO_MERCANTE_1, () -> {
+                        engine.mostraDialogoCallback(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Fantoccio", aiuti[0], null, null);
+                    });
+                    zonePalazzo.put(CostantiHitbox.PALAZZO_MERCANTE_2, () -> {
+                        engine.mostraDialogoCallback(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Fantoccio", aiuti[1], null, null);
+                    });
+                    zonePalazzo.put(CostantiHitbox.PALAZZO_MERCANTE_3, () -> {
+                        engine.mostraDialogoCallback(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Fantoccio", aiuti[2], null, null);
+                    });
+                }
+                
+                Runnable stepLeggi4 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienLeggi4, spriteMarien, avviaPopupVestiti); };
+                Runnable stepLeggi3 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienLeggi3, spriteMarien, stepLeggi4); };
+                Runnable stepLeggi2 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienLeggi2, spriteMarien, stepLeggi3); };
+                Runnable stepLeggi1 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienLeggi1, spriteMarien, stepLeggi2); };
+                Runnable stepLeggiIntro = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienLeggiIntro, spriteMarien, stepLeggi1); };
+                
+                Runnable stepTessuto5 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienTessuto5, spriteMarien, stepLeggiIntro); };
+                Runnable stepTessuto4 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienTessuto4, spriteMarien, stepTessuto5); };
+                Runnable stepTessuto3 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienTessuto3, spriteMarien, stepTessuto4); };
+                Runnable stepTessuto2 = () -> { engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienTessuto2, spriteMarien, stepTessuto3); };
+                
+                engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienTessuto1, spriteMarien, stepTessuto2);
+            };
+            
+            // Presentazione (solo prima volta)
+            if (!enigmaGiaVisto[0]) {
+                Runnable stepAltriMercanti = () -> {
+                    engine.mostraDialogoCallback(CostruttoreScene.this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Fantoccio", altriMercanti, null, stepLeggi);
+                };
+                engine.mostraDialogoCallback(this.palazzoScreen, CostantiMappa.PALAZZO_PRINCIPESSA, "Principessa Marien", marienPresentazione, spriteMarien, stepAltriMercanti);
+            } else {
+                stepLeggi.run();
+            }
         });
+        
         GameScreen palazzoScreen = engine.getSceneManager().creaScenaBase("SalaDellaPrincipessa.png", zonePalazzo);
         this.palazzoScreen = palazzoScreen;
+        
+        // Debug Coordinate per la scena
+        this.palazzoScreen.abilitaDebugCoordinate();
+        
         engine.getSceneManager().registraScena(CostantiMappa.PALAZZO_PRINCIPESSA, palazzoScreen);
-
     }
 
     private void costruisciLettere() {
@@ -1062,6 +1252,13 @@ public class CostruttoreScene {
 
         });
         engine.getSceneManager().registraScena(CostantiMappa.LETTERA, schermata_lettera);
+        
+        List<String> letteraFinale = JsonLoader.estraiLista(engine.getDbWallOfText().getAsJsonObject("Lettera"), "lettera_finale");
+        this.schermataFinale = new SchermataFinale(letteraFinale, () -> {
+            engine.setDialogueActive(false);
+            engine.getStatistics().statistiche(true);
+        });
+        engine.getSceneManager().registraScena(CostantiMappa.LETTERA_FINALE, this.schermataFinale);
     }
 
     private Personaggio registraNPC(String nome, List<String> dialoghi) {

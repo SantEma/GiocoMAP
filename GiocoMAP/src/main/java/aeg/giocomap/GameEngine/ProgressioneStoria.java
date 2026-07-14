@@ -19,7 +19,7 @@ package aeg.giocomap.GameEngine;
 public class ProgressioneStoria {
 
     private final StatoProgressione stato = new StatoProgressione();
-    private final RegistroNpc registroNPC = new RegistroNpc();
+    private final RegistroNPC registroNPC = new RegistroNPC();
     private final CostruttoreScene costruttore;
     private final NavigazioneMappa navigazione;
 

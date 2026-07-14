@@ -9,13 +9,25 @@
       "Uno",
       "Tre",
       "Cinque"
-    ],
-    "Enigma_Finale_Principessa": [
-      "1. Velluto Cremisi, 2. Seta Celeste, 3. Damasco Verde Smeraldo, 4. Lino Candido, 5. Broccato Dorato",
-      "1. Velluto Cremisi, 2. Broccato Dorato, 3. Lino Candido, 4. Damasco Verde Smeraldo, 5. Seta Celeste",
-      "1. Damasco Verde Smeraldo, 2. Seta Celeste, 3. Lino Candido, 4. Velluto Cremisi, 5. Broccato Dorato",
-      "1. Velluto Cremisi, 2. Seta Celeste, 3. Lino Candido, 4. Damasco Verde Smeraldo, 5. Broccato Dorato"
     ]
+  },
+  "Vestiti_Enigmi": {
+    "Enigma_Finale_Principessa": {
+      "vestiti": [
+        "Seta Celeste",
+        "Velluto Cremisi",
+        "Broccato Dorato",
+        "Lino Candido",
+        "Damasco Verde Smeraldo"
+      ],
+      "ordine_corretto": [
+        "Velluto Cremisi",
+        "Seta Celeste",
+        "Lino Candido",
+        "Damasco Verde Smeraldo",
+        "Broccato Dorato"
+      ]
+    }
   },
   "Aiuti_Enigmi": {
     "Enigma_1_Porto": [

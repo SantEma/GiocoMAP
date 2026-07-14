@@ -79,8 +79,9 @@ public class SceneManager {
             nomeScena.equals("MAPPA") || 
             nomeScena.equals("INVENTARIO") || 
             nomeScena.equals("TITOLI_CODA") || 
-            nomeScena.equals("LETTERA") || 
-            nomeScena.equals("LETTERA_RETRO") || 
+            nomeScena.equals("LETTERA") ||
+            nomeScena.equals("LETTERA_RETRO") ||
+            nomeScena.equals("LETTERA_FINALE") ||
             nomeScena.equals("DIALOGO_CORRENTE") ||
             nomeScena.equals("MENU_PAUSA") ||
             nomeScena.equals("COMANDI") ||
@@ -89,6 +90,9 @@ public class SceneManager {
         } else {
             frame.setFrecceVisibili(true);
         }
+
+        // Il bottone chat fluttuante non deve comparire sopra i titoli di coda
+        frame.setChatButtonVisibile(!nomeScena.equals("TITOLI_CODA"));
     }
     
     // Logiche della Mappa

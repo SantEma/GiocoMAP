@@ -5,7 +5,7 @@
             "Sono lieto di invitarvi al palazzo reale con lo scopo di rendere uno di voi il mio artigiano di corte.\n\n",
             "Come certamente le voci di corridoio avranno già sussurrato alle vostre orecchie, il cuore di mia figlia,\n la Principessa Marien, è stato conquistato dal capitano delle guardie Jack, e i preparativi per il matrimonio dell'anno sono ufficialmente aperti.\n Un evento di tale magnitudo, destinato a rimanere scolpito negli annali della nostra società, esige un fasto senza precedenti.\n Gli occhi del mondo intero saranno puntati sull'abito della sposa. Desideriamo per lei non un tessuto comune,\n ma un capolavoro di trama e ordito, capace di catturare la luce dei lampadari di cristallo e la meraviglia di ogni invitato.\n\n",
             "Ordunque, necessito che mi portiate il tessuto migliore che avete e tra tutti voi concorrenti sceglierò il migliore\n con cui sarà vergato l'abito per mia figlia, e fidatevi, sarete ben che meno ricompensati.\n\n",
-            "Distinti saluti, Vostra Imminenza"
+            "Distinti saluti, Vostra Eminenza"
         ],
         "lettera_finale":[
             "Partono le nozze regali e tutti i mercanti ricorderanno per sempre il nome di Eryndor come uno dei mercanti più astuti e forti della storia.\n",
@@ -17,7 +17,7 @@
         ]
     },
     "Schermo":{
-        "tessuto_rubato": "Il tuo tessuto è stato rubato dalla figura losca che si para d'inanzi a te",
+        "tessuto_rubato": "Il tuo tessuto è stato rubato dalla figura losca che si para dinanzi a te",
         "trovi_chiave": "Trovi una chiave mentre rovisti nelle tasche di Fox, sembra importante e decidi di tenerla",
         "strano_liquido": "Il robot sembra danneggiato e ti ha dato uno strano liquido da bere",
         "ubriacato": "Improvvisamente vedi tutto nero. Ti risvegli dopo qualche ora cosciente nel palazzo reale",
@@ -43,7 +43,7 @@
         "Recuper_tessuto": "Hai recuperato il tuo tessuto",
         "altri_mercanti": "Origliando senti che alcuni mercanti stanno facendo squadra tra loro",
         "mercante_piumato": "Un mercante con un turbante piumato spinge via Eryndor con il gomito, ridacchiando",
-        "disposizione_mercante": "Il mercante dispone i tessuti esattamente secondo l'opzione n.",
+        "disposizione_mercante": "Il mercante dispone i tessuti esattamente secondo l'opzione pensata da te",
         "opzione_vestito": "Quale delle seguenti opzioni scegli? ",
         "cattura_piumato": "Le guardie lo trascinano via mentre i suoi nastri piumati volano per la sala",
         "interruzione_jack": "Il momento viene spezzato all'improvviso.\n Le gigantesche porte della sala vengono spalancate\n con una violenza tale da far tremare i lampadari di cristallo.\n Una figura imponente in armatura pesante fa il suo ingresso, accecata dall'ira.",
