@@ -19,7 +19,6 @@ public enum StatoStoria {
     ACCUSA_ERIPETA_SUPERATA(11),
     DAVID_INTERPELLATO(12),
     ENIGMA_VINCOLO_RISOLTO(13),
-    SEGRETO_ERIPETA_SVELATO(14),
     AMPOLLA_CONSEGNATA(15);
 
     private final int valore;

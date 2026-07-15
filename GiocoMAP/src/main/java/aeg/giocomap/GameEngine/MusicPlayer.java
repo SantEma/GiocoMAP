@@ -20,11 +20,10 @@ public class MusicPlayer {
     
     // Costruttore con tutte le tracce audio
     public MusicPlayer(){
-        tracceAudio = new String[3];
+        tracceAudio = new String[2];
         
         tracceAudio[0] = "/musiche/GreenlandsTitleScreen.wav"; //Ttile screen
         tracceAudio[1] = "/musiche/DEAFKEVEndTitle.wav"; // End Screen
-        //tracceAudio[2] = "daviderechemettere";
     }
     
     public void playMusic(int i){
