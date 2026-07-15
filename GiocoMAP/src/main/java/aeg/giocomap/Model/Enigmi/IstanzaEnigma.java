@@ -127,7 +127,7 @@ public class IstanzaEnigma {
         List<String> ordineCorretto = caricaListaVestiti("Enigma_Finale_Principessa", "ordine_corretto");
         return new EnigmaOrdinamento(
             "Enigma_Finale_Principessa",
-            caricaTesto("Enigma_Finale_Principessa"),
+            "",
             caricaAiuti("Enigma_Finale_Mercanti_Collaborano"),
             reward,
             vestiti,

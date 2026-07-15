@@ -168,6 +168,7 @@ public class GameEngine {
     }
 
     private void avviaGioco(boolean carica) {
+        statistics.resetPunteggio();
         String[] salvataggio = db.loadGame();
 
         if (carica) {

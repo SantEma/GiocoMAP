@@ -28,6 +28,11 @@ public class GameStatistics {
         this.sceneManager = sceneManager;
     }
 
+    // Azzera il punteggio accumulato post scena crediti
+    public void resetPunteggio() {
+        punteggioTotale = 0;
+    }
+
     public void iniziaEnigma(Enigma enigma) {
         String id = (enigma != null) ? enigma.getId() : null;
 
