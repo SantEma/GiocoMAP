@@ -14,7 +14,7 @@ import java.awt.Rectangle;
  *
  * @author andrea
  */
-public final class MappaPanel extends JPanel implements CoordinateDebuggable {
+public final class MappaPanel extends JPanel {
     private BufferedImage immagineMappa;
     private BufferedImage mappaPre; 
     private BufferedImage immaginePosizione;
@@ -58,12 +58,10 @@ public final class MappaPanel extends JPanel implements CoordinateDebuggable {
         });
     }
     
-    @Override
     public JPanel getPanel() {
         return this;
     }
 
-    @Override
     public Rectangle getAreaImmagine(int panelW, int panelH) {
         if (immagineMappa == null) return new Rectangle(0, 0, panelW, panelH);
         

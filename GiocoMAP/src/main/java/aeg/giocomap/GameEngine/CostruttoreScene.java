@@ -472,7 +472,6 @@ public class CostruttoreScene {
             System.err.println("Errore caricamento sfondo porto: " + e.getMessage());
         }
         GameScreen portoScreen = new GameScreen(sfondoPorto, zonePorto);
-        portoScreen.abilitaDebugCoordinate(); // disabilitato per test
         this.portoScreen = portoScreen;
         
         
@@ -739,7 +738,6 @@ public class CostruttoreScene {
         engine.getSceneManager().registraScena(CostantiMappa.BOSCO, boscoScreen);
         
         GameScreen boscoDeepScreen = engine.getSceneManager().creaScenaBase("BoscoINN.png", zoneBoscoDeep);
-        boscoDeepScreen.abilitaDebugCoordinate(); // disabilitato per test
         this.boscoDeepScreen = boscoDeepScreen;
         engine.getSceneManager().registraScena(CostantiMappa.BOSCO_DEEP, boscoDeepScreen);
         
@@ -940,7 +938,6 @@ public class CostruttoreScene {
         }
         
         GameScreen ingressoScreen = engine.getSceneManager().creaScenaBase("CancelloCastello.png", zoneIngresso);
-        ingressoScreen.abilitaDebugCoordinate(); // disabilitato per test
         this.ingressoScreen = ingressoScreen;
         engine.getSceneManager().registraScena(CostantiMappa.INGRESSO_PALAZZO, ingressoScreen);
         engine.getSceneManager().registraScena(CostantiMappa.SCALE, engine.getSceneManager().creaScenaBase("ScalePalazzo.png", null));
@@ -1217,10 +1214,7 @@ public class CostruttoreScene {
         
         GameScreen palazzoScreen = engine.getSceneManager().creaScenaBase("SalaDellaPrincipessa.png", zonePalazzo);
         this.palazzoScreen = palazzoScreen;
-        
-        // Debug Coordinate per la scena
-        this.palazzoScreen.abilitaDebugCoordinate();
-        
+
         engine.getSceneManager().registraScena(CostantiMappa.PALAZZO_PRINCIPESSA, palazzoScreen);
     }
 
