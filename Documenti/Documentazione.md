@@ -500,9 +500,144 @@ public static final int TITLE_SCREEN_MUSIC = 0;
         //tracceAudio[2] = "traccasuccessiva";
     }
 ```
+
 ### Database (JDBC)
 
-bla bla bla…
+L'utilizzo della JDBC nel progetto è immagazzinato nel package `giocomap.Model.Storage.ModelDB`, così la logica del DB viene separata dal resto della logica di gioco.
+
+La gestione della JDBC in `ModelDB.java` segue le classiche fasi del **ciclo di vita di una connessione a un database**, gestendo tutto in modo strutturato.
+Per eseguire le sue operazioni nel suo opportuno file abbiamo importato a monte le seguenti librerie:
+
+```JAVA
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+```
+ 
+ Essi sono le librerie per utilizzare il linguaggio di **interrogazione SQL**.
+ Ma per far funzionare il DB di H2 che lavora in maniera locale, abbiamo dovuto comunque inserire nelle **dipendenze** di maven (`pom.xml`) la struttura di h2:
+ 
+ ```xml
+ <dependencies>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.200</version>
+        </dependency>
+        
+        ...
+        
+ ```
+ 
+ La connessione al DB avviene tramite il comando `DriverManager.getConnection("jdbc:h2:./saves/DB")` all'interno dell'apposito metodo privato:
+
+```JAVA
+// Funzione che connette al Database e crea/aggiorna le tabelle
+private void connettiDatabase(){
+    try{
+        conn = DriverManager.getConnection("jdbc:h2:./saves/DB");
+        System.out.println("TEST: Connessione al DB avvenuta");
+
+        // saves: la stanza e' il NOME della scena (testo), non un numero
+        eseguiUpdate("CREATE TABLE IF NOT EXISTS saves ("
+                    + "id INT PRIMARY KEY,"
+                    + "stanza_attuale VARCHAR(100),"
+                    + "enigma_attuale INT)");
+
+        // migrazione per i vecchi DB dove stanza_attuale era INT:
+        // converto la colonna in testo senza perdere l'eventuale riga
+        try {
+            eseguiUpdate("ALTER TABLE saves ALTER COLUMN stanza_attuale VARCHAR(100)");
+        } catch (SQLException e) {
+            // colonna gia' del tipo giusto: ignoro
+        }
+
+        // colonne per lo stato di avanzamento (aggiunte se mancano)
+        try {
+            eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS stato_city INT DEFAULT 0");
+            eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS possiede_mappa BOOLEAN DEFAULT FALSE");
+            eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS enigmi_risolti VARCHAR(1000)");
+            eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS inventario VARCHAR(1000)");
+            eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS primo_accesso_palazzo BOOLEAN DEFAULT TRUE");
+            eseguiUpdate("ALTER TABLE saves ADD COLUMN IF NOT EXISTS carica_spada INT DEFAULT 0");
+        } catch (SQLException e) {
+            System.err.println("Errore aggiornamento colonne saves: " + e.getMessage());
+        }
+
+        // records: classifica dei punteggi
+        eseguiUpdate("CREATE TABLE IF NOT EXISTS records ("
+                    + "id INT AUTO_INCREMENT PRIMARY KEY,"
+                    + "nome VARCHAR(50),"
+                    + "punteggio INT,"
+                    + "data TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+
+        // difesa contro vecchi DB creati senza la colonna nome
+        try {
+            eseguiUpdate("ALTER TABLE records ADD COLUMN IF NOT EXISTS nome VARCHAR(50)");
+        } catch (SQLException e) {
+            // colonna gia' presente: ignoro
+        }
+    }
+    catch (SQLException e){
+        System.err.println("Errore di connessione al DB: "+e.getMessage());
+    }
+}
+```
+
+La connessione ad **H2** avviene subito appena viene chiamata la classe nel progetto poiché la funzione precedente, `connettiDatabase()`, viene chiamata dentro al costruttore di `ModelDB`, creando immediatamente così la cartella locale del giocatore con le tabelle relative ai suoi **salvataggi** e **records**. Questa creazione avviene nel momento in cui si clicca su **Nuova Partita** nello schermo iniziale del gioco:
+
+![[NuovaPartitaTitleScreen.png]]
+
+Per interagire con i dati, il codice sfrutta prevalentemente le istanze di `PreparedStatement` (es. nei metodi `salvaPartita` e `salvaSeNecessario`). Questa scelta previene le **SQL injection** e semplifica il caricamento delle variabili Java all'interno delle query (tramite set di metodi come `pstm.setString()`).
+
+Come abbiamo fatto per i file, anche qui gli **errori** vengono gestiti tramite `try-catch`, con le `SQLException` così da visualizzare in fase di debug gli errori dati e risolverli ma specialmente per non far fermare il gioco in caso di errori.
+
+Ogni metodo è ferreo sulla **chiusura dei DB** per deallocare le risorse, specialmente se si chiude il gioco dalla finestra e non dai comandi di uscita implementati, così da non lasciare H2 sempre in ascolto, tra cui i metodi `loadGame()` e `salvaPartita()`, utilizzano addirittura la clausola `finally` in modo tale da chiudere sempre il DB anche in caso di errore: 
+
+```JAVA
+
+//...
+
+catch (SQLException e) {
+            System.err.println(e.getMessage());
+            return null;
+        }
+        finally {
+            if (rs != null) {
+                try { rs.close(); }
+                catch (SQLException ex) { System.err.println("Errore chiusura ResultSet: " + ex.getMessage()); }
+            }
+            if (pstm != null) {
+                try { pstm.close(); }
+                catch (SQLException ex) { System.err.println("Errore chiusura Statement: " + ex.getMessage()); }
+            }
+        }
+```
+
+Questa chiusura avviene tramite il metodo `chiudiConnessione()`, il quale effettua un controllo che se la **Connection** esiste ed è aperta allora procede alla sua corretta terminazione:
+
+```JAVA
+// Chiudo la connessione ad h2 se aperta
+    public void chiudiConnessione(){
+        try{
+            if(conn != null && !conn.isClosed()){
+                conn.close();
+                System.out.println("DEBUG: DB chiuso");    
+            } 
+        }
+        catch (SQLException e){
+            System.out.println("DEBUG: Errore durante la chiusura del DB "+e.getMessage());
+        }
+    }
+```
+
+L'uso principale del DB è stato quello di creare i dati di un giocatore in caso iniziasse una nuova partita, altrimenti se clicca nel titlescreen **Carica Partita**, nel momento in cui lui ha salvato la partita regolarmente durante una sessione di gioco:
+
+![[SalvaedEsci.png]]
+
+può rientrare nella partita nel punto in cui era rimasto, poiché nelle colonne del DB vengono **salvate le seguenti colonne**, importanti per tenere traccia del punto in cui vi si è fermati nella storia: `stanza_attuale, stato_city, possiede_mappa, enigmi_risolti, inventario, primo_accesso_palazzo, carica_spada`, tutte controllate rigorosamente dalla funzione `loadGame()` presente sempre in `ModelDB` al momento dell'avvio del gioco (da `avvioGioco()` di `GameEngine`) tramite il tasto predisposto.
 
 ### Lamba Expression (compresi stream e pipeline)
 
