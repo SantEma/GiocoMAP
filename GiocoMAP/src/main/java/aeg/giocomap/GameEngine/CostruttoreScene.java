@@ -52,7 +52,6 @@ public class CostruttoreScene {
     private Personaggio david;
     private Personaggio ladroFox;
     private Personaggio guardiaReale;
-    private Personaggio eripeta;
     private Personaggio marien;
     
     // Azione interattiva di Eripeta
@@ -372,7 +371,7 @@ public class CostruttoreScene {
 
         riattivaDavidDopoMappa = () -> {
             zonePorto.put(davidHitbox, () ->
-                    flussi.gestisciDavidDopoMappa(this.portoScreen, david, spriteDavid, davidDb));
+                    flussi.gestisciDavidDopoMappa(this.portoScreen, spriteDavid, davidDb));
             // Gli aiuti degli abitanti 1 e 3 si abilitano solo dopo che David annuncia
             // l'Enigma del Vincolo (statoCity 12), quando il player torna da Eripeta
             if (stato.getStato() == StatoStoria.DAVID_INTERPELLATO) {
@@ -964,7 +963,7 @@ public class CostruttoreScene {
     private void costruisciCripta() {
         Map<double[], Runnable> zoneCripta = new HashMap<>();
         JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
-        eripeta = registraNPC("Eripeta", Arrays.asList(eripetaDb.get("rifiuto").getAsString()));
+        registraNPC("Eripeta", Arrays.asList(eripetaDb.get("rifiuto").getAsString()));
         
         interazioneEripeta = () -> {
             JsonObject eryndorDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Eripeta");

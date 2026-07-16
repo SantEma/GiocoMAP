@@ -80,7 +80,7 @@ public class GameEngine {
 
         sceneManager.registraScena("MAPPA", new MappaPanel(sceneManager));
 
-        this.giocatore = new Giocatore("Eryndor");
+        this.giocatore = new Giocatore();
 
         Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
         if (tessutoIniziale_temp != null)

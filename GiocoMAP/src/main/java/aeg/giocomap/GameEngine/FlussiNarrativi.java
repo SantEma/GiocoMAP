@@ -1,7 +1,6 @@
 package aeg.giocomap.GameEngine;
 
 import aeg.giocomap.Model.Oggetti.Oggetto;
-import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.Util.Parser;
 import aeg.giocomap.Model.Enigmi.EnigmaSceltaMultipla;
@@ -136,7 +135,7 @@ public class FlussiNarrativi {
         engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", txt1_1, spriteEripeta, step3);
     }
 
-    void gestisciDavidDopoMappa(GameScreen portoScreen, Personaggio david, ImageIcon spriteDavid, JsonObject davidDb) {
+    void gestisciDavidDopoMappa(GameScreen portoScreen, ImageIcon spriteDavid, JsonObject davidDb) {
         if (stato.getStato() == StatoStoria.ACCUSA_ERIPETA_SUPERATA) {
             String ritorno1 = davidDb.get("ritorno_1").getAsString();
             engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", ritorno1, spriteDavid, () -> {
@@ -148,7 +147,7 @@ public class FlussiNarrativi {
                     setStatoCity(12);
                     String ritorno2 = davidDb.get("ritorno_2").getAsString();
                     engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", ritorno2, spriteDavid, () -> {
-                        lanciaEnigma5(portoScreen, david, spriteDavid, davidDb);
+                        lanciaEnigma5(portoScreen, spriteDavid, davidDb);
                     });
                 } else {
                     String incomprensione = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Contadino_Green").get("incomprensione").getAsString();
@@ -156,7 +155,7 @@ public class FlussiNarrativi {
                 }
             });
         } else if (stato.getStato() == StatoStoria.DAVID_INTERPELLATO) {
-            lanciaEnigma5(portoScreen, david, spriteDavid, davidDb);
+            lanciaEnigma5(portoScreen, spriteDavid, davidDb);
         } else if (stato.getStato() == StatoStoria.ENIGMA_VINCOLO_RISOLTO) {
             mostraStoriaEripeta(portoScreen, spriteDavid, davidDb);
         } else {
@@ -165,7 +164,7 @@ public class FlussiNarrativi {
         }
     }
 
-    private void lanciaEnigma5(GameScreen portoScreen, Personaggio david, ImageIcon spriteDavid, JsonObject davidDb) {
+    private void lanciaEnigma5(GameScreen portoScreen, ImageIcon spriteDavid, JsonObject davidDb) {
         Oggetto reward = engine.getTxt().getOggettoDaCatalogo(9);
         EnigmaSceltaMultipla enigma5 = IstanzaEnigma.creaEnigma5(reward);
         engine.getStatistics().iniziaEnigma(enigma5);

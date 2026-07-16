@@ -31,7 +31,6 @@ public class ModelTXTOggetti {
             int currentId=-1;
             String currentNome="";
             String currentDesc="";
-            boolean isNuovoOggetto;
             
             // Fin tanto che la linea letta da file non è nulla...
             while ((linea=reader.readLine())!=null) {

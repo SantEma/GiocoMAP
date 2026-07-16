@@ -11,7 +11,6 @@ import java.util.Collection;
  * @author emanuele
  */
 public class Giocatore {
-    private final String nome_lore;
     private String nome_player;
     private Inventario<Oggetto> inventario;
     private boolean possiedeInventario;
@@ -20,8 +19,7 @@ public class Giocatore {
     // ID degli enigmi gia' risolti (per non rifarli al ricaricamento)
     private final Set<String> enigmiRisolti = new HashSet<>();
 
-    public Giocatore(String nome){
-        this.nome_lore=nome;
+    public Giocatore(){
         this.nome_player="";// Inizialmente vuoto poi il player lo inserirà come sta nelle stats
         this.possiedeInventario=false; // Non ancora ottenuto quando lo si crea
         this.possiedeMappa=false; // Non ha ancora la mappa all'inizio

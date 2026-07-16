@@ -3,7 +3,6 @@ package aeg.giocomap.GameEngine;
 import aeg.giocomap.Model.Stanza.Stanza;
 import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.Model.Personaggi.Fantoccio;
-import aeg.giocomap.Model.Stanza.Stanza;
 import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.Util.JsonLoader;
 
