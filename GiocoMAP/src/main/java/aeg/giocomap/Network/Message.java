@@ -15,7 +15,15 @@ public class Message {
         this.contenuto = contenuto;
     }
 
-    public TipoMessaggio getTipo() { return tipo; }
-    public String getMittente() { return mittente; }
-    public String getContenuto() { return contenuto; }
+    public TipoMessaggio getTipo() { 
+        return tipo; 
+    }
+    
+    public String getMittente() { 
+        return mittente; 
+    }
+    
+    public String getContenuto() { 
+        return contenuto; 
+    }
 }

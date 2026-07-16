@@ -41,7 +41,7 @@ public class TitleScreen extends JPanel {
         btn_record = new JButton("Statistiche");
         btn_connetti = new JButton("Partecipa alla Chat");    // ← aggiunto
 
-        // estetica
+        // Estetica dei bottoni
         Font fontBottoni = new Font("Arial", Font.BOLD, 18);
         Dimension dimB = new Dimension(250, 40);
 
@@ -57,7 +57,7 @@ public class TitleScreen extends JPanel {
 
         CursorUtil.setHandCursor(btn_nuova_partita, btn_carica_partita, btn_record, btn_connetti);
 
-        // aggiungo i bottoni
+        // Aggiunta dei bottoni
         buttonPanel.add(btn_nuova_partita);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 20)));
         buttonPanel.add(btn_carica_partita);

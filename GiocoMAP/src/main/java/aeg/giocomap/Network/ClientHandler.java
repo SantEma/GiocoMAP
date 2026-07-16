@@ -22,8 +22,7 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
-            BufferedReader input = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()));
+            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             output = new PrintWriter(socket.getOutputStream(), true);
 
             String raw;
@@ -33,10 +32,10 @@ public class ClientHandler implements Runnable {
 
                 switch (msg.getTipo()) {
                     case JOIN:
-                        nomeGiocatore = msg.getMittente();
+                        String nomeRichiesto = msg.getMittente();
 
-                        // verifica se il nome è disponibile
-                        if (!server.nomeDisponibile(nomeGiocatore)) {
+                        // Verifica se il nome è disponibile per la chat
+                        if (!server.nomeDisponibile(nomeRichiesto)) {
                             invia(MessageParser.serializza(
                                 new Message(TipoMessaggio.NOME_DUPLICATO, "SERVER",
                                     "Nome già in uso! Scegline un altro.")));
@@ -44,6 +43,7 @@ public class ClientHandler implements Runnable {
                             return;
                         }
 
+                        nomeGiocatore = nomeRichiesto;
                         server.aggiungiNome(nomeGiocatore);
                         System.out.println("DEBUG: " + nomeGiocatore + " entrato");
                         server.broadcast(msg);

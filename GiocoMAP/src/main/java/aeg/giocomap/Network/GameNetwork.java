@@ -89,6 +89,16 @@ public class GameNetwork {
             return;
         }
 
+        if (nome.contains("|") || nome.contains("\n") || nome.contains("\r")) {
+            JOptionPane.showMessageDialog(
+                frame,
+                "Il nome non può contenere i caratteri '|' o a capo!",
+                "Nome non valido",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
         gameClient = new GameClient(nome.trim());
         chatPanel = new ChatPanel();
         boolean ok = gameClient.connetti(ip);

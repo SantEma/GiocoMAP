@@ -44,7 +44,7 @@ public class InventarioPanel extends JPanel {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         add(scrollPane,BorderLayout.CENTER); // Lo inseriamo non nel contenitore ma direttamente nel pannello principale di questa classe
         
-        // Titolo Inventario
+        // Titolo inventario
         JLabel titolo=new JLabel("Inventario",SwingConstants.CENTER);
         titolo.setFont(new Font("Arial",Font.BOLD,28));
         titolo.setForeground(Color.WHITE);

@@ -25,7 +25,7 @@ public final class MappaPanel extends JPanel {
     public MappaPanel(SceneManager sceneManager) {
         this.sceneManager = sceneManager;
         try{
-            //Carico la mappa e il marker posizione
+            // Caricamento mappa e marker di posizione
             immagineMappa = ImageIO.read(getClass().getResourceAsStream("/sprites/StrumentiGrafici/MappaShambhala.png"));
             immaginePosizione = ImageIO.read(getClass().getResourceAsStream("/sprites/StrumentiGrafici/Posizione.png"));
             System.out.println("DEBUG: Mappa e cursore posizione caricati con successo in MappaPanel!");
@@ -37,12 +37,12 @@ public final class MappaPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.BLACK);
         
-        // Istruzioni per far capire come usare la Mappa
+        // Istruzioni per far capire come usare la mappa
         JLabel istruzioni = new JLabel("Premi M per aprire e chiudere la mappa",SwingConstants.CENTER);
         istruzioni.setFont(new Font("Arial",Font.BOLD,20));
         istruzioni.setForeground(Color.WHITE);
         
-        //Testo posizionato sotto l'immagine
+        // Testo posizionato sotto l'immagine
         istruzioni.setOpaque(true);
         istruzioni.setBackground(new Color(0,0,0,150));
         istruzioni.setBorder(BorderFactory.createEmptyBorder(10,0,10,0));

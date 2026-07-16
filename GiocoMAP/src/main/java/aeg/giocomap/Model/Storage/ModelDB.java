@@ -24,7 +24,6 @@ public class ModelDB {
             conn = DriverManager.getConnection("jdbc:h2:./saves/DB");
             System.out.println("TEST: Connessione al DB avvenuta");
 
-            // saves: la stanza e' il NOME della scena (testo), non un numero
             eseguiUpdate("CREATE TABLE IF NOT EXISTS saves ("
                     + "id INT PRIMARY KEY,"
                     + "stanza_attuale VARCHAR(100),"
@@ -79,7 +78,7 @@ public class ModelDB {
 
     public void salvaSeNecessario(String nome, int punteggio) {
         try {
-            // controlla se esiste già quel nome con quel punteggio
+            // Controlla se esiste già quel nome con quel punteggio
             String query = "SELECT id FROM records WHERE nome = ? AND punteggio = ?";
             PreparedStatement pstm = conn.prepareStatement(query);
             pstm.setString(1, nome);
@@ -167,10 +166,11 @@ public class ModelDB {
         }
     }
     
-    // Carica la partita. Restituisce:
-    //   [0] = nome scena, [1] = statoCity, [2] = possiedeMappa,
-    //   [3] = enigmi risolti (id separati da virgola), [4] = inventario,
-    //   [5] = primoAccessoPalazzo, [6] = caricaSpada
+    /* Carica la partita restituendo:
+       [0] = nome scena, [1] = statoCity, [2] = possiedeMappa,
+       [3] = enigmi risolti (ID separati da virgola), [4] = inventario,
+       [5] = primoAccessoPalazzo, [6] = caricaSpada
+    */
     public String[] loadGame() {
         String query = "SELECT stanza_attuale, stato_city, possiede_mappa, enigmi_risolti, inventario, primo_accesso_palazzo, carica_spada FROM saves WHERE id = 1";
         PreparedStatement pstm = null;
@@ -192,7 +192,7 @@ public class ModelDB {
                 return new String[]{stanza, statoCity, possiedeMappa, enigmi, inventario, primoAccessoPalazzo, caricaSpada};
             }
 
-            return null;    // nessun salvataggio trovato
+            return null;    // Nessun salvataggio trovato
 
         }
         catch (SQLException e) {
@@ -211,10 +211,8 @@ public class ModelDB {
         }
     }
 
-    // Salva (o aggiorna) la partita corrente nella riga id=1
-    public void salvaPartita(String stanzaAttuale, int statoCity,
-                             boolean possiedeMappa, String enigmiRisolti, String inventario, boolean primoAccessoPalazzo,
-                             int caricaSpada) {
+    // Salva (o aggiorna) la partita corrente nella riga ID
+    public void salvaPartita(String stanzaAttuale, int statoCity, boolean possiedeMappa, String enigmiRisolti, String inventario, boolean primoAccessoPalazzo, int caricaSpada) {
         // MERGE = insert o update: funziona sia se il salvataggio esiste già
         // sia se è il primo, senza violare la primary key id=1
         String query = "MERGE INTO saves (id, stanza_attuale, enigma_attuale, stato_city, possiede_mappa, enigmi_risolti, inventario, primo_accesso_palazzo, carica_spada) "

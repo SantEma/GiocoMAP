@@ -25,10 +25,10 @@ public class NavigazioneMappa {
     private final RegistroNPC registroNPC;
     private final CostruttoreScene costruttore;
 
-    // Struttura dati per astrarre la logica dei percorsi (routing table)
+    // Struttura dati per astrarre la logica dei percorsi
     private final Map<String, Map<String, Runnable>> collegamentiMappa = new HashMap<>();
 
-    // Mappa per le Stanze (routing standard)
+    // Mappa per le stanze 
     private final Map<String, Stanza> mappaStanze = new HashMap<>();
 
     public NavigazioneMappa(GameEngine engine, StatoProgressione stato,
@@ -43,6 +43,7 @@ public class NavigazioneMappa {
         return mappaStanze.computeIfAbsent(nome, n -> new Stanza(n));
     }
 
+    // Direzioni delle frecce, 
     public void impostaFrecceLogica() {
         inizializzaRoot();
 

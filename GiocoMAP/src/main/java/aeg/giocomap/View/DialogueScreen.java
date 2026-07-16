@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * @author andrea
  */
 public class DialogueScreen extends JLayeredPane {
-    // Regex: intercetta il simbolo di grado (es. negli elenchi "1° Giorno") per
+    // Intercettazione delsimbolo di grado (come negli elenchi) per
     // colorare la battuta di azzurro, come avviene per i pensieri tra parentesi
     private static final Pattern PATTERN_GRADO = Pattern.compile("°");
 
@@ -73,7 +73,7 @@ public class DialogueScreen extends JLayeredPane {
         area_text.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
         boxDialogo.add(area_text,BorderLayout.CENTER); // Dialogo centrato
         
-        //(DA TESTARE) il bottone richiamato
+        //
         JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         southPanel.setOpaque(false);
         southPanel.add(new BottoneAvanti(e -> azioneAvanti.run()));
@@ -120,9 +120,7 @@ public class DialogueScreen extends JLayeredPane {
             area_text.setText(nome+ ":\n"+ battuta);
         else area_text.setText(battuta);
         
-        // Se l'intera battuta contiene una parentesi (pensiero) o il simbolo di grado °
-        // (elenchi tipo "1° Giorno"), colorala di azzurro.
-        // Se contiene l'indizio di eripeta, colorala di giallo.
+        /* Se l'intera battuta contiene una parentesi (pensiero) viene colorata di azzurro */
         if (battuta.contains("(") || PATTERN_GRADO.matcher(battuta).find()) {
             area_text.setForeground(new Color(85, 170, 255));
         } else if (battuta.contains("il mio nome e sarai ricompensato")) {

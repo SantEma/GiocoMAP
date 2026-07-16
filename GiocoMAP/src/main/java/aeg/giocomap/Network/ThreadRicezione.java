@@ -46,7 +46,7 @@ public class ThreadRicezione implements Runnable {
                 Message msg = MessageParser.deserializza(raw);
                 if (msg == null) continue;
 
-                // gestisci nome duplicato separatamente
+                // Gestisci nome duplicato separatamente
                 if (msg.getTipo() == TipoMessaggio.NOME_DUPLICATO) {
                     if (onNomeDuplicato != null) {
                         javax.swing.SwingUtilities.invokeLater(onNomeDuplicato);
@@ -54,7 +54,7 @@ public class ThreadRicezione implements Runnable {
                     break;
                 }
 
-                // tutti gli altri messaggi vanno in chat
+                // Tutti gli altri messaggi vanno in chat
                 String testo = formatta(msg);
                 synchronized (messaggiRicevuti) {
                     messaggiRicevuti.add(testo);
@@ -64,7 +64,7 @@ public class ThreadRicezione implements Runnable {
                     javax.swing.SwingUtilities.invokeLater(onMessaggio);
                 }
 
-                // se il server si disconnette esci
+                // Se il server si disconnette esci
                 if (msg.getTipo() == TipoMessaggio.LEAVE &&
                     msg.getMittente().equals("SERVER")) {
                     System.out.println("DEBUG: Server disconnesso");

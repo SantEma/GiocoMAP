@@ -15,38 +15,38 @@ import java.util.Map;
  * @author andrea
  */
 public class SceneManager {
-    // variabili scene
+    // Variabili scene
     private final MainFrame frame;
     private final Map<String, JComponent> sceneCache = new HashMap<>();
     
-    // nome della scena mostrata al momento (serve per il salvataggio)
+    // Nome della scena mostrata al momento (serve per il salvataggio)
     private String scenaCorrente = "MENU_PRINCIPALE";;
     
-    // nome della scena "vera" sotto un overlay (mappa/inventario), per poterlo
-    // ripristinare alla chiusura ed evitare di salvare "MAPPA"/"INVENTARIO"
+    /* Nome della scena "vera" sotto un overlay  per poterlo
+    ripristinare alla chiusura ed evitare di salvare la mappa o l'inventario */
     private String scenaPrecedente = "MENU_PRINCIPALE";
     // Variabili per ricordare la scena precedente
     private JComponent scenario_precedente;
     
-    // varibili mappa
+    // Varibili mappa
     private boolean mapOpen = false;
     
-    // variabili inventario
+    // Variabili inventario
     private boolean inventarioOpen = false;
     
-    // variabili chat
+    // Variabili chat
     private boolean chatOpen = false;
 
     public SceneManager(MainFrame frame){
         this.frame = frame;
     }
 
-    // carica scena all'avvio nella memoria
+    // Carica scena all'avvio nella memoria
     public void registraScena(String nomeScena, JComponent pannello){
         sceneCache.put(nomeScena,pannello);
     }
 
-    // cambia scena
+    // Cambia scena
     public void mostraScena(String nomeScena){
         JComponent ns = sceneCache.get(nomeScena);
         if(ns!=null) {
@@ -57,12 +57,12 @@ public class SceneManager {
         else System.err.println("ERROR: Scena "+nomeScena+" non registrata");
     }
     
-    // In che zona della mappa stiamo, utile per salvarla
+    // Recupera che zona della mappa stiamo, utile per salvarla
     public String getScenaCorrente(){
         return scenaCorrente;
     }
     
-    // In che scenario si trovava il player prima di aprire la mappa
+    // Recupera che scenario si trovava il player prima di aprire la mappa
     public String getScenaPrecedente(){
         return scenaPrecedente;
     }
@@ -72,6 +72,7 @@ public class SceneManager {
         return sceneCache.get(nomeScena);
     }
     
+    // Attiva/disattiva le frecce a chiamata
     private void aggiornaVisibilitaFrecce(String nomeScena) {
        if (nomeScena == null) return;
         // Nascondi le frecce se siamo in una grafica e non uno scenario
@@ -95,14 +96,13 @@ public class SceneManager {
         frame.setChatButtonVisibile(!nomeScena.equals("TITOLI_CODA"));
     }
     
-    // Logiche della Mappa
     public void apriMappa(){
         if(!isMapOpen()){
-            // salvo il contenuto della scena precedente
+            // Salvo il contenuto della scena precedente
             if (frame.getContentPane().getComponentCount() > 0)
                 scenario_precedente = (JComponent) frame.getContentPane().getComponent(0);
             scenaPrecedente = getScenaCorrente();
-
+            
             mostraScena("MAPPA");
 
             mapOpen=true;
@@ -125,7 +125,7 @@ public class SceneManager {
         return mapOpen;
     }
     
-    // Logiche dell'Inventario
+    // Logiche dell'inventario
     public void apriInventario(){
         if(!isOpenInventario()){
             // Salvo la scena precedente di gioco
@@ -171,15 +171,15 @@ public class SceneManager {
     // Logiche della Chat
     public void toggleChat(JComponent chat) {
         if (!isChatOpen()) {
-            // salvo la scena precedente
+            // Salvo la scena precedente
             scenaPrecedente = getScenaCorrente();
-
+            
             frame.mostraPannello(chat);
             chatOpen = true;
             frame.setFrecceVisibili(false);
             System.out.println("DEBUG: Chat aperta");
         } else {
-            // torno alla scena precedente
+            // Torno alla scena precedente
             chatOpen = false;
             if (getScenaPrecedente() != null) {
                 mostraScena(getScenaPrecedente());

@@ -42,7 +42,7 @@ public class IstanzaEnigma {
         return Arrays.asList(ops);
     }
 
-    // Metodo privato per caricare la lista dei vestiti (o l'ordine corretto) dell'enigma ad ordinamento
+    // Metodo privato per caricare la lista dei vestiti (o l'ordine corretto) dell'enigma dei vestiti finale
     private static List<String> caricaListaVestiti(String enigmaId, String campo) {
         JsonObject root = JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
         if (root == null) return Collections.emptyList();
@@ -59,7 +59,7 @@ public class IstanzaEnigma {
         return Arrays.asList(valori);
     }
 
-    // Metodo privato per caricare il testo dal file walloftext
+    // Serve per caricare il testo dal wall of text
     private static String caricaTesto(String chiave) {
         JsonObject root = JsonLoader.caricaJson("/dialoghi/walloftext.json");
         if (root == null) return "";

@@ -4,6 +4,7 @@ package aeg.giocomap.GameEngine;
  *
  * @author andrea
  */
+
 public enum StatoStoria {
     INIZIO(0),
     MISSIONE_COOPER_ACCETTATA(1),
@@ -30,11 +31,12 @@ public enum StatoStoria {
     public int getValore() {
         return valore;
     }
-
+    
+    //Conversione da int a Enum
     public static StatoStoria daValore(int valore) {
         for (StatoStoria s : values()) {
             if (s.valore == valore) return s;
         }
-        return INIZIO; // Default fallback
+        return INIZIO; 
     }
 }

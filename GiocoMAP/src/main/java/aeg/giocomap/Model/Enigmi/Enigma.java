@@ -22,8 +22,8 @@ public abstract class Enigma {
         this.reward = reward;
         this.risolto = false;
     }
-
-        public String getId() { 
+    
+    public String getId() { 
         return id; 
     }
     

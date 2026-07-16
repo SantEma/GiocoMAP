@@ -12,7 +12,7 @@ public class TimerEnigma {
     private int secondiFinali;
     private boolean attivo;
 
-    // usato solo per l'azione periodica di debug, eseguita sull'EDT
+    // Usato solo per l'azione periodica di debug
     private final Timer tickTimer;
 
     public TimerEnigma(Runnable onTick) {

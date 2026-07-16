@@ -11,30 +11,22 @@ import java.awt.event.MouseEvent;
  */
 public interface CoordinateDebuggable {
     
-    /**
-     * Riferimento al pannello su cui abilitare il listener del mouse.
-     * Le classi che implementano questa interfaccia (es. GameScreen, MappaPanel) 
-     * restituiranno 'this'.
-     * @return 
-     */
+    /* 
+        CLASSE NON PIÙ UTILIZZATA. UTILE SOLO PER CALCOLARE LE COORDINATE
+        DELLE HITBOX
+    */
     JPanel getPanel();
 
-    /**
-     * Calcola l'area effettiva in cui è disegnata l'immagine.
-     * Di default è l'intero pannello, ma può essere sovrascritto se l'immagine
-     * ha un offset (es. per mantenere l'aspect ratio con bande nere).
-     * @param panelWidth
-     * @param panelHeight
-     * @return 
+    /*
+     * Calcola l'area effettiva in cui è disegnata l'immagine, di default è l'intero pannello 
      */
     default Rectangle getAreaImmagine(int panelWidth, int panelHeight) {
         return new Rectangle(0, 0, panelWidth, panelHeight);
     }
 
-    /**
-     * Abilita un MouseListener che stampa le coordinate percentuali basate
-     * sull'area dell'immagine calcolata.
-     */
+    
+    // Stampa le coordinate percentuali basate sull'area dell'immagine calcolata ad ogni click
+    
     default void abilitaDebugCoordinate() {
         JPanel panel = getPanel();
         panel.addMouseListener(new MouseAdapter() {
