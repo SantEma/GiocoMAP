@@ -17,7 +17,7 @@ Avventuratevi e scoprite se il nostro protagonista riuscirà a raggiungere il su
 Per consultare la **trama completa nel suo sviluppo** e visualizzare gli **enigmi con la loro soluzione** e spiegazione matematica, visualizzare il file [**Trama.md**](Idee%20trama/Trama.md)
 # Progettazione
 
-## 1. Individuazione delle classi
+### Individuazione delle classi
 
 Le classi sono state individuate a partire da un'analisi del **dominio del problema** e dei **casi d'uso** del gioco.
 
@@ -25,7 +25,7 @@ Ad ogni classe è stato assegnato il principio della **singola responsabilità (
 
 Dove più classi condividevano attributi e comportamenti comuni si è introdotta una **gerarchia di ereditarietà** ( es.  `Enigma` come base astratta dei tre tipi di enigma). Dove invece serviva un contratto comune senza condivisione di implementazione si è usata un'**interfaccia** (`GiveObject`).
 
-## 2. Organizzazione in package
+### Organizzazione in package
 
 L'applicazione è strutturata secondo il pattern architetturale **MVC (Model–View–Controller):**
 
@@ -49,9 +49,9 @@ Il **Model** è ulteriormente scomposto per area di responsabilità:
 
 L'idea base è stata quella di massimizzare la **coesione interna**  e minimizzare l'**accoppiamento tra package**. Le dipendenze fluiscono coerentemente con MVC: la View non conosce il Model se non attraverso il Controller; il `GameEngine` (Controller) coordina Model e View; il Model non dipende né dalla View né dal Controller.
 
-## 3. Competenze delle classi principali
+###  Competenze delle classi principali
 
-### 3.1 Controller — `aeg.giocomap.GameEngine`
+#### Controller — `aeg.giocomap.GameEngine`
 
 - **`GameEngine`** — è il **controller** centrale creato dal `main`. Riceve gli input, coordina Model e View e mantiene lo stato di alto livello della partita (scena da salvare, dialogo attivo). Precarica i database dei dialoghi/storia/hint (JSON), istanzia `ModelDB`/`ModelTXTOggetti`, `SceneManager` e la rete, e gestisce il ciclo di gioco (`avviaGioco`, `salvaEdEsci`, mostra dialoghi con NPC e wall-of-text).
 - **`SceneManager`** — gestisce il **cambio di scena** e la cache dei pannelli. Sa quale scena è correntemente mostrata (per il salvataggio), gestisce gli overlay (mappa, inventario, chat) e ripristina la scena sottostante alla loro chiusura, delegando a `MainFrame` la visualizzazione concreta.
@@ -59,7 +59,7 @@ L'idea base è stata quella di massimizzare la **coesione interna**  e minimizza
 - **`TimerEnigma`** — cronometra la risoluzione di un enigma, fornendo a `GameStatistics` il tempo impiegato.
 - Oltre alle classi mostrate, il package comprende alcune classi di supporto al controller: **`StatoProgressione`** conserva lo stato di avanzamento della partita e si appoggia all'enum **`StatoStoria`**, che elenca in ordine le tappe narrative; **`CostruttoreScene`** costruisce le scene di gioco (sfondi, personaggi, enigmi) ed è usata da `ProgressioneStoria`, mentre **`FlussiNarrativi`** gestisce le sequenze narrative complesse ed è composta da `CostruttoreScene`. **`MusicPlayer`**, infine, riproduce le tracce audio ed è richiamata dal `GameEngine`, senza dipendere da altre classi del progetto.
 
-### 3.2 Model — dominio
+####  Model — dominio
 
 **Enigmi (`Model.Enigmi`)**
 
@@ -82,7 +82,7 @@ L'idea base è stata quella di massimizzare la **coesione interna**  e minimizza
 
 **Personaggi (`Model.Personaggi`)**
 
-- **`Entity`** *(astratta)* — base di tutti i personaggi, incapsula il `nome`.
+- **`Entità`** *(astratta)* — base di tutti i personaggi, incapsula il `nome`.
 - **`Personaggio`** — NPC con albero di dialoghi: gestisce l'avanzamento delle battute (`parla`, `setDialoghi`, `resetDialogo`).
 - **`Fantoccio`** — personaggio "muto"/decorativo, specializzazione minimale di `Personaggio`.
 
@@ -91,7 +91,7 @@ L'idea base è stata quella di massimizzare la **coesione interna**  e minimizza
 - **`ModelDB`** —  connessione, salvataggio/caricamento partita (`salvaPartita`, `loadGame`), gestione record e punteggi.
 - **`ModelTXTOggetti`** — carica il **catalogo degli oggetti** da file di testo in una `Map<Integer, Oggetto>`, fungendo da sorgente dati per gli oggetti di gioco.
 
-### 3.3 View — `aeg.giocomap.View`
+####  View — `aeg.giocomap.View`
 
 - **`MainFrame`** — la **finestra principale** (`JFrame`). Ospita i pannelli delle scene tramite un `JLayeredPane`, gestisce elementi sempre in sovraimpressione (bottone chat, frecce di navigazione, effetti) e il ridimensionamento. È l'unico punto di ingresso grafico verso cui il Controller invia i pannelli da mostrare.
 - **`GameScreen`** — pannello che **disegna una scena** di gioco: renderizza l'immagine di sfondo e registra le zone cliccabili (hotspot) associate ad azioni (`Runnable`).
@@ -99,7 +99,7 @@ L'idea base è stata quella di massimizzare la **coesione interna**  e minimizza
 - **`InventarioPanel` / `MappaPanel`** — overlay per **inventario** e **mappa**, mostrati sopra la scena corrente e gestiti dal `SceneManager`.
 - **`ChatPanel`** — pannello grafico della **chat multiplayer**: area messaggi, campo di input e invio. Fa da ponte tra la View e il `GameClient` del package Network.
 
-### 3.4 Network — `aeg.giocomap.Network`
+#### Network — `aeg.giocomap.Network`
 
 Modulo autonomo che implementa una **chat multiplayer** con architettura **client-server su socket TCP**.
 
@@ -112,7 +112,7 @@ Modulo autonomo che implementa una **chat multiplayer** con architettura **clien
 - **`TipoMessaggio`** *(enum)* — tipi di messaggio del protocollo: `JOIN`, `LEAVE`, `CHAT`, `NOME_DUPLICATO`.
 - **`MessageParser`** — **serializzazione/deserializzazione** dei messaggi in stringhe da trasmettere sul socket (formato `tipo|mittente|contenuto`), incapsulando il protocollo di comunicazione.
 
-### 3.5 Util — `aeg.giocomap.Util`
+#### Util — `aeg.giocomap.Util`
 
 Raccolta di classi di supporto trasversali, senza logica di dominio:
 
@@ -120,7 +120,7 @@ Raccolta di classi di supporto trasversali, senza logica di dominio:
 - **`Parser`** — parsing di dati testuali
 - **`CursorUtil`** — gestione del cursore e delle zone cliccabili nelle scene
 
-## 4. Strumenti esterni utilizzati
+###  Strumenti esterni utilizzati
 
 - **Mermaid** — per la stesura dei diagrammi UML (diagramma delle classi, e volendo diagrammi di sequenza/stato per i flussi di gioco e di rete).
 - **Gson** — libreria per la (de)serializzazione JSON, usata da `JsonLoader` per leggere i file di dialoghi/storia/hint.
@@ -135,33 +135,33 @@ Raccolta di classi di supporto trasversali, senza logica di dominio:
 
 Il diagramma delle classi rappresenta la struttura del sistema: le classi, i loro attributi e metodi e le relazioni che le legano. Si è fatto uso dei principali meccanismi della progettazione a oggetti — **astrazione**, **classi astratte**, **ereditarietà**, **interfacce** e **composizione** (insieme alle altre forme di associazione) — descritti di seguito con i relativi esempi.
 
-## Astrazione
+### Astrazione
 
 L'astrazione è il criterio con cui, per ogni entità del dominio, si sono modellati solo gli attributi e i comportamenti **rilevanti**, nascondendo i dettagli implementativi. Ogni classe espone la propria interfaccia pubblica (metodi `get`/operazioni) e mantiene privato il proprio stato (attributi marcati `-`), rispettando il principio di **incapsulamento**: ad esempio `Oggetto` nasconde `idOggetto`, `nomeOggetto`, `descrizioneOggetto` ed è accessibile solo tramite i metodi `getIdOggetto()`, `getNomeOggetto()`, `getDescrizioneOggetto()`.
 
-## Classi astratte
+###  Classi astratte
 
 Nel diagramma sono presenti due classi astratte, marcate con lo stereotipo «abstract»:
 
 - **`Entità`** — astrae il concetto generico di *entità dotata di nome*. Definisce l'attributo comune `nome` e l'operazione `getNome()`, ma non è istanziabile direttamente: rappresenta solo ciò che accomuna tutti i personaggi del gioco.
 - **`Enigma`** — astrae il concetto di *enigma*. Raccoglie lo stato condiviso da ogni enigma (`id`, `testo`, `aiuti`, `reward`, `risolto`) e i metodi comuni (`getId()`, `getTesto()`, `getReward()`, `getAiuti()`). Dichiara inoltre il metodo **astratto** `verifica(risposta): boolean`, la cui implementazione è demandata alle sottoclassi.
 
-## Ereditarietà
+### Ereditarietà
 
 L'ereditarietà (relazione «ereditarietà», freccia con punta vuota verso la superclasse) modella la relazione **"è un"** e permette alle sottoclassi di riusare e specializzare il comportamento della superclasse. Nel diagramma sono presenti due gerarchie principali:
 
-### Gerarchia dei personaggi
+#### Gerarchia dei personaggi
 
 - `Personaggio` **eredita da** `Entità`: è un'entità dotata di nome, arricchita con l'albero dei dialoghi (`alberoDialoghi`, `indiceDialogoAttuale`) e i metodi `parla()`, `setDialoghi()`, `resetDialogo()`.
 - `Fantoccio` **eredita da** `Personaggio`: ne è una specializzazione minimale (personaggio decorativo/muto), che riusa tutta la struttura del padre.
 
-### Gerarchia degli enigmi
+#### Gerarchia degli enigmi
 
 - `EnigmaTestuale`, `EnigmaSceltaMultipla` ed `EnigmaOrdinamento` **ereditano** tutti dalla classe astratta `Enigma`. Ognuna aggiunge gli attributi specifici (rispettivamente `soluzione`; `opzioni`/`indiceSoluzione`; `vestiti`/`ordineCorretto`) e **ridefinisce** (override) il metodo `verifica(risposta)`.
 
 Quest'ultima gerarchia è anche un esempio di **polimorfismo.**
 
-## Interfacce
+### Interfacce
 
 L'interfaccia definisce un **contratto** di comportamento indipendente dall'implementazione:
 
@@ -170,26 +170,26 @@ L'interfaccia definisce un **contratto** di comportamento indipendente dall'impl
 
 La differenza rispetto alla classe astratta è che l'interfaccia non fornisce stato né implementazione: serve a definire *cosa* un oggetto deve saper fare, non *com'è fatto*. Questo disaccoppia il chiamante dall'implementazione — chi risolve l'enigma dialoga con il tipo `GiveObject` senza conoscere la classe `Spada`.
 
-## Composizione e altre associazioni
+### Composizione e altre associazioni
 
 Il diagramma usa diverse forme di associazione, con semantica di legame via via più forte.
 
-### Composizione
+#### Composizione
 
 - `GameEngine` è composto da  `ModelDB`, `ModelTXTOggetti` e `GameStatistics`: sono componenti creati e gestiti internamente dal motore di gioco, che ne detiene il ciclo di vita.
 - `Giocatore` è composto da `Inventario<T>`: l'inventario nasce e muore insieme al giocatore che lo possiede.
 
-### Aggregazione
+#### Aggregazione
 
 - `Inventario<T>` **aggrega** `Oggetto` (molteplicità `0..*`): l'inventario raccoglie oggetti che hanno vita propria e possono essere trasferiti o esistere fuori dall'inventario.
 - `ModelTXTOggetti` **aggrega** gli `Oggetto` del `catalogo` caricato da file.
 
-### Dipendenza
+#### Dipendenza
 
 - `GameEngine` **dipende da** `Entità` (la usa nella gestione dei personaggi).
 - `GameStatistics` **dipende da** `Enigma`: riceve un `Enigma` nei metodi `iniziaEnigma()` ed `enigmaRisolto()` per calcolare il punteggio, senza possederlo.
 
-### Associazione d'uso
+#### Associazione d'uso
 
 Collaborazioni fra classi indicate con «usa», come tra `GameEngine`/`GameStatistics` e `Giocatore`, e la relazione tra `Enigma` e `Oggetto` come *reward*: un enigma, una volta risolto, restituisce un `Oggetto` come ricompensa.
 
