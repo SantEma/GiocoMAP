@@ -187,7 +187,7 @@ public class Giocatore {
     private String nome_player;
     private Inventario<Oggetto> inventario;
     
-    ...
+    //...
     
     public Inventario<Oggetto> getInventario(){
         // creamo l'inventario solo alla prima chiamata
@@ -205,8 +205,174 @@ Così la funzione `Inventario<Oggetto> getInventario()` sia vincolata all'uso di
 Oltre all'implementazione di classi generiche create da noi, il progetto fa un uso nativo della programmazione generica di Java attraverso il *Java Collections* per le **liste**: `List<String> alberoDialoghi` nella classe `Personaggio` e `List<ClientHandler> clientConnessi` in `GameServer`.
 ### File
 
-bla bla bla…
+Nel progetto usiamo **due approcci differenti** per la lettura dai **file**.
+I file usati generalmente vengono gestiti con `getResourceAsStream` per estrarre la **posizione fisica** di quel file, questa metodologia viene eseguita per i file **JSON**, i quali contengono i **dialoghi** e le frasi a schermo del gioco, i file `.wav` per la **musica** letta tramite l'apposita classe e libreria e per le **immagini** `.png` del gioco.
+Mentre per il **catalogo degli oggetti** usiamo il `FileReader("src/main/resources/oggetti/oggetti.txt")`, che a differenza del metodo precedente legge solo **flussi di carattere** e non immagini e suoni e all'interno della classe `ModelTXTOggetti.java`, il costruttore utilizza un percorso relativo, il `FileReader` dice al sistema operativo di iniziare a cercare a partire dalla cartella da cui è stato avviato il programma (questo ovviamente in base a chi gioca al gioco può essere diverso come percorso, ma partendo da `src`, che è unico per tutti, non crea problemi).
 
+Siamo consci che per un ottimo videogioco *"pubblicabile"* era buona prassi usare **solamente una delle due implementazioni** e tra le due implementazioni la migliore è quella usata per i JSON, ma abbiamo preferito mostrare anche la seconda metodologia per mostrare a livello di progetto universitario la padronanza di entrambe.
+
+#### JSON
+La gestione dei file viene pensata principalmente per i file JSON, centralizzati nella classe `JsonLoader`:
+
+```JAVA
+import com.google.gson.*;
+import java.io.*;
+
+//...
+
+public class JsonLoader {
+    
+    public static JsonObject caricaJson(String percorso){
+        try{
+            InputStream is = JsonLoader.class.getResourceAsStream(percorso);
+            if(is == null){
+                System.err.println("File JSON non trovato: " + percorso);
+                return null;
+            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            return JsonParser.parseReader(reader).getAsJsonObject();
+        }
+        catch(JsonIOException | JsonSyntaxException | UnsupportedEncodingException e){
+            System.err.println("Errore lettura JSON " + percorso + ": " + e.getMessage());
+            return null;
+        }
+    }
+    
+	// ...
+
+```
+
+In questo metodo della classe `JsonLoader` andiamo a caricare il file JSON specificato dal `percorso`, così da poterlo utilizzare (come vedremo dopo). Il JSON viene aperto tramite `InputStream` e viene letto tramite `BufferedReader` con specifica **UTF-8** per poter prendere gli accenti nelle `TextArea` dei dialoghi, come mostrato nella foto seguente:
+![[Pasted image 20260716195101.png|518]]
+
+Il metodo restituisce `null`, così da non dover far bloccare il gioco in caso di dialogo mancante, ma proseguirebbe senza quella parte di dialogo. Ovviamente nella **console** durante i test di gioco veniva mostrato questo messaggio per verificarne l'esattezza.
+
+Come anticipato prima, questo metodo viene richiamato in `GameEngine` dove i tre file JSON dei dialoghi vengono caricati inizialmente e tenuti in memoria per tutta la partita così da **non doverli rileggere** ogni volta che servivano:
+```JAVA
+this.dbWallOfText = JsonLoader.caricaJson("/dialoghi/walloftext.json");
+this.dbStoria = JsonLoader.caricaJson("/dialoghi/dialoghi_storia.json");
+this.dbHint = JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
+```
+
+I file sono tre, gestiti tutti da **chiave - valore** nel JSON così da richiamare ad ogni scena la chiave di quella frase e contengono rispettivamente:
+- dialoghi lunghi per la narrazione (`walloftext.json`)
+- dialoghi della trama principale, tra cui enigmi e discorsi dei personaggi (`dialoghi_storia.json`):
+```JSON
+...
+  
+"Marien": {
+	"presentazione_enigma": "Viandante, vorresti risolvere tu, come tutti i qui presenti, il problema che io stessa ho ideato.\nDovete sapere tutti che fino ad ora nessuno è mai riuscito a risolverlo e io sono una grande amante delle sfide che richiedono cervello.\nNemmeno il mio promesso sposo Jack è mai riuscito a risolverlo. A tal punto, non diteglielo quando arriverà qui in stanza o andrà su tutte le furie.",
+
+...
+
+```
+- dialoghi dei consigli alle soluzioni degli enigmi, soluzioni trovabili consultando zone e NPC del gioco (`dialoghi_hint.json`)
+#### TXT
+Una gestione diversa riguarda invece il catalogo degli oggetti ottenibili, definito nel file di testo `oggetti.txt` e caricato dalla classe `ModelTXTOggetti`. A differenza dei JSON qui usiamo un formato a righe ideato appositamente per il progetto, così da comprendere i 10 oggetti da inizio gioco e assegnarli nell'inventario quando saranno effettivamente ottenuti, con i campi separati dal carattere `;`:
+
+```JAVA
+private void loadOggettiDaCatologo(){
+        catalogoOggetti = new HashMap<>();
+        
+        try{
+            //Leggiamo il file
+            BufferedReader reader=new BufferedReader(new FileReader("src/main/resources/oggetti/oggetti.txt"));
+            
+            // Fin tanto che la linea letta da file non è nulla...
+            while ((linea=reader.readLine())!=null) {
+                //... e fin tanto che non è vuota..
+                if (linea.trim().isEmpty()){
+                    continue;
+                }
+                /* 
+                ... allora divido la linea in diverse parti dove trovo
+                il punto e virgola (deciso tra noi come separatore nel file)
+                e poi salvo tutto in 3 parti, in modo da istanziare
+                */
+                String[] parti=linea.split(";",3);
+                
+                if (parti.length==3){
+                    try {
+                        // Rimuovo gli spazi bianchi tramite trim()
+                        currentId = Integer.parseInt(parti[0].trim());
+                        currentNome = parti[1].trim();
+                        currentDesc = parti[2].trim();
+                        inserisciOggetto(currentId, currentNome, currentDesc);
+                    } catch (NumberFormatException e) {
+                        System.err.println("DEBUG: Impossibile convertire ID in numero sulla linea n."+linea);
+                    }
+                } else {
+                    System.err.println("DEBUG: Formato della riga non valido, attese 3 parti:"+ linea);
+                }
+            }
+                reader.close();
+                System.out.println("DEBUG: Catalogo oggetti: "+ catalogoOggetti.size()+" presenti all'interno");
+        }
+        catch(IOException e){
+            System.out.println("DEBUG: Errore imprevisto: " + e);
+        }
+    }
+```
+
+Ogni riga del file rappresenta un oggetto nel formato `id;nome;descrizione` (es. `1;Tessuto;Il prezioso tessuto da consegnare al Re di Shambhala.`); il metodo `split(";", 3)` divide la riga in massimo tre parti, così che eventuali `;` presenti nella descrizione non spezzino ulteriormente la stringa. Così da visualizzare nell'inventario queste caratteristiche e caricare nell'inventario, in base al momento nella storia, l'oggetto con **id**: $n$.
+
+![[Pasted image 20260716204216.png]]
+
+#### PNG
+Le **immagini** sono basati sulla libreria standard `javax.imageio.ImageIO`. Il caricamento è **dinamico**, dove il nome del file non è scritto nel codice ma viene costruito a runtime a partire da un **dato di gioco**. Lo si vede bene in `InventarioPanel`, dove lo *sprite* di ogni oggetto viene recuperato usando il nome dell'oggetto stesso come nome del file:
+
+```java
+String nomeFileImmagine = obj.getNomeOggetto() + ".png";
+InputStream is = getClass().getResourceAsStream("/sprites/Oggetti/" + nomeFileImmagine);
+
+if (is != null) {
+    BufferedImage img = ImageIO.read(is);
+    Image scaledImage = img.getScaledInstance(90, 90, Image.SCALE_SMOOTH);
+    iconLabel.setIcon(new ImageIcon(scaledImage));
+} else {
+    iconLabel.setText(obj.getNomeOggetto().substring(0,1));
+}
+```
+
+Questo approccio evita di dover mappare manualmente ogni oggetto al proprio file immagine: basta rispettare la convenzione **"nome oggetto = nome file"** nella cartella delle risorse.
+Comunque in caso non venga trovato, nel ramo `else` viene gestito un metodo per far apparire comunque l'oggetto, tramite la sua lettera iniziale nella **griglia visiva dell'inventario**. Stessa logica viene gestita per gli scenari, solo che se non viene trovato viene impostato a `null`, mostrando schermo nero senza far bloccare il gioco.
+#### WAV
+La musica è gestita dalla classe `MusicPlayer`, che si appoggia alla libreria `javax.sound.sampled` per riprodurre file `.wav` in loop continuo:
+
+```JAVA
+public void playMusic(int i){
+    try{
+	    //Seleziono la traccia dall'array (usato come lettore di canzoni)
+        BufferedInputStream bs = new BufferedInputStream(getClass().getResourceAsStream(tracceAudio[i])); 
+	    
+	    // Traduce il wav nel formato leggibile java
+        AudioInputStream as = AudioSystem.getAudioInputStream(bs); 
+        clip = AudioSystem.getClip();
+        clip.open(as); // Inseriamo la traccia loop dentro il lettore java
+        clip.loop(Clip.LOOP_CONTINUOUSLY);
+	    clip.start();
+    }
+    catch (IOException | LineUnavailableException | UnsupportedAudioFileException e){
+        System.out.println("DEBUG: Traccia numero "+i+" non trovata "+ e.getMessage());
+    }
+}
+```
+
+Come possiamo notare, viene detto che si usa un array per gestire il *"nastro musicale"* del player delle canzoni, di fatto i percorsi delle tracce sono definiti in un **array di stringhe nel costruttore** della classe, così da poter essere richiamati altrove nel codice tramite **costanti** (`MusicPlayer.TITLE_SCREEN_MUSIC`, `MusicPlayer.END_TITLE_MUSIC`) invece che con indici numerici scritti a mano, così da poter ampliare il `MusicPlayer`, in caso si vogliano aggiungere altre tracce.
+
+```JAVA
+public static final int TITLE_SCREEN_MUSIC = 0;
+    public static final int END_TITLE_MUSIC = 1;
+    
+    // Costruttore con tutte le tracce audio
+    public MusicPlayer(){
+        tracceAudio = new String[3];
+        
+        tracceAudio[0] = "/musiche/GreenlandsTitleScreen.wav"; //Ttile screen
+        tracceAudio[1] = "/musiche/DEAFKEVEndTitle.wav"; // End Screen
+        //tracceAudio[2] = "traccasuccessiva";
+    }
+```
 ### Database (JDBC)
 
 bla bla bla…
