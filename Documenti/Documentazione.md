@@ -17,16 +17,13 @@ Avventuratevi e scoprite se il nostro protagonista riuscirà a raggiungere il su
 Per consultare la **trama completa nel suo sviluppo** e visualizzare gli **enigmi con la loro soluzione** e spiegazione matematica, visualizzare il file [**Trama.md**](Idee%20trama/Trama.md)
 # Progettazione
 
-### Individuazione delle classi
-
 Le classi sono state individuate a partire da un'analisi del **dominio del problema** e dei **casi d'uso** del gioco.
 
 Ad ogni classe è stato assegnato il principio della **singola responsabilità (SRP)**: ogni classe è stata pensata per avere una sola ragione di cambiamento. Da qui la scelta di separare, ad esempio, la logica di un enigma (`Enigma`) dalla sua rappresentazione grafica (`DialogueScreen`, `DialogoOrdinamentoVestiti`) e dalla sua persistenza (`ModelDB`).
 
 Dove più classi condividevano attributi e comportamenti comuni si è introdotta una **gerarchia di ereditarietà** ( es.  `Enigma` come base astratta dei tre tipi di enigma). Dove invece serviva un contratto comune senza condivisione di implementazione si è usata un'**interfaccia** (`GiveObject`).
 
-### Organizzazione in package
-
+#### Organizzazione in package
 L'applicazione è strutturata secondo il pattern architetturale **MVC (Model–View–Controller):**
 
 | Package | Ruolo | Contenuto |
@@ -49,47 +46,45 @@ Il **Model** è ulteriormente scomposto per area di responsabilità:
 
 L'idea base è stata quella di massimizzare la **coesione interna**  e minimizzare l'**accoppiamento tra package**. Le dipendenze fluiscono coerentemente con MVC: la View non conosce il Model se non attraverso il Controller; il `GameEngine` (Controller) coordina Model e View; il Model non dipende né dalla View né dal Controller.
 
-###  Competenze delle classi principali
-
 #### Controller — `aeg.giocomap.GameEngine`
 
 - **`GameEngine`** — è il **controller** centrale creato dal `main`. Riceve gli input, coordina Model e View e mantiene lo stato di alto livello della partita (scena da salvare, dialogo attivo). Precarica i database dei dialoghi/storia/hint (JSON), istanzia `ModelDB`/`ModelTXTOggetti`, `SceneManager` e la rete, e gestisce il ciclo di gioco (`avviaGioco`, `salvaEdEsci`, mostra dialoghi con NPC e wall-of-text).
-- **`SceneManager`** — gestisce il **cambio di scena** e la cache dei pannelli. Sa quale scena è correntemente mostrata (per il salvataggio), gestisce gli overlay (mappa, inventario, chat) e ripristina la scena sottostante alla loro chiusura, delegando a `MainFrame` la visualizzazione concreta.
+- **`SceneManager`** — gestisce il **cambio di scena** e la cache dei pannelli. Sa quale scena è correntemente mostrata (per il salvataggio), gestisce gli overlay (mappa, puntatore, inventario, chat) e ripristina la scena sottostante alla loro chiusura, delegando a `MainFrame` la visualizzazione concreta.
 - **`GameStatistics`** — tiene il **punteggio** e le statistiche di sessione: avvia/chiude gli enigmi (`iniziaEnigma`, `enigmaRisolto`), calcola i punti in base al tempo impiegato (`calcolaPunti`) tramite `TimerEnigma`.
 - **`TimerEnigma`** — cronometra la risoluzione di un enigma, fornendo a `GameStatistics` il tempo impiegato.
 - Oltre alle classi mostrate, il package comprende alcune classi di supporto al controller: **`StatoProgressione`** conserva lo stato di avanzamento della partita e si appoggia all'enum **`StatoStoria`**, che elenca in ordine le tappe narrative; **`CostruttoreScene`** costruisce le scene di gioco (sfondi, personaggi, enigmi) ed è usata da `ProgressioneStoria`, mentre **`FlussiNarrativi`** gestisce le sequenze narrative complesse ed è composta da `CostruttoreScene`. **`MusicPlayer`**, infine, riproduce le tracce audio ed è richiamata dal `GameEngine`, senza dipendere da altre classi del progetto.
 
-####  Model — dominio
+#### Model — dominio
+Esistono vari package Model che gestiscono logiche di back in base al compito da svolgere, favorendo così l'**incapsuletion hiding**, di seguito vengono riportati con le loro classi:
 
-**Enigmi (`Model.Enigmi`)**
+- **Enigmi (`Model.Enigmi`)**:
+	- **`Enigma`** *(astratta)* -  Definisce lo stato comune (`id`, `testo`, `aiuti`, `reward`, `risolto`) e la risposta `verifica(risposta)`, lasciato astratto perché ogni tipo di enigma valida la risposta in modo diverso (**polimorfismo**).
+	- **`EnigmaTestuale`** — enigma a risposta libera: confronta la risposta con una `soluzione`.
+	- **`EnigmaSceltaMultipla`** — enigma a opzioni: valida l'indice/valore scelto tra le `opzioni`.
+	- **`EnigmaOrdinamento`** — enigma in cui va ricostruito l'ordine corretto (es. sequenza di vestiti), con `verificaPosizione` per la validazione parziale.
+	- Il package include anche **`IstanzaEnigma`**, che funge da costruttore concreto degli enigmi: carica testi e aiuti dai file JSON (tramite `JsonLoader`) e istanzia il tipo di `Enigma` appropriato, restituendo l'oggetto `Oggetto` da assegnare come ricompensa.
 
-- **`Enigma`** *(astratta)* — . Definisce lo stato comune (`id`, `testo`, `aiuti`, `reward`, `risolto`) e la risposta `verifica(risposta)`, lasciato astratto perché ogni tipo di enigma valida la risposta in modo diverso (**polimorfismo**).
-- **`EnigmaTestuale`** — enigma a risposta libera: confronta la risposta con una `soluzione`.
-- **`EnigmaSceltaMultipla`** — enigma a opzioni: valida l'indice/valore scelto tra le `opzioni`.
-- **`EnigmaOrdinamento`** — enigma in cui va ricostruito l'ordine corretto (es. sequenza di vestiti), con `verificaPosizione` per la validazione parziale.
-- Il package include anche **`IstanzaEnigma`**, che funge da costruttore concreto degli enigmi: carica testi e aiuti dai file JSON (tramite `JsonLoader`) e istanzia il tipo di `Enigma` appropriato, restituendo l'oggetto `Oggetto` da assegnare come ricompensa.
+* **Giocatore (`Model.Giocatore`)**
 
-**Giocatore (`Model.Giocatore`)**
+	- **`Giocatore`** — rappresenta lo **stato del giocatore**: nome, possesso di mappa/inventario, insieme degli enigmi risolti. Espone le operazioni sul progresso (`aggiungiEnigmaRisolto`, `isEnigmaRisolto`) e possiede un `Inventario`.
+	- **`Inventario<T>`** — collezione **generica** di oggetti posseduti dal giocatore (aggiunta/rimozione/ricerca).
 
-- **`Giocatore`** — rappresenta lo **stato del giocatore**: nome, possesso di mappa/inventario, insieme degli enigmi risolti. Espone le operazioni sul progresso (`aggiungiEnigmaRisolto`, `isEnigmaRisolto`) e possiede un `Inventario`.
-- **`Inventario<T>`** — collezione **generica** di oggetti posseduti dal giocatore (aggiunta/rimozione/ricerca).
+- **Oggetti (`Model.Oggetti`)**
 
-**Oggetti (`Model.Oggetti`)**
+	- **`Oggetto`** — entità  raccoglibile/utilizzabile, identificata da `idOggetto`, `nome`, `descrizione`.
+	- **`Spada`** — oggetto speciale che implementa `GiveObject`: reagisce alla risoluzione di un enigma (`reagisciRisoluzioneEnigma`) e gestisce una carica (`caricaSincro`) con soglia massima.
+	- **`GiveObject`** *(interfaccia)* — contratto per gli oggetti che devono **reagire** al completamento di un enigma; disaccoppia chi risolve l'enigma dall'oggetto che ne subisce l'effetto.
 
-- **`Oggetto`** — entità  raccoglibile/utilizzabile, identificata da `idOggetto`, `nome`, `descrizione`.
-- **`Spada`** — oggetto speciale che implementa `GiveObject`: reagisce alla risoluzione di un enigma (`reagisciRisoluzioneEnigma`) e gestisce una carica (`caricaSincro`) con soglia massima.
-- **`GiveObject`** *(interfaccia)* — contratto per gli oggetti che devono **reagire** al completamento di un enigma; disaccoppia chi risolve l'enigma dall'oggetto che ne subisce l'effetto.
+- **Personaggi (`Model.Personaggi`)**
 
-**Personaggi (`Model.Personaggi`)**
+	- **`Entità`** *(astratta)* — base di tutti i personaggi, incapsula il `nome`.
+	- **`Personaggio`** — NPC con albero di dialoghi: gestisce l'avanzamento delle battute (`parla`, `setDialoghi`, `resetDialogo`).
+	- **`Fantoccio`** — personaggio "muto"/decorativo, specializzazione minimale di `Personaggio`
 
-- **`Entità`** *(astratta)* — base di tutti i personaggi, incapsula il `nome`.
-- **`Personaggio`** — NPC con albero di dialoghi: gestisce l'avanzamento delle battute (`parla`, `setDialoghi`, `resetDialogo`).
-- **`Fantoccio`** — personaggio "muto"/decorativo, specializzazione minimale di `Personaggio`.
+- **Storage (`Model.Storage`)**
 
-**Storage (`Model.Storage`)**
-
-- **`ModelDB`** —  connessione, salvataggio/caricamento partita (`salvaPartita`, `loadGame`), gestione record e punteggi.
-- **`ModelTXTOggetti`** — carica il **catalogo degli oggetti** da file di testo in una `Map<Integer, Oggetto>`, fungendo da sorgente dati per gli oggetti di gioco.
+	- **`ModelDB`** —  connessione, salvataggio/caricamento partita (`salvaPartita`, `loadGame`), gestione record e punteggi.
+	- **`ModelTXTOggetti`** — carica il **catalogo degli oggetti** da file di testo in una `Map<Integer, Oggetto>`, fungendo da sorgente dati per gli oggetti di gioco.
 
 ####  View — `aeg.giocomap.View`
 
@@ -97,40 +92,39 @@ L'idea base è stata quella di massimizzare la **coesione interna**  e minimizza
 - **`GameScreen`** — pannello che **disegna una scena** di gioco: renderizza l'immagine di sfondo e registra le zone cliccabili (hotspot) associate ad azioni (`Runnable`).
 - **`DialogueScreen`** — schermata di **dialogo/enigma**: mostra testo, opzioni e aiuti e raccoglie la risposta del giocatore.
 - **`InventarioPanel` / `MappaPanel`** — overlay per **inventario** e **mappa**, mostrati sopra la scena corrente e gestiti dal `SceneManager`.
-![alt text](InventarioSenzaDescrizione.png)
-![alt text](Mappa.png)
+![alt text|505](InventarioSenzaDescrizione.png)
+![alt text|626](Mappa%201.png)
+
 - **`ChatPanel`** — pannello grafico della **chat multiplayer**: area messaggi, campo di input e invio. Fa da ponte tra la View e il `GameClient` del package Network.
-![alt text](ProvaDiChatting.png)
+
+![alt text|697](ProvaDiChatting%201.png)
 
 #### Network — `aeg.giocomap.Network`
-
 Modulo autonomo che implementa una **chat multiplayer** con architettura **client-server su socket TCP**.
 
-- **`GameNetwork`** — Coordina l'avvio come host (`GameServer` + `GameClient` locale) o l'ingresso come client (`connettiComeClient`), rileva l'IP locale da condividere e collega il `ChatPanel` alla connessione.
-- **`GameServer`** *(Runnable)* — il **server**: apre il `ServerSocket` sulla porta, accetta le connessioni creando un `ClientHandler` per ciascun client, gestisce l'elenco dei nomi connessi (unicità) e il **broadcast** dei messaggi a tutti.
-- **`ClientHandler`** *(Runnable)* — gestisce **un singolo client** lato server, su thread dedicato: legge i messaggi in arrivo, verifica i nomi duplicati e inoltra al server per il broadcast (JOIN/CHAT/LEAVE).
+- **`GameNetwork`** — Coordina l'avvio come **host** (`GameServer` + `GameClient` locale) o l'ingresso come client (`connettiComeClient`), rileva l'IP locale da **condividere** e collega il `ChatPanel` alla connessione.
+- **`GameServer`** *(Runnable)* — il **server**: apre il `ServerSocket` sulla porta, accetta le connessioni creando un `ClientHandler` per ciascun client, gestisce l'elenco dei nomi connessi (**unicità**) e il **broadcast** dei messaggi a tutti.
 - **`GameClient`** — il **client**: si connette al server, invia messaggi (`invia`) e avvia il `ThreadRicezione` per l'ascolto asincrono.
+- **`ClientHandler`** *(Runnable)* — gestisce **un singolo client** lato server, su **thread** dedicato: legge i messaggi in arrivo, verifica i nomi duplicati e inoltra al server per il broadcast (*JOIN/CHAT/LEAVE*).
 - **`ThreadRicezione`** *(Runnable)* — thread di **ricezione asincrona** dei messaggi lato client; formatta i messaggi ricevuti e notifica la View tramite callback (`SwingUtilities.invokeLater`), garantendo l'aggiornamento sul thread grafico.
 - **`Message`** — oggetto  che modella un messaggio (tipo, mittente, contenuto).
 - **`TipoMessaggio`** *(enum)* — tipi di messaggio del protocollo: `JOIN`, `LEAVE`, `CHAT`, `NOME_DUPLICATO`.
 - **`MessageParser`** — **serializzazione/deserializzazione** dei messaggi in stringhe da trasmettere sul socket (formato `tipo|mittente|contenuto`), incapsulando il protocollo di comunicazione.
 
 #### Util — `aeg.giocomap.Util`
-
 Raccolta di classi di supporto trasversali, senza logica di dominio:
 
 - **`JsonLoader`** — lettura dei database JSON di dialoghi/storia/hint
 - **`Parser`** — parsing di dati testuali
-- **`CursorUtil`** — gestione del cursore e delle zone cliccabili nelle scene
+- **`CursorUtil`** — gestione del cursore e delle **zone cliccabili** nelle scene
 
-###  Strumenti esterni utilizzati
+####  Strumenti esterni utilizzati
 
 - **Mermaid** — per la stesura dei diagrammi UML (diagramma delle classi, e volendo diagrammi di sequenza/stato per i flussi di gioco e di rete).
 - **Gson** — libreria per la (de)serializzazione JSON, usata da `JsonLoader` per leggere i file di dialoghi/storia/hint.
 - **H2** — database relazionale embedded usato da `ModelDB` per il salvataggio/caricamento delle partite.
 - **Java Swing** — libreria grafica per l'interfaccia utente (`MainFrame`, `GameScreen`, `DialogueScreen`, pannelli overlay), con zone cliccabili responsive basate su percentuali (`CursorUtil`) per adattarsi al ridimensionamento della finestra.
 - **Socket TCP** — per il modulo di rete multiplayer (`GameServer`/`GameClient`),
-
 
 ## Diagramma delle classi
 
@@ -488,7 +482,7 @@ private void loadOggettiDaCatologo(){
 
 Ogni riga del file rappresenta un oggetto nel formato `id;nome;descrizione` (es. `1;Tessuto;Il prezioso tessuto da consegnare al Re di Shambhala.`); il metodo `split(";", 3)` divide la riga in massimo tre parti, così che eventuali `;` presenti nella descrizione non spezzino ulteriormente la stringa. Così da visualizzare nell'inventario queste caratteristiche e caricare nell'inventario, in base al momento nella storia, l'oggetto con **id**: $n$.
 
-![[Pasted image 20260716204216.png]]
+![[Inventario.png]]
 
 #### PNG
 Le **immagini** sono basati sulla libreria standard `javax.imageio.ImageIO`. Il caricamento è **dinamico**, dove il nome del file non è scritto nel codice ma viene costruito a runtime a partire da un **dato di gioco**. Lo si vede bene in `InventarioPanel`, dove lo *sprite* di ogni oggetto viene recuperato usando il nome dell'oggetto stesso come nome del file:
