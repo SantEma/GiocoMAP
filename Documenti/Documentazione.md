@@ -773,8 +773,7 @@ In questo modo più *lambda* annidate possono condividere e aggiornare nel tempo
 ![[AvviaPopupVestiti.png]]
 ### SWING
 
-L'idea iniziale prevedeva tre meccanismi **Swing** distinti per rendere l'avventura grafico-testuale interattiva: un puntatore dinamico sulle zone sensibili, delle frecce direzionali per lo spostamento e un parser a **Regex** per l'input da tastiera. Tutti e tre sono stati effettivamente realizzati nel progetto.
-
+L'idea iniziale prevedeva tre meccanismi **Swing** distinti per rendere l'avventura grafico-testuale interattiva: un puntatore dinamico sulle zone sensibili, delle frecce direzionali per lo spostamento e un parser a **Regex** per l'input da tastiera. Tutti e tre sono stati effettivamente realizzate nel progetto.
 #### Puntatore dinamico (hotspot)
 La classe `CursorUtil` (package `Util`) espone il metodo `registraZone(JPanel panel, Map<double[], Runnable> zone)`, richiamato da ogni `GameScreen` per registrare le proprie **zone cliccabili**. Un `MouseMotionAdapter` intercetta `mouseMoved` e, se il cursore entra in una delle zone, cambia l'icona in `Cursor.HAND_CURSOR` (altrimenti resta `Cursor.DEFAULT_CURSOR`); un `MouseAdapter` separato gestisce `mouseClicked`, ricalcola la stessa zona ed esegue il `Runnable` associato:
 
@@ -796,12 +795,35 @@ panel.addMouseMotionListener(new MouseMotionAdapter() {
 ```
 
 Le zone non sono coordinate assolute in pixel ma **percentuali** (`{xPerc, yPerc, wPerc, hPerc}`), ricalcolate rispetto all'area dell'immagine di sfondo: questo permette alle zone cliccabili di restare correttamente posizionate anche quando la finestra viene **ridimensionata**.
+Le coordinate in fase di debug le prendavamo dall'**interfaccia** `CoordinateDebuggable` 
+#### Marcatore di posizione sulla mappa
+Quando si apre la mappa (overlay `MappaPanel`, tasto **M**), sopra l'immagine della mappa viene disegnato anche un piccolo **marcatore** (`Posizione.png`) che indica in quale stanza si trova attualmente il giocatore, caricato come `BufferedImage` e ridisegnato ad ogni `paintComponent`:
 
+```JAVA
+private BufferedImage immaginePosizione;
+// ...
+immaginePosizione = ImageIO.read(getClass().getResourceAsStream("/sprites/StrumentiGrafici/Posizione.png"));
+```
+
+La posizione del marcatore non viene calcolata dinamicamente, ma associata alla scena in cui si trovava il giocatore prima di aprire la mappa (`sceneManager.getScenaPrecedente()`) tramite uno `switch` che mappa ogni nome di scena a una coppia di coordinate percentuali sulla mappa, con la stessa logica di ridimensionamento percentuale già vista per `CursorUtil`:
+
+```JAVA
+String scena = sceneManager.getScenaPrecedente();
+switch (scena) {
+    case "PORTO":
+        relX = 0.1920; relY = 0.2373;
+        break;
+    // ... una coppia di coordinate per ciascuna stanza
+}
+```
+
+Va precisato che non si tratta di un `Cursor` del mouse personalizzato (nel progetto non viene mai usato `Cursor.createCustomCursor`), ma di uno **sprite fisso in overlay**: la mappa resta **puramente consultiva**, senza alcun click-to-travel, dato che `MappaPanel` non registra alcun `MouseListener` proprio; lo spostamento reale resta affidato solo alle frecce direzionali, che infatti vengono nascoste automaticamente da `SceneManager` quando la mappa è aperta.
+
+![[PosizioneMappa.png]]
 #### Frecce direzionali
 `MainFrame` istanzia quattro `JButton` dedicati (`btnNord`, `btnSud`, `btnEst`, `btnOvest`), posizionati come overlay fisso sul `JLayeredPane` tramite `impostaFrecceLogica()`, e li espone tramite `setFrecceListener(ActionListener nord, sud, est, ovest)`. La logica di navigazione vera e propria, però, non risiede nella View ma nel Controller: è `NavigazioneMappa.impostaFrecceLogica()` a collegare ai quattro bottoni le rispettive callback, ciascuna delle quali invoca `eseguiCollegamento(CostantiMappa.NORD/SUD/EST/OVEST)` per determinare la stanza successiva.
-
 #### Analisi testuale (Regex)
-La classe `Parser` (package `Util`) usa `java.util.regex.Pattern`/`Matcher` nel metodo `contieneRadiceParola(String input, String pattern)`: costruisce dinamicamente un'espressione regolare inserendo `\s*` opzionale tra ogni lettera del pattern (per tollerare spazi extra digitati dal giocatore) e, se il pattern termina con `*`, aggiunge un suffisso libero `\w*` per accettare variazioni della parola (es. plurali):
+La classe `Parser` (package `Util`) usa `java.util.regex.Pattern`/`Matcher` nel metodo `contieneRadiceParola(String input, String pattern)`: costruisce dinamicamente un'espressione regolare inserendo `\s*` opzionale tra ogni lettera del pattern (per tollerare spazi extra digitati dal giocatore) e, se il pattern termina con `*`, aggiunge un suffisso libero `\w*` per accettare variazioni della parola (gestito principalmente per i plurali):
 
 ```JAVA
 String regex = haWildcard
@@ -809,8 +831,80 @@ String regex = haWildcard
     : "(?i).*\\b" + regexRadice.toString() + "\\b.*";
 ```
 
-Il flag inline `(?i)` rende il confronto **case-insensitive**. Questo parser viene richiamato ogni volta che il gioco chiede una risposta libera da tastiera tramite `JOptionPane.showInputDialog`, ad esempio in `CostruttoreScene.contieneRadiceParola(input, "carot*")` nel dialogo col Contadino Green, così da riconoscere "carota", "carote" o varianti con spazi/maiuscole senza dover elencare ogni possibile risposta.
+Il flag **inline** `(?i)` rende il confronto **case-insensitive**. Questo **parser** viene richiamato ogni volta che il gioco chiede una risposta libera da tastiera tramite `JOptionPane.showInputDialog`, ad esempio in `CostruttoreScene.contieneRadiceParola(input, "carot*")` nel dialogo col Contadino Green, così da riconoscere "carota", "carote" o varianti con spazi/maiuscole senza dover elencare ogni possibile risposta.
+#### Icona e titolo della finestra
+`MainFrame.java` non è rimasto invariato rispetto al codice generato automaticamente dal Form Editor di **NetBeans**: il titolo era già impostato in `initComponents()` (`setTitle("Adventure Game MAP")`), ma l'**icona** della finestra (quella mostrata nella barra del titolo e nella taskbar) non veniva assegnata a un'immagine reale, dato che il placeholder generato automaticamente è `setIconImage(getIconImage())`, che di fatto non imposta nulla poiché in quel punto `getIconImage()` restituisce ancora `null`. Nel costruttore di `MainFrame` è stata quindi aggiunta manualmente l'assegnazione dell'icona, usando come immagine lo sprite del **Tessuto**, l'oggetto centrale della trama:
 
+```JAVA
+URL iconURL = getClass().getResource("/sprites/Oggetti/Tessuto.png");
+if (iconURL != null) {
+    ImageIcon icona = new ImageIcon(iconURL);
+    this.setIconImage(icona.getImage());
+}
+```
+#### Cambio di scena e overlay
+`MainFrame.mostraPannello(JComponent newPanel)` non usa un `CardLayout`, ma sostituisce direttamente il contenuto del `contentPane`, impostato a `BorderLayout`:
+
+```JAVA
+public void mostraPannello(JComponent newPanel){
+    this.getContentPane().removeAll();
+    this.getContentPane().setLayout(new BorderLayout());
+    this.getContentPane().add(newPanel, BorderLayout.CENTER);
+    this.revalidate();
+    this.repaint();
+}
+```
+
+Gli elementi che devono restare **sempre visibili** a prescindere dalla scena (bottone chat, frecce direzionali) non vivono nel `contentPane` appena svuotato, ma nel `JLayeredPane` del frame (`getLayeredPane()`), tutti sul livello `JLayeredPane.POPUP_LAYER`: in questo modo sopravvivono a ogni `removeAll()` e restano sempre sopra alla scena corrente. Il frame usa anche un `glassPane` dedicato per un effetto di transizione ("lampo" a schermo intero con dissolvenza tramite `Timer`), completamente separato dal `JLayeredPane`.
+
+La gestione di **quale** pannello mostrare è affidata a `SceneManager`, che mantiene una cache (`Map<String, JComponent> sceneCache`) popolata una sola volta all'avvio tramite `registraScena(...)`: aprire la mappa o l'inventario (`apriMappa()`, `apriInventario()`) non crea una nuova istanza del pannello, ma pesca quella già esistente dalla cache e la passa a `mostraPannello(...)`, salvando la scena precedente per poterla ripristinare alla chiusura. Fa eccezione la `ChatPanel`, creata alla prima apertura (sia in `GameNetwork.toggleChat()` come host, sia in `connettiComeClient(...)` come client) e poi riutilizzata allo stesso modo per le aperture successive, dopo che viene mostrato l'**IP address da inserire**.
+Gestiamo tramite il **LayeredPane** la disposizione di una griglia a livelli, così da inserire le immagini e testi in questo ordine:
+$Sfondo<Immagine\ personaggio<Testo\ di \ dialogo$
+In merito a ciò lo analizziamo nella seguente descrizione:
+#### Composizione a livelli
+La schermata di dialogo estende direttamente `JLayeredPane` e sovrappone tre componenti su livelli semanticamente coerenti con Swing: lo sfondo della scena sottostante, lo sprite del personaggio sopra di esso, e il box di testo del dialogo in primo piano:
+
+```JAVA
+this.add(scena_stanza, JLayeredPane.DEFAULT_LAYER);  // sfondo (GameScreen)
+this.add(panelSpritePG, JLayeredPane.PALETTE_LAYER);  // sprite del personaggio
+this.add(boxDialogo, JLayeredPane.MODAL_LAYER);       // box di testo
+```
+#### Ridimensionamento responsive
+La finestra parte non massimizzata ma resta **ridimensionabile** fino a una dimensione minima (`setMinimumSize(1024, 768)`). Un `ComponentAdapter` registrato sul `rootPane` intercetta ogni ridimensionamento e riposiziona gli elementi fissi:
+
+```JAVA
+getRootPane().addComponentListener(new ComponentAdapter() {
+    @Override
+    public void componentResized(ComponentEvent e) {
+        riposizionaBottoneChat();
+        riposizionaFrecce();
+    }
+});
+```
+
+Le frecce direzionali vengono ridimensionate in **percentuale** rispetto al lato più corto della finestra (`Math.min(larghezza, altezza) * 8 / 100`) e ridisegnate a partire dalle immagini originali salvate in memoria (non da versioni già scalate), per evitare che ridimensionamenti ripetuti degradino la qualità dell'icona.
+
+Questa **scalatura percentuale**, sia delle frecce che degli sfondi e delle zone cliccabili, è stata testata manualmente anche su **sistemi operativi diversi** tra i membri del gruppo (Emanuele usa Linux), verificando il ridimensionamento migliore da usare come media generale per i vari SO (purtroppo non è perfetta per tutti, ma è un ottimo compromesso architetturale scelto assieme tra i membri del gruppo).
+#### Scalatura delle immagini
+Lo sfondo di ogni `GameScreen` viene disegnato manualmente sovrascrivendo `paintComponent`, con layout assoluto (`setLayout(null)`) per poter posizionare sopra di esso le zone cliccabili di `CursorUtil`:
+
+```JAVA
+@Override
+protected void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    if (immagine != null) {
+        g.drawImage(immagine, 0, 0, getWidth(), getHeight(), this);
+    }
+}
+```
+
+L'immagine viene qui **stirata** per riempire tutto il pannello (senza mantenere le proporzioni originali), scelta coerente con le zone cliccabili percentuali già viste per `CursorUtil`. Dato che sfondo e zone si scalano allo stesso modo, restano sempre allineati. 
+Lo sprite del personaggio in `DialogueScreen`, invece, viene disegnato con un `paintComponent` distinto che **mantiene l'aspect ratio** (fattore di scala minimo tra larghezza e altezza), per evitare che i personaggi appaiano deformati.
+#### Key Bindings con `InputMap`/`ActionMap`
+Le scorciatoie da tastiera globali del gioco (mappa, chat, inventario, ESC) non usano un `KeyListener`, ma sono registrate sul `rootPane` tramite `InputMap`/`ActionMap` con condizione `WHEN_IN_FOCUSED_WINDOW` (Snippet già mostrato nella sezione sul [[#Il limite delle Lambda|limite delle lambda]] per `impostaKeyBindingMappa()`). 
+`mostraPannello` sostituisce di continuo il pannello centrale con componenti diversi (bottoni, `JTextArea`, ecc., ognuno potenzialmente titolare del focus), un `KeyListener` legato a un singolo componente smetterebbe di funzionare non appena il focus si sposta altrove o la scena cambia. Legando invece i tasti al `rootPane`, che non viene mai rimosso dalla finestra, le **scorciatoie restano attive indipendentemente da quale componente figlio abbia il focus** in quel momento.
+#### `JOptionPane` per input e conferme
+Oltre agli usi già visti per l'input testuale degli enigmi (gestito poi da `Parser`), `JOptionPane` viene usato nel progetto anche per le **conferme** di navigazione (`JOptionPane.showConfirmDialog(..., JOptionPane.YES_NO_OPTION, ...)` in `NavigazioneMappa`, per chiedere conferma prima di uno spostamento significativo) e per i **messaggi informativi/di errore** della chat multiplayer (es. "Sei già l'host!", "Nome già in uso!" in `GameNetwork`), oltre che per la richiesta del nome giocatore a fine partita in `GameStatistics.statistiche()`.
 ### Thread e programmazione concorrente
 
 L'idea originale era di affiancare al calcolo del punteggio un **thread concorrente** che misurasse il tempo di risoluzione di un enigma. Nell'implementazione finale, però, `TimerEnigma` non avvia un thread dedicato: calcola il tempo trascorso in modo **sincrono**, salvando l'istante di partenza e confrontandolo con l'istante corrente:
@@ -827,6 +921,17 @@ public int getSecondi() {
 L'unico `javax.swing.Timer` presente in `TimerEnigma` serve solo per un ticchettio periodico di debug (stampa in console), eseguito sull'**Event Dispatch Thread**, e non introduce concorrenza reale; `GameStatistics.calcolaPunti()` assegna poi il punteggio in base a delle fasce di secondi trascorsi, in modo anch'esso interamente sincrono.
 
 La vera **programmazione concorrente** del progetto si trova invece nel modulo di rete (package `Network`), dove più thread lavorano realmente in parallelo per gestire la chat multiplayer. `GameServer` si avvia come `Runnable` su un thread dedicato (`new Thread(this).start()`) che resta in ascolto di nuove connessioni; per **ogni client** che si collega viene creato un `ClientHandler` eseguito a sua volta su un proprio thread (`new Thread(handler).start()`), così che i messaggi di più giocatori vengano letti in parallelo senza bloccarsi a vicenda. Lato client, `GameClient` avvia un `ThreadRicezione` dedicato all'ascolto asincrono dei messaggi in arrivo, mentre l'interfaccia grafica resta libera di rispondere agli input dell'utente. Poiché più thread accedono contemporaneamente alle stesse strutture condivise (l'elenco dei client connessi e dei nomi), `GameServer` protegge questi accessi rendendo `synchronized` i metodi che li leggono o modificano (`nomeDisponibile`, `aggiungiNome`, `rimuoviNome`, `broadcast`, `rimuoviClient`), evitando così race condition tra il thread di accettazione e i thread dei singoli `ClientHandler`.
+
+#### Thread-safety tra rete e interfaccia grafica
+Proprio perché il modulo di rete gira su thread propri, si pone il problema di farlo comunicare con l'interfaccia grafica senza violare le regole di **Swing**, che non è *thread-safe*: i componenti grafici vanno aggiornati solo sull'**Event Dispatch Thread** (EDT). Il thread `ThreadRicezione`, che legge i messaggi in arrivo bloccandosi sul socket, non aggiorna quindi mai direttamente la `ChatPanel`, ma inoltra la callback all'EDT tramite `SwingUtilities.invokeLater`:
+
+```JAVA
+if (onMessaggio != null) {
+    SwingUtilities.invokeLater(onMessaggio);
+}
+```
+
+Questo evita che un messaggio ricevuto in un momento imprevedibile (asincrono rispetto al ciclo di eventi di Swing) provochi un aggiornamento della `JTextArea` della chat da un thread diverso da quello grafico, causa comune di comportamenti imprevedibili o crash nelle applicazioni Swing multithread.
 
 ### Socket e/o REST
 
