@@ -127,12 +127,82 @@ si verifica che ogni singolo elemento estratto dal primo insieme appartenga al s
 
 ## Dettagli implementativi
 
-Per ciascun argomento del corso spiegare se e come è stato utilizzato all’interno del progetto.
-
 ### Programmazione generica
 
-bla bla bla…
+Le **Generics** nel progetto vengono utilizzate per estendere le **liste e le mappe** nel gioco così da non far prendere qualsiasi tipo di dato dalle `HashMap` ma per definire esattamente che tipo di dato deve contenere la **collezione di dati** e senza fare il **casting** dal tipo oggetto al tipo corretto.
+Un esempio lo si trova nella **gestione della mappa e delle uscite** nel file `Stanza.java`:
 
+``` JAVA
+private final Map<String, Stanza> uscite;
+// ...
+public void impostaUscita(String direzione, Stanza stanza) {
+    uscite.put(direzione.toUpperCase(),stanza);
+}
+```
+
+Qui l'**uscita** da una stanza viene salvata in questa `HashMap` dove la chiave è la stringa della direzione (che nel codice viene definito che può essere uno dei **punti cardinali**) e l'oggetto è la `stanza` di destinazione.
+
+Una **Generics nuova**, creata direttamente per il gioco è stata ideata nel package `Giocatore` per la gestione del suo `Inventario`. Se si analizza il codice della classe `Inventario` si nota come la sintassi `<T extends Oggetto>` definisce la sua regola di accettare solamente le istanze della classe `Oggetto` e le sue sottoclassi annesse (`Spada`).
+Con questa implementazione evitiamo di dover controllare l'inserimento di tipi non validi quando vengono usate le funzioni di aggiunta di un oggetto all'inventario e di ricerca di quest'ultimo:
+
+```JAVA
+public class Inventario<T extends Oggetto> {
+
+    // La lista non cambia, cambiano i contenuti all'interno
+    private final List<T> listaOggetti; 
+
+    public Inventario() {
+        this.listaOggetti = new ArrayList<>();
+    }
+
+    public void aggiungiOggetto(T oggetto) {
+        if (cercaOggetto(oggetto.getNomeOggetto()) == null) {
+            listaOggetti.add(oggetto);
+        }
+    }
+
+    public void rimuoviOggetto(T oggetto) {
+        listaOggetti.remove(oggetto);
+    }
+       
+    public T cercaOggetto(String nome) {
+        return listaOggetti.stream()
+                .filter(obj -> obj.getNomeOggetto().equalsIgnoreCase(nome))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<T> getListaOggetti() {
+        return listaOggetti;
+    }
+}
+```
+
+Alla luca di questa implementazione se torniamo ad analizzare `Giocatore` e specificamente in questa sezione di codice:
+
+```JAVA
+import aeg.giocomap.Model.Oggetti.Oggetto;
+public class Giocatore {
+    private final String nome_lore;
+    private String nome_player;
+    private Inventario<Oggetto> inventario;
+    
+    ...
+    
+    public Inventario<Oggetto> getInventario(){
+        // creamo l'inventario solo alla prima chiamata
+        if(this.inventario==null) this.inventario=new Inventario<>();
+        
+        // se non esiste da questo inventario perché non ha ancora quello esistente
+        return this.inventario;
+    }
+}
+```
+
+si nota come l'istanza di inventario venga da subito specificata che conterrà un oggetto di tipo `Oggetto` (si precisa che c'è una grande differenza tra `Oggetto` e `Object`, anche se Java è basato sulla classe `Object`, quest'ultima non è `Oggetto`, poiché quest'ultima gestisce gli **oggetti del gioco**).
+Così la funzione `Inventario<Oggetto> getInventario()` sia vincolata all'uso di quel tipo di dato.
+
+Oltre all'implementazione di classi generiche create da noi, il progetto fa un uso nativo della programmazione generica di Java attraverso il *Java Collections* per le **liste**: `List<String> alberoDialoghi` nella classe `Personaggio` e `List<ClientHandler> clientConnessi` in `GameServer`.
 ### File
 
 bla bla bla…
