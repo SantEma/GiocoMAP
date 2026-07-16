@@ -546,8 +546,7 @@ public class GameEngine {
         int caricaSpada = 0;
         for (Oggetto o : getGiocatore().getInventario().getListaOggetti()) {
             invIds.add(String.valueOf(o.getIdOggetto()));
-            // Gli oggetti sono serializzati solo per ID: salvo a parte lo stato
-            // interno della Spada Sincro (la sua carica), altrimenti andrebbe perso
+            // Gli oggetti sono serializzati solo per ID, quindi la carica la salviamo separatamente
             if (o instanceof Spada spada) {
                 caricaSpada = spada.getCaricaSincro();
             }

@@ -25,7 +25,7 @@ public class RegistroNPC {
         return pg;
     }
 
-    //Crea un Fantoccio con i dialoghi indicati, lo registra sotto la chiave data e lo restituisce.
+    //Creazione fantoccio con i dialoghi indicati, lo registra sotto la chiave data e lo restituisce
      
     public Fantoccio registraFantoccio(String chiaveRegistro, List<String> dialoghi) {
         Fantoccio f = new Fantoccio();

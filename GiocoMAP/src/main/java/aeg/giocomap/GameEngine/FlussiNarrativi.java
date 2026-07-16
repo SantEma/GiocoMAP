@@ -21,16 +21,19 @@ public class FlussiNarrativi {
     private final StatoProgressione stato;
     private final CostruttoreScene costruttore;
 
+    // Costruttore, prende i riferimenti da CostruttoreScene e amici
     public FlussiNarrativi(GameEngine engine, StatoProgressione stato, CostruttoreScene costruttore) {
         this.engine = engine;
         this.stato = stato;
         this.costruttore = costruttore;
     }
 
+    // Setter dello statoCity
     private void setStatoCity(int valore) {
         stato.setStatoCity(valore);
     }
 
+    // Eripeta blocca Eryndor sulle scale e si presenta, prima di accusarlo
     void avviaIntercettazioneEripeta() {
         GameScreen scale = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.SCALE);
         ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
@@ -78,6 +81,7 @@ public class FlussiNarrativi {
         engine.mostraDialogoCallback(scale, CostantiMappa.SCALE, "Eripeta", txt1, spriteEripeta, step2);
     }
 
+    // L'accusa di Eripeta nella Cripta: visione, difesa, sfida e indizio finale
     private void avviaAccusaEripeta() {
         GameScreen cripta = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.CRIPTA_ERIPETA);
         ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
@@ -135,6 +139,7 @@ public class FlussiNarrativi {
         engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", txt1_1, spriteEripeta, step3);
     }
 
+    // David al Porto dopo la mappa: cosa dice dipende da a che punto siamo nella storia
     void gestisciDavidDopoMappa(GameScreen portoScreen, ImageIcon spriteDavid, JsonObject davidDb) {
         if (stato.getStato() == StatoStoria.ACCUSA_ERIPETA_SUPERATA) {
             String ritorno1 = davidDb.get("ritorno_1").getAsString();
@@ -164,6 +169,7 @@ public class FlussiNarrativi {
         }
     }
 
+    // Si parte con l'Enigma del Vincolo: testo e loop di risposta
     private void lanciaEnigma5(GameScreen portoScreen, ImageIcon spriteDavid, JsonObject davidDb) {
         Oggetto reward = engine.getTxt().getOggettoDaCatalogo(9);
         EnigmaSceltaMultipla enigma5 = IstanzaEnigma.creaEnigma5(reward);

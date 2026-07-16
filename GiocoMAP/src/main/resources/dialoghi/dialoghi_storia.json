@@ -1,11 +1,8 @@
 {
     "Eryndor":{
         "inizio":{
-            "lettera_retro_pensiero": "(Mmm... Non so come arrivarci però. Fammi controllare se sul retro c'è qualcosa).",
-            "lettera_retro_parlato": "Il retro riporta una sottospecie di enigma, dice:",
             "locali_chiusi": "Sembra attualmente chiuso, ci ripasserò dopo",
-            "passaggio_cavaglieri": "Diavolo, mi son perso l'armata reale, ma almeno ora la strada è libera",
-            "post_sbronza": "Come ci son finito qui... e tu chi sei?"
+            "passaggio_cavaglieri": "Diavolo, mi son perso l'armata reale, ma almeno ora la strada è libera"
         },
         "Grotta": {
             "successo_spada": "Incredibile! L'incudine si è aperta e ho estratto la Spada Sincro!",
@@ -31,8 +28,7 @@
             "correzione_consegna": "Aspetta, Fox! Mi sono sbagliato, quella non è la pianta giusta. Vado a guardare meglio, credo sia quella velenosa ...",
             "consegna_corretta": "Ecco a te. Questa è la rarissima erba medica che cercavi.",
             "pensiero_vittoria_1": "(Perfetto. Il cartello degli esploratori aveva ragione: il fiore viola è un potente sonnifero, altro che medicina!)",
-            "pensiero_vittoria_2": "(Ora che sta dormendo come un sasso, posso riprendermi il tessuto della Principessa direttamente dalle sue tasche senza che possa muovere un dito. Giustizia è fatta!)",
-            "reazione_guarigione": "Maledizione! Fox si è curato e mi attacca! Devo riprovare l'enigma..."
+            "pensiero_vittoria_2": "(Ora che sta dormendo come un sasso, posso riprendermi il tessuto della Principessa direttamente dalle sue tasche senza che possa muovere un dito. Giustizia è fatta!)"
         },
         "Saggio_Clock": {
             "stupore": "Wow, sua saggezza è ... strabiliante, ma anche di una stranezza. Cosa posso fare per lei?",
@@ -54,8 +50,6 @@
             "parlato_seduzione_1": "Siete troppo gentile, mia signora. La vera forza non risiede sempre nell'acciaio, ma nella trama delle nostre scelte.\nOgni tappa del mio viaggio era solo un filo necessario per tessere la strada che mi avrebbe condotto al cospetto della vostra impareggiabile intelligenza.",
             "pensiero_seduzione_2": "(Perfetto. È completamente rapita. Un mercante sa sempre cogliere l'occasione quando gli si presenta davanti).",
             "parlato_seduzione_2": "Ho sfidato le insidie del regno intero per portarvi il mio tessuto migliore, Principessa.\nEssere compreso e apprezzato da una mente brillante come la vostra... è un onore che per me vale molto più di qualsiasi ricompensa in oro.",
-            "pensiero_mercante_piumato": "(Per poco non ho commesso lo stesso errore. Con cinque tessuti la trappola è doppia: non basta più incrociare due indizi, bisogna verificarli tutti insieme prima di muovere un solo dito.)",
-            "tradimento": "Tu chi sei e che ci fai abbracciato al mio futuro sposo. Via di qui, tutti e due!",
             "errore_ordine": "Per poco non ho commesso lo stesso errore... devo riprovare."
         },
         "Jack": {
@@ -84,7 +78,6 @@
             "soluzione_enigma_3": "- 5° Giorno: Cedi il frammento da 1.\n- 6° Giorno: Cedi il frammento da 2, ricevendo l'1 come resto.\n- 7° Giorno: Cedi l'ultimo frammento da 1.",
             "storia_eripeta_1": "Purtroppo le lacrime di questo indovinello sono quelle di Eripeta.\nDevi sapere che è diventata veggente proprio per trovare chi ha trasformato suo figlio in oro liquido. Prima era una guerriera, ma il Re non voleva consegnarle questo oggetto, credeva che l'avrebbe fatta soffrire troppo. Per questo l'ha dato via.",
             "storia_eripeta_2": "Ma una persona onesta e giusta dal cuore nobile, credo che debba riunire sempre una madre col proprio figlio,\n per quanto male possa fare, è la cosa giusta da dover eseguire.",
-            "crash_robot": "Biiip Biiiip... Bop bop, trunz trunz. CLANK!",
             "saluto_generico": "Buona fortuna con la tua avventura, straniero!",
             "consiglio_stalla": "La prossima tappa è il bosco! Per arrivare nel bosco ti serve una carrozza, vai alla stalla."
         },
@@ -126,8 +119,7 @@
             "reazione_pianta_corretta_1": "Davvero? Ottimo! Dammela subito!",
             "reazione_pianta_corretta_2": "Ahah! Funziona, sento già gli effetti! E ora, come ti dicevo prima... il tessuto me lo tengo io, fesso! Non ti ridò un bel nient...\nAspetta... perché... mi sento le palpebre... così pesanti...?",
             "addormentato": "Zzz... che sonno ...",
-            "sbrigati": "Allora, hai trovato la pianta che mi serve o no? Muoviti!",
-            "guarigione": "Ah! Sento di essermi guarito! Non ti darò mai il tessuto, fesso!"
+            "sbrigati": "Allora, hai trovato la pianta che mi serve o no? Muoviti!"
         },
         "Saggio_Clock": {
             "presentazione": "Benvenuto, Eryndor. So chi sei. So tutto di tutti nel regno io.\nLascia che mi presenti, sono il Saggio Clock, antico mago temporale e aiutante del Re prima del mio ritiro.\nSai, sono io che ho dato vita al costrutto del Re che ti ha dato la Mappa.",
@@ -151,7 +143,6 @@
             "ringraziamento_2": "Voglio restare un po' da sola a riflettere ora. Comprendimi.",
             "congedo": "... Vai",
             "rifiuto": "Non sei degno di proseguire. Risolvi prima il mio enigma.",
-            "consenso": "Hai dimostrato il tuo valore. Puoi procedere.",
             "errore": "La tua risposta è errata. Torna quando sarai più saggio."
         },
         "Marien": {
@@ -173,15 +164,12 @@
             "ammirazione_3": "Eryndor. Per tutta la vita mi hanno circondata di sfarzo vuoto, impavidi guerrieri e forza bruta.\nMa tu... tu sei diverso. La tua mente ha danzato con la mia attraverso i fili di questo enigma. Sento che tu riesci a comprendermi come nessuno ha mai fatto.",
             "rivelazione": "Eryndor... io credo che il mio enigma non servisse solamente a scegliere un artigiano. In cuor mio, sapevo che serviva a trovare...",
             "finale": "Mio salvatore, Jack ci avrebbe decapitato entrambi. Hai salvato la vita del nostro amore.\nPer le leggi di Shambhala editate da mio padre in persona, chi uccide il promesso sposo della principessa è destinato ad essere il nuovo sposo. E sono molto contenta che sia tu",
-            "sfida": "Risolvi il mio enigma per vincere.",
-            "vittoria_finale": "Non ho mai assistito a così tanta astuzia... Sei il prescelto! Sarai il mio sposo!",
-            "errore_cacciata": "Fermo! Avete spezzato l'ordine matematico. Guardie, fuori di qui!"
+            "sfida": "Risolvi il mio enigma per vincere."
         },
         "Jack": {
             "ingresso": "MARIEN! Che significa tutto questo?! Chi è questo pezzente di un bottegaio che osa avvicinarsi a te?!",
             "sfida": "Ti presento Daniel, la mia sciabola più fidata. Preparati a sguainare la tua misera spada e a pregare Tiamat di restare in vita.",
-            "sconfitta": "Impossibile! Chi ti ha concesso di impugnare la Spada Sincro?! La sua lama è già illuminata... dovete aver condiviso un intero viaggio.\nQuesta spada accresce la sua potenza risuonando con chi la brandisce, fondendo l'arma e il suo padrone in un'unica, devastante forza!",
-            "bevuta": "Gran bella bevuta, sei carismatico, mi piaci. Non mi hai nemmeno detto chi sei"
+            "sconfitta": "Impossibile! Chi ti ha concesso di impugnare la Spada Sincro?! La sua lama è già illuminata... dovete aver condiviso un intero viaggio.\nQuesta spada accresce la sua potenza risuonando con chi la brandisce, fondendo l'arma e il suo padrone in un'unica, devastante forza!"
         },
         "Mercante_Piumato": {
             "presunzione": "Fatti da parte, bottegaio! Con cinque manichini ci vuole un occhio allenato come il mio, non quello di un dilettante di provincia!",

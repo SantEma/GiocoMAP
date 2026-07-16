@@ -17,9 +17,9 @@ public interface CoordinateDebuggable {
     */
     JPanel getPanel();
 
-    /*
-     * Calcola l'area effettiva in cui è disegnata l'immagine, di default è l'intero pannello 
-     */
+   
+    //Calcola l'area effettiva in cui è disegnata l'immagine, di default è l'intero pannello 
+    
     default Rectangle getAreaImmagine(int panelWidth, int panelHeight) {
         return new Rectangle(0, 0, panelWidth, panelHeight);
     }

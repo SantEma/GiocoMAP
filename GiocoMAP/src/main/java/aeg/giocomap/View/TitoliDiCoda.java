@@ -18,16 +18,7 @@ public class TitoliDiCoda extends JPanel {
     private JButton btn_indietro;   
     // Presente solo nei titoli di coda
     private PannelloScorrimento scroll;
-
-    /**
-     * @param records
-     * @param punteggioAttuale
-     * @param nomeGiocatore
-     * @param soloHallOfFame true = mostra solo la Hall of Fame statica con il
-     *                       bottone indietro (schermata Statistiche dal menu);
-     *                       false = titoli di coda che scorrono, senza bottone,
-     *                       che tornano da soli al menu a fine scorrimento.
-     */
+    
     public TitoliDiCoda(List<String[]> records, int punteggioAttuale,
                         String nomeGiocatore, boolean soloHallOfFame) {
         setBackground(Color.BLACK);
@@ -116,9 +107,7 @@ public class TitoliDiCoda extends JPanel {
         return wrap;
     }
 
-    // =========================================================================
     // Pannello con i titoli di coda che scorrono verso l'alto una volta
-    // =========================================================================
     private static class PannelloScorrimento extends JPanel {
 
         private final List<Riga> righe = new ArrayList<>();

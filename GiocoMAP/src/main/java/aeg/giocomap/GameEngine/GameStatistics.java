@@ -36,8 +36,7 @@ public class GameStatistics {
     public void iniziaEnigma(Enigma enigma) {
         String id = (enigma != null) ? enigma.getId() : null;
 
-        // se sto gia' cronometrando LO STESSO enigma non ancora risolto,
-        // NON resetto il timer (evita che ri-cliccando l'NPC riparta il tempo)
+        // Se sto già cronometrando LO STESSO enigma non ancora risolto, NON resetto il timer (evita che ri-cliccando l'NPC riparta il tempo)
         if (timerEnigma != null && timerEnigma.isAttivo()
                 && id != null && id.equals(enigmaCorrenteId)) {
             System.out.println("DEBUG: Timer gia' attivo per " + id + ", non resetto");

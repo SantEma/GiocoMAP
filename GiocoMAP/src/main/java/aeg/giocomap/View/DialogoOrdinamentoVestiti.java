@@ -95,6 +95,7 @@ public class DialogoOrdinamentoVestiti extends JDialog {
         slot.setBackground(coloreVestito(vestito));
     }
 
+    // Toglie il vestito 
     public void disabilitaVestito(String vestito) {
         JButton bottone = bottoniVestiti.get(vestito);
         if (bottone != null) bottone.setEnabled(false);

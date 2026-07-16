@@ -17,8 +17,6 @@
         ]
     },
     "Schermo":{
-        "tessuto_rubato": "Il tuo tessuto è stato rubato dalla figura losca che si para dinanzi a te",
-        "trovi_chiave": "Trovi una chiave mentre rovisti nelle tasche di Fox, sembra importante e decidi di tenerla",
         "fiore_gia_raccolto": "Hai già raccolto questo fiore.",
         "fiore_sostituito": "Hai lasciato il fiore precedente e raccolto: ",
         "fiore_raccolto": "Hai raccolto: ",
@@ -27,9 +25,6 @@
         "Enigma_1_Lettera": "Lascia il telaio e segui la via a Nord, guidato dalla voce della grande campana di bronzo.\nIl tuo cammino termina dove la strada si fa di legno e il vento sa di sale.\nCerca la piccola vasca di pietra che respira: due volte al giorno il mare la riempie, due volte al giorno la svuota.\nLì, all'ombra dei giganti che riposano con le ali di tela chiuse, il custode della via ti attende.",
         "Enigma_2_Germi": "Hai un vaso di vetro con dentro un solo germe.\nDopo un minuto, il germe si suddivide in due germi. Dopo un altro minuto, i due germi si suddividono di nuovo, formando un totale di quattro germi.\nCon questo ritmo, partendo da un germe il vaso sarà pieno di germi dopo esattamente un'ora di tempo.\nSapresti dire dopo quanti minuti si riempirà il vaso partendo con due germi anziché uno?",
         "Cartello_Esploratori": "La febbre dei boschi si cura solo con il fiore blu, il colore del cielo.\nAttenzione al fiore viola: il suo veleno addormenta all'istante anche un orso.",
-        "Analisi_Fiori_Rosso": "È un fiore Rosso. Emana un odore molto dolce.",
-        "Analisi_Fiori_Blu": "È un fiore Blu, lo stesso colore del cielo limpido.",
-        "Analisi_Fiori_Viola": "È un fiore Viola. Cresce tra le radici nodose di un albero.",
         "Cartello_Spada_Fucina": "Una spada dall'elsa opaca e priva di filo, incastrata nell'incudine.\nSulla guardia c'è uno strano contatore magico a forma di cuore metallico che batte lentamente, attualmente fermo allo 0%.",
         "Narrazione_Spada_Fucina": "Nemmeno con tutta la forza del mondo riusciresti a prendere questa cianfrusaglia.\nC'è un disegno dietro all'incudine però...",
         "Enigma_4_Orologio": "Un normalissimo orologio tradizionale ha due lancette e naturalmente la lancetta più lunga gira più in fretta rispetto all'altra.\nSupponendo che l'orologio qui raffigurato funzioni perfettamente, sapresti dire quante volte le lancette passeranno l'una sull'altra nell'arco di tempo compreso tra mezzogiorno e mezzanotte?",
@@ -41,7 +36,6 @@
         "altri_mercanti": "Origliando senti che alcuni mercanti stanno facendo squadra tra loro",
         "mercante_piumato": "Un mercante con un turbante piumato spinge via Eryndor con il gomito, ridacchiando",
         "disposizione_mercante": "Il mercante dispone i tessuti esattamente secondo l'opzione pensata da te",
-        "opzione_vestito": "Quale delle seguenti opzioni scegli? ",
         "cattura_piumato": "Le guardie lo trascinano via mentre i suoi nastri piumati volano per la sala",
         "interruzione_jack": "Il momento viene spezzato all'improvviso.\n Le gigantesche porte della sala vengono spalancate\n con una violenza tale da far tremare i lampadari di cristallo.\n Una figura imponente in armatura pesante fa il suo ingresso, accecata dall'ira.",
         "potere_spada": "Una luce arcobaleno irradia la stanza e un fendente d'orata trafigge Jack,\n facendo cadere la sua sciabola per terra ricoprendo la stanza di un silenzio profondo\n che dura per qualche minuto.\n Dopo di che, alcuni mercanti cominciano ad applaudire sempre più forte"
