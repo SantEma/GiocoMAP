@@ -2,7 +2,6 @@ package aeg.giocomap;
 
 import aeg.giocomap.View.MainFrame;
 import aeg.giocomap.GameEngine.GameEngine;
-import aeg.giocomap.Model.Storage.*;
 
 /**
  *
@@ -16,7 +15,7 @@ public class GiocoMAP {
         MainFrame frame = new MainFrame();
         
         // Controller che gestisce Model e View
-        GameEngine engine = new GameEngine(frame);
+        new GameEngine(frame);
         
         // Finestra
         frame.setVisible(true);

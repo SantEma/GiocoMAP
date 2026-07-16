@@ -39,9 +39,10 @@ public class CostruttoreScene {
     private final RegistroNPC registroNPC;
     private final StatoProgressione stato;
 
-    // Sequenze narrative della fase finale (Eripeta, David/Enigma del Vincolo)
+    // Sequenze narrative della fase finale del giocop
     private final FlussiNarrativi flussi;
 
+    // Istanziazione personaggi
     private Personaggio ab1;
     private Personaggio ab2;
     private Personaggio ab3;
@@ -51,12 +52,12 @@ public class CostruttoreScene {
     private Personaggio david;
     private Personaggio ladroFox;
     private Personaggio guardiaReale;
-    private Personaggio eripeta;
     private Personaggio marien;
     
-    // Azione interattiva di Eripeta (rimpiazza il vecchio gestisciEripetaInCripta)
+    // Azione interattiva di Eripeta
     private Runnable interazioneEripeta;
-
+    
+    // Variabili per ogni scena creata
     private GameScreen palazzoScreen;
     private GameScreen criptaScreen;
     private GameScreen ingressoScreen;
@@ -69,7 +70,7 @@ public class CostruttoreScene {
     private GameScreen piazzaCentrale;
     private SchermataFinale schermataFinale;
 
-    // Variabili condivise tra i metodi costruisciPiazzaCentrale / costruisciPorto / costruisciStalla / ecc.
+    // Variabili di servizio
     private Map<double[], Runnable> zonePiazza;
     private double[] hitboxAb1;
     private double[] hitboxAb3;
@@ -86,22 +87,22 @@ public class CostruttoreScene {
     private Runnable mrCooperInteraction;
     private Runnable foxInteraction;
 
-    // Azione che ri-registra la hitbox di David al Porto quando la storia lo rende
-    // di nuovo interpellabile (ritorno mandato da Eripeta, a statoCity >= 11)
+    /* Azione che ri-registra la hitbox di David al Porto quando la storia lo rende
+    di nuovo interpellabile (quindi viene raggiuntostatoCity >= 11)*/
     private Runnable riattivaDavidDopoMappa;
 
-    // Azione che abilita le hitbox degli abitanti 1 e 3 in Piazza (aiuti Enigma 5).
-    // Va invocata solo quando David annuncia l'Enigma del Vincolo, non prima.
+    /* Azione che abilita le hitbox degli abitanti 1 e 3 in piazza per il quinto enigma
+    Invocata solo quando David annuncia l'enigma, non prima*/
     private Runnable attivaAiutiEnigma5;
 
-    // Azione che rimuove le hitbox degli abitanti 1 e 3 in Piazza una volta risolto
-    // l'Enigma 5 (i loro aiuti non servono più), simmetrica all'attivazione
+    // Azione che disabilita le hitbox degli abitanti 1 e 3 in piazza per il quinto enigma
     private Runnable disattivaAiutiEnigma5;
 
     // Riferimenti agli NPC di Karundis per poter aggiornare i loro dialoghi
     private Personaggio npcKarundis1;
     private Personaggio npcKarundis2;
 
+    // Si salva tutto il necessario e si crea il gestore dei flussi narrativi
     public CostruttoreScene(GameEngine engine, StatoProgressione stato, RegistroNPC registroNPC) {
         this.engine = engine;
         this.stato = stato;
@@ -109,46 +110,47 @@ public class CostruttoreScene {
         this.flussi = new FlussiNarrativi(engine, stato, this);
     }
 
-    // Scorciatoia interna equivalente al vecchio setStatoCity della god class,
-    // usata dai costruttori di scena e dai flussi narrativi.
+    // Setter dello statoCity
     private void setStatoCity(int valore) {
         stato.setStatoCity(valore);
     }
 
-    // --- Accessori runtime per NavigazioneMappa -------------------------------
-    // I ganci sono creati dai costruttori di scena e letti in modo lazy dal
-    // routing al momento del click sulle frecce.
+    //  Interazione con Mr.Cooper alla stalla
     Runnable getMrCooperInteraction() {
         return mrCooperInteraction;
     }
 
+    // Interazione con la volpe
     Runnable getFoxInteraction() {
         return foxInteraction;
     }
 
+    // Usato per l'intercettazione di Eripeta durante la storia
     Runnable getInterazioneEripeta() {
         return interazioneEripeta;
     }
 
+    // Utile per impostare i dialoghi hint del primo Karundis
     Personaggio getNpcKarundis1() {
         return npcKarundis1;
     }
 
+    // Utile per impostare i dialoghi hint del secondo Karundis
     Personaggio getNpcKarundis2() {
         return npcKarundis2;
     }
 
-    // --- Ganci runtime per FlussiNarrativi ------------------------------------
-    // Creati in costruisciPorto e letti in modo lazy dai flussi al momento
-    // dell'esecuzione (David al Porto / accusa di Eripeta).
+    // Usato per riattivare David dopo la mappa
     Runnable getRiattivaDavidDopoMappa() {
         return riattivaDavidDopoMappa;
     }
 
+    // Usato per attivare gli aiuti dell'enigma 5
     Runnable getAttivaAiutiEnigma5() {
         return attivaAiutiEnigma5;
     }
 
+    // Usato per disattivare gli aiuti dell'enigma 5
     Runnable getDisattivaAiutiEnigma5() {
         return disattivaAiutiEnigma5;
     }
@@ -159,6 +161,7 @@ public class CostruttoreScene {
         flussi.avviaIntercettazioneEripeta();
     }
 
+    //Costruzione di tutte le scene
     public void costruisciScene() {
         inizializzaPersonaggiPrincipali();
         costruisciPiazzaCentrale();
@@ -173,6 +176,10 @@ public class CostruttoreScene {
         costruisciLettere();
     }
 
+    /*
+        Precaricamento dei dati che dovrebbero essere utilizzati prossimamente
+        (dialoghi specifici e generici + sprite)
+    */
     private void inizializzaPersonaggiPrincipali() {
 
         hints = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
@@ -183,7 +190,11 @@ public class CostruttoreScene {
         spriteMrCooper = new ImageIcon(getClass().getResource("/sprites/Personaggi/MrCooper.png"));
         idleDialogs = JsonLoader.estraiLista(engine.getDbHint(), "Dialoghi_Generici_Idle");
     }
-
+    
+    /*
+        Qui registriamo abitanti (con hint per il primo e quinto enigma) e tutti
+        i personaggi della piazza 
+    */
     private void costruisciPiazzaCentrale() {
         zonePiazza = new HashMap<>();
 
@@ -208,16 +219,19 @@ public class CostruttoreScene {
             pescivendoloDb.get("saluto").getAsString() + "\n" +
             pescivendoloDb.get("richiesta").getAsString()
         ));
-
-        // spriteMrCooper è già un campo di istanza, inizializzato in inizializzaPersonaggiPrincipali()
+        
+        
         ImageIcon spriteGreen = new ImageIcon(getClass().getResource("/sprites/Personaggi/Green.png"));
 
+        // Inizializzazione hitbox
         hitboxAb1 = CostantiHitbox.PIAZZA_ABITANTE_1;
         double[] hitboxAb2 = CostantiHitbox.PIAZZA_ABITANTE_2;
         hitboxAb3 = CostantiHitbox.PIAZZA_ABITANTE_3;
 
-        // Interazione abitante 1: hint Enigma 1 (prima della mappa) o hint Enigma 5 (ritorno da Eripeta).
-        // Estratta in variabile per poterla ri-registrare quando la storia riabilita gli aiuti.
+        /* Interazione abitante 1:
+           Se non ha la mappa l'NPC da gli aiuti del primo enigma (Stalla)
+           Altrimenti da quelli del quinto enigma (Eripeta)
+        */
         interazioneAb1 = () -> {
             if (!engine.getGiocatore().isPossiedeMappa()) {
                 List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
@@ -234,7 +248,11 @@ public class CostruttoreScene {
         if (!engine.getGiocatore().isPossiedeMappa() || stato.getStato() == StatoStoria.ACCUSA_ERIPETA_SUPERATA || stato.getStato() == StatoStoria.DAVID_INTERPELLATO) {
             zonePiazza.put(hitboxAb1, interazioneAb1);
         }
-
+        
+        /*
+        Lui è l'NPC sfigato, da soltanto un aiuto al primo enigma e poi ti saluta
+        per tutto il resto del gioco. Un grande.
+        */
         zonePiazza.put(hitboxAb2, () -> {
             Personaggio tempAb2 = new Personaggio("Abitante 2");
             if (!engine.getGiocatore().isPossiedeMappa()) {
@@ -247,8 +265,11 @@ public class CostruttoreScene {
             }
             engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, tempAb2, null);
         });
-
-        // Interazione abitante 3: hint Enigma 1 (prima della mappa) o hint Enigma 5 (ritorno da Eripeta).
+        
+        /* Interazione abitante 3:
+           Se non ha la mappa l'NPC da gli aiuti del primo enigma (Stalla)
+           Altrimenti da quelli del quinto enigma (Eripeta)
+        */
         interazioneAb3 = () -> {
             if (!engine.getGiocatore().isPossiedeMappa()) {
                 List<String> hintsE1 = JsonLoader.estraiLista(engine.getDbHint().getAsJsonObject("Aiuti_Enigmi"), "Enigma_1_Porto");
@@ -278,9 +299,10 @@ public class CostruttoreScene {
                             contadino.setDialoghi(Arrays.asList(contadinoDb.get("richiesta").getAsString()));
                             engine.mostraDialogoNPCCallback(CostruttoreScene.this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, () -> {
                                 Runnable loopConfermaContadino = new Runnable() {
-                                    int countRifiuti = 0;
+                                    int countRifiuti = 0; // Arrivato a tot. rifiuti ripete la stessa frase
                                     JsonArray rifiutiJson = engine.getDbHint().getAsJsonObject("Loop_Rifiuti_Quest").getAsJsonArray("Contadino_Green");
                                     
+                                    // Creazione finestra insistente
                                     @Override
                                     public void run() {
                                         int scelta = JOptionPane.showConfirmDialog(engine.getFrame(), "Accetti la proposta del Contadino?", "Scelta", JOptionPane.YES_NO_OPTION);
@@ -299,7 +321,7 @@ public class CostruttoreScene {
                                 loopConfermaContadino.run();
                             });
                         } else {
-                            contadino.setDialoghi(Arrays.asList(contadinoDb.get("incomprensione").getAsString()));
+                            contadino.setDialoghi(Arrays.asList(contadinoDb.get("incomprensione").getAsString())); //Visualizzazione dialogo dove non comprende
                             engine.mostraDialogoNPCCallback(CostruttoreScene.this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, this);
                         }
                     }
@@ -335,6 +357,7 @@ public class CostruttoreScene {
         engine.getSceneManager().registraScena(CostantiMappa.PIAZZA_CENTRALE, piazzaCentrale);
     }
 
+    // Porto: David, il Pescivendolo e gli enigmi 1 e 2
     private void costruisciPorto() {
         Map<double[], Runnable> zonePorto = new HashMap<>();
 
@@ -344,9 +367,7 @@ public class CostruttoreScene {
 
         double[] davidHitbox = CostantiHitbox.PORTO_DAVID;
 
-        // Ripristina la hitbox di David con il comportamento "dopo la mappa".
-        // Viene invocata sia al caricamento di un salvataggio avanzato, sia live
-        // quando l'accusa di Eripeta porta a statoCity 11 (vedi avviaAccusaEripeta).
+        // Ripristina la hitbox di David con il comportamento post mappa
         attivaAiutiEnigma5 = () -> {
             zonePiazza.put(hitboxAb1, interazioneAb1);
             zonePiazza.put(hitboxAb3, interazioneAb3);
@@ -354,11 +375,9 @@ public class CostruttoreScene {
 
         riattivaDavidDopoMappa = () -> {
             zonePorto.put(davidHitbox, () ->
-                    flussi.gestisciDavidDopoMappa(this.portoScreen, david, spriteDavid, davidDb));
-            // Gli aiuti degli abitanti 1 e 3 si abilitano solo dopo che David annuncia
-            // l'Enigma del Vincolo (statoCity 12). A statoCity 11 (appena tornato da
-            // Eripeta) l'enigma non è ancora stato dettato, quindi niente aiuti.
-            // Qui copro il caso del salvataggio ricaricato con enigma già in corso.
+                    flussi.gestisciDavidDopoMappa(this.portoScreen, spriteDavid, davidDb));
+            /* Gli aiuti degli abitanti 1 e 3 si abilitano solo dopo che David annuncia
+            l'Enigma del Vincolo (statoCity 12), quando il player torna da Eripeta*/
             if (stato.getStato() == StatoStoria.DAVID_INTERPELLATO) {
                 attivaAiutiEnigma5.run();
             }
@@ -398,8 +417,7 @@ public class CostruttoreScene {
                 Runnable startEnigma = () -> {
                     Enigma enigma2 = IstanzaEnigma.creaEnigma2(engine.getTxt().getOggettoDaCatalogo(4));
                     engine.getStatistics().iniziaEnigma(enigma2);
-                    // Quando ricominciano a parlare (per gli aiuti dell'Enigma 2),
-                    // assegno i nuovi testi presi dal JSON e riaggiungo le hitbox così tornano cliccabili (icona mano)
+                    // Quando ricominciano a parlare (per gli aiuti dell'Enigma 2), assegno i nuovi testi presi dal JSON e riaggiungo le hitbox così tornano cliccabili (icona mano)
                     ab1.setDialoghi(Arrays.asList(enigma2.getAiuti().get(0)));
                     zonePiazza.put(hitboxAb1, () -> engine.mostraDialogoNPC(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, ab1, null));
                     
@@ -472,13 +490,13 @@ public class CostruttoreScene {
             System.err.println("Errore caricamento sfondo porto: " + e.getMessage());
         }
         GameScreen portoScreen = new GameScreen(sfondoPorto, zonePorto);
-        portoScreen.abilitaDebugCoordinate(); // disabilitato per test
         this.portoScreen = portoScreen;
         
         
         engine.getSceneManager().registraScena(CostantiMappa.PORTO, portoScreen);
     }
 
+    // Stalla: Mr. Cooper e tutta la storia delle carote
     private void costruisciStalla() {
         Map<double[], Runnable> zoneStalla = new HashMap<>();
         mrCooperInteraction = () -> {
@@ -554,6 +572,7 @@ public class CostruttoreScene {
         engine.getSceneManager().registraScena(CostantiMappa.STALLA, stallaScreen);
     }
 
+    // Bosco e Bosco Deep: Fox, l'enigma dei fiori (Enigma 3) e la raccolta dei fiori
     private void costruisciBosco() {
         Map<double[], Runnable> zoneBosco = new HashMap<>();
         JsonObject foxDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Fox");
@@ -627,7 +646,7 @@ public class CostruttoreScene {
             if (stato.getStato().getValore() < 6) {
                 ladroFox.setDialoghi(Arrays.asList(foxDb.get("incontro").getAsString()));
                 engine.mostraDialogoNPCCallback(this.boscoScreen, CostantiMappa.BOSCO, ladroFox, spriteFox, () -> {
-                    engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("reazione_furto").getAsString(), null, () -> {
+                engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("reazione_furto").getAsString(), null, () -> {
                         ladroFox.setDialoghi(Arrays.asList(foxDb.get("ricatto").getAsString()));
                         engine.mostraDialogoNPCCallback(this.boscoScreen, CostantiMappa.BOSCO, ladroFox, spriteFox, () -> {
                             engine.mostraDialogoCallback(this.boscoScreen, CostantiMappa.BOSCO, "Eryndor", eryndorFoxDb.get("reazione_inseguimento").getAsString(), null, () -> {
@@ -703,7 +722,7 @@ public class CostruttoreScene {
 
 
 
-        // Ripristino hitboxes se l'utente ha già letto il cartello / ha già un fiore ricaricando
+        // Ripristino hitbox se l'utente ha già letto il cartello / ha già un fiore ricaricandole
         if (stato.getStato() == StatoStoria.INCONTRO_FOX) {
             boolean haGiaUnFiore = engine.getGiocatore().getInventario().cercaOggetto("Fiore Rosso") != null ||
                                    engine.getGiocatore().getInventario().cercaOggetto("Fiore Blu") != null ||
@@ -716,11 +735,11 @@ public class CostruttoreScene {
             }
         }
 
-        // Hitbox Cartello
+        // Hitbox cartello
         zoneBoscoDeep.put(CostantiHitbox.BOSCODEEP_CARTELLO, () -> {
             if (stato.getStato() == StatoStoria.INCONTRO_FOX) {
                 cartelloLetto[0] = true;
-                // Aggiungiamo i fiori dinamicamente in modo che il cursore a mano si attivi solo ora
+                // Aggiungiamo i fiori dinamicamente in modo che il cursore a mano si attivi
                 zoneBoscoDeep.put(hitboxFioreBlu, () -> raccogliFiore.accept(6));
                 zoneBoscoDeep.put(hitboxFioreRosso, () -> raccogliFiore.accept(5));
                 zoneBoscoDeep.put(hitboxFioreViola, () -> raccogliFiore.accept(7));
@@ -739,17 +758,16 @@ public class CostruttoreScene {
         engine.getSceneManager().registraScena(CostantiMappa.BOSCO, boscoScreen);
         
         GameScreen boscoDeepScreen = engine.getSceneManager().creaScenaBase("BoscoINN.png", zoneBoscoDeep);
-        boscoDeepScreen.abilitaDebugCoordinate(); // disabilitato per test
         this.boscoDeepScreen = boscoDeepScreen;
         engine.getSceneManager().registraScena(CostantiMappa.BOSCO_DEEP, boscoDeepScreen);
         
         // Karundis
     }
 
+    // Karundis: due NPC di passaggio e l'accesso alla Grotta
     private void costruisciKarundis() {
-        Map<double[], Runnable> zoneKarundis = new HashMap<>(); // Dichiarato qui per poterlo usare nel callback
+        Map<double[], Runnable> zoneKarundis = new HashMap<>();
         
-        // idleDialogs è già un campo di istanza, inizializzato in inizializzaPersonaggiPrincipali()
         this.npcKarundis1 = registraNPC("Abitante 1", Arrays.asList(idleDialogs.get(0)));
         this.npcKarundis2 = registraNPC("Abitante 2", Arrays.asList(idleDialogs.get(1)));
         
@@ -808,9 +826,10 @@ public class CostruttoreScene {
         this.karundisScreen = karundisScreen;
         engine.getSceneManager().registraScena(CostantiMappa.KARUNDIS, karundisScreen);
         
-        // Grotta
+        
     }
 
+    // Grotta
     private void costruisciGrotta() {
         Map<double[], Runnable> zoneGrotta = new HashMap<>();
         final boolean[] enigma4Attivo = {false};
@@ -891,6 +910,7 @@ public class CostruttoreScene {
         // Cancello del Castello - Guardia Reale
     }
 
+    // Ingresso Palazzo: la Guardia Reale non ti fa passare senza la chiave
     private void costruisciIngressoPalazzo() {
         Map<double[], Runnable> zoneIngresso = new HashMap<>();
         JsonObject guardiaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Guardiano");
@@ -940,18 +960,18 @@ public class CostruttoreScene {
         }
         
         GameScreen ingressoScreen = engine.getSceneManager().creaScenaBase("CancelloCastello.png", zoneIngresso);
-        ingressoScreen.abilitaDebugCoordinate(); // disabilitato per test
         this.ingressoScreen = ingressoScreen;
         engine.getSceneManager().registraScena(CostantiMappa.INGRESSO_PALAZZO, ingressoScreen);
         engine.getSceneManager().registraScena(CostantiMappa.SCALE, engine.getSceneManager().creaScenaBase("ScalePalazzo.png", null));
         
-        // Cripta Eripeta
+        
     }
 
+    // Cripta: qui vive Eripeta
     private void costruisciCripta() {
         Map<double[], Runnable> zoneCripta = new HashMap<>();
         JsonObject eripetaDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Eripeta");
-        eripeta = registraNPC("Eripeta", Arrays.asList(eripetaDb.get("rifiuto").getAsString()));
+        registraNPC("Eripeta", Arrays.asList(eripetaDb.get("rifiuto").getAsString()));
         
         interazioneEripeta = () -> {
             JsonObject eryndorDb = engine.getDbStoria().getAsJsonObject("Eryndor").getAsJsonObject("Eripeta");
@@ -999,6 +1019,7 @@ public class CostruttoreScene {
         // palazzo reale principessa
     }
 
+    // Palazzo della Principessa: l'enigma finale dei vestiti e il gran finale
     private void costruisciPalazzoPrincipessa() {
         Map<double[], Runnable> zonePalazzo = new HashMap<>();
         JsonObject marienDb = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Marien");
@@ -1217,13 +1238,11 @@ public class CostruttoreScene {
         
         GameScreen palazzoScreen = engine.getSceneManager().creaScenaBase("SalaDellaPrincipessa.png", zonePalazzo);
         this.palazzoScreen = palazzoScreen;
-        
-        // Debug Coordinate per la scena
-        this.palazzoScreen.abilitaDebugCoordinate();
-        
+
         engine.getSceneManager().registraScena(CostantiMappa.PALAZZO_PRINCIPESSA, palazzoScreen);
     }
 
+    // Le schermate a tutto schermo delle lettere (iniziale, retro e finale)
     private void costruisciLettere() {
         List<String> lettera=JsonLoader.estraiLista(engine.getDbWallOfText().getAsJsonObject("Lettera"),"lettera_iniziale");
         String enigmaText = engine.getDbWallOfText().getAsJsonObject("Schermo").get("Enigma_1_Lettera").getAsString();
@@ -1253,6 +1272,7 @@ public class CostruttoreScene {
         engine.getSceneManager().registraScena(CostantiMappa.LETTERA_FINALE, this.schermataFinale);
     }
 
+    // Scarica il lavoro sporco al RegistroNPC
     private Personaggio registraNPC(String nome, List<String> dialoghi) {
         return registroNPC.registraNPC(nome, dialoghi);
     }

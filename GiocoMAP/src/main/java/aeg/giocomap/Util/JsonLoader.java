@@ -1,4 +1,3 @@
-
 package aeg.giocomap.Util;
 
 import com.google.gson.*;

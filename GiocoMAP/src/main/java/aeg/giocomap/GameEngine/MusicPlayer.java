@@ -10,7 +10,7 @@ import java.io.IOException;
  */
 public class MusicPlayer {
     /*È un oggetto della libreria javax.sound.sampled 
-     progettato appositamente per caricare in memoria file audio .wav e riprodurli
+    progettato appositamente per caricare in memoria file audio .wav e riprodurli
     */
     private Clip clip;
     private final String[] tracceAudio;
@@ -20,21 +20,20 @@ public class MusicPlayer {
     
     // Costruttore con tutte le tracce audio
     public MusicPlayer(){
-        tracceAudio = new String[3];
+        tracceAudio = new String[2];
         
         tracceAudio[0] = "/musiche/GreenlandsTitleScreen.wav"; //Ttile screen
         tracceAudio[1] = "/musiche/DEAFKEVEndTitle.wav"; // End Screen
-        //tracceAudio[2] = "daviderechemettere";
     }
     
     public void playMusic(int i){
         try{
-            //Seleziono la traccia dall'array
+            // Seleziono la traccia dall'array
             BufferedInputStream bs = new BufferedInputStream(getClass().getResourceAsStream(tracceAudio[i])); 
             // Java ha bisogno del Buffered per scorrere la canzone per intero, il resto del procedimento segue lo stile delle immagini
             AudioInputStream as = AudioSystem.getAudioInputStream(bs); // Traduce il wav nel formato leggibile java
             clip = AudioSystem.getClip();
-            clip.open(as); // Inseriamo la traccia loop dentro il lettore java
+            clip.open(as); // Inseriamo la traccia loop dentro il lettore 
             clip.loop(Clip.LOOP_CONTINUOUSLY);
             clip.start();
         }
@@ -45,7 +44,7 @@ public class MusicPlayer {
     
     public void stopMusic(){
         if(clip != null && clip.isRunning()){
-            // Deallocare le risorse quando la musica si dovrà fermare
+            // Deallocazione risorse quando la musica si dovrà fermare (appena si entra in gioco)
             clip.stop();
             clip.close();
             clip=null;

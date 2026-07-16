@@ -51,7 +51,7 @@ public class GameServer implements Runnable {
             while (running) {
                 Socket client = serverSocket.accept();
                 ClientHandler handler = new ClientHandler(client, this);
-                clientConnessi.add(handler);
+                aggiungiClient(handler);
                 new Thread(handler).start();
                 System.out.println("DEBUG: Nuovo client connesso");
             }
@@ -60,17 +60,17 @@ public class GameServer implements Runnable {
         }
     }
 
-    // verifica se il nome è disponibile
+    // Verifica se il nome è disponibile
     public synchronized boolean nomeDisponibile(String nome) {
         return !nomiConnessi.contains(nome.toLowerCase());
     }
 
-    // aggiunge il nome alla lista
+    // Aggiunge il nome alla lista
     public synchronized void aggiungiNome(String nome) {
         nomiConnessi.add(nome.toLowerCase());
     }
 
-    // rimuove il nome alla disconnessione
+    // Rimuove il nome alla disconnessione
     public synchronized void rimuoviNome(String nome) {
         nomiConnessi.remove(nome.toLowerCase());
     }
@@ -85,5 +85,10 @@ public class GameServer implements Runnable {
 
     public synchronized void rimuoviClient(ClientHandler handler) {
         clientConnessi.remove(handler);
+    }
+
+    // Aggiunge un client alla lista dei connessi
+    public synchronized void aggiungiClient(ClientHandler handler) {
+        clientConnessi.add(handler);
     }
 }

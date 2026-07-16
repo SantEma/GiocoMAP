@@ -24,7 +24,7 @@ public class ProgressioneStoria {
         costruttore.costruisciScene();
     }
 
-    // stato di avanzamento della fase città (per salvataggio/caricamento)
+    // Stato di avanzamento della fase città (per salvataggio/caricamento)
     public int getStatoCity() {
         return stato.getStatoCity();
     }

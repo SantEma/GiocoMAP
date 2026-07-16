@@ -16,7 +16,7 @@ public class RegistroNPC {
     private final Map<String, Personaggio> registro = new HashMap<>();
 
     /**
-     * Crea un Personaggio con i dialoghi indicati, lo registra e lo restituisce.
+     * Creazione personaggio con nome e dialoghi
      */
     public Personaggio registraNPC(String nome, List<String> dialoghi) {
         Personaggio pg = new Personaggio(nome);
@@ -25,10 +25,8 @@ public class RegistroNPC {
         return pg;
     }
 
-    /**
-     * Crea un Fantoccio con i dialoghi indicati, lo registra sotto la chiave
-     * data e lo restituisce.
-     */
+    //Creazione fantoccio con i dialoghi indicati, lo registra sotto la chiave data e lo restituisce
+     
     public Fantoccio registraFantoccio(String chiaveRegistro, List<String> dialoghi) {
         Fantoccio f = new Fantoccio();
         f.setDialoghi(dialoghi);

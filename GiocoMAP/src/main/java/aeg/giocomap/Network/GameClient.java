@@ -38,16 +38,16 @@ public class GameClient {
             output = new PrintWriter(socket.getOutputStream(), true);
             connesso = true;
 
-            // avvia thread ricezione
+            // Avvia thread ricezione
             threadRicezione = new ThreadRicezione(socket);
             new Thread(getThreadRicezione()).start();
 
-            // manda JOIN
+            // Manda "Joined" in chat
             invia(new Message(TipoMessaggio.JOIN, getNomeGiocatore(), "entrato"));
             System.out.println("DEBUG: Connesso al server " + host);
             return true;
         } catch (IOException e) {
-            System.err.println("DEBUG: Server non trovato → " + e.getMessage());
+            System.err.println("DEBUG: Server non trovato : " + e.getMessage());
             connesso = false;
             return false;
         }

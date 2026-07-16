@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
-import aeg.giocomap.View.CoordinateDebuggable;
-
 /**
  *
  * @author andrea
@@ -31,11 +29,7 @@ public class CursorUtil {
     /**
      * Registra zone cliccabili responsive su un pannello con sfondo grafico.
      *
-     * Le zone sono definite in percentuale rispetto alle dimensioni del pannello
-     * o all'area dell'immagine (se il pannello implementa CoordinateDebuggable).
-     *
-     * Le percentuali si ricavano abilitando il Metodo Debug a runtime, 
-     * chiamando semplicemente abilitaDebugCoordinate() sul pannello se implementa l'interfaccia.
+     * Le zone sono definite in percentuale rispetto alle dimensioni del pannello.
      *
      * @param panel  il pannello su cui registrare le zone
      * @param zone   mappa che associa {xPerc, yPerc, wPerc, hPerc} alla sua azione
@@ -45,13 +39,8 @@ public class CursorUtil {
         panel.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                Rectangle area;
-                if (panel instanceof CoordinateDebuggable) {
-                    area = ((CoordinateDebuggable) panel).getAreaImmagine(panel.getWidth(), panel.getHeight());
-                } else {
-                    area = new Rectangle(0, 0, panel.getWidth(), panel.getHeight());
-                }
-                                 
+                Rectangle area = new Rectangle(0, 0, panel.getWidth(), panel.getHeight());
+
                 boolean sopra = false;
 
                 for (double[] perc : zone.keySet()) {
@@ -73,12 +62,7 @@ public class CursorUtil {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Rectangle area;
-                if (panel instanceof CoordinateDebuggable) {
-                    area = ((CoordinateDebuggable) panel).getAreaImmagine(panel.getWidth(), panel.getHeight());
-                } else {
-                    area = new Rectangle(0, 0, panel.getWidth(), panel.getHeight());
-                }
+                Rectangle area = new Rectangle(0, 0, panel.getWidth(), panel.getHeight());
 
                 List<Runnable> actionsToRun = new ArrayList<>();
                 for (Map.Entry<double[], Runnable> entry : zone.entrySet()) {

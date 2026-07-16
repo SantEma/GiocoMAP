@@ -5,7 +5,7 @@ package aeg.giocomap.Network;
  * @author giulio
  */
 public class MessageParser {
-    // definisco un separatore
+    // Separatore dei messaggi
     private static final String SEP = "|";
 
     // converte Message in stringa da mandare sul socket
@@ -14,7 +14,7 @@ public class MessageParser {
         return m.getTipo() + SEP + m.getMittente() + SEP + m.getContenuto();
     }
 
-    // converte  una stringa ricevuta dal socket in Message
+    // Converte una stringa ricevuta dal socket in Message
     public static Message deserializza(String raw) {
         try {
             String[] parti = raw.split("\\|", 3);

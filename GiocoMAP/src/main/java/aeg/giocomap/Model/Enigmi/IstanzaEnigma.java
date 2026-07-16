@@ -42,7 +42,7 @@ public class IstanzaEnigma {
         return Arrays.asList(ops);
     }
 
-    // Metodo privato per caricare la lista dei vestiti (o l'ordine corretto) dell'enigma ad ordinamento
+    // Metodo privato per caricare la lista dei vestiti (o l'ordine corretto) dell'enigma dei vestiti finale
     private static List<String> caricaListaVestiti(String enigmaId, String campo) {
         JsonObject root = JsonLoader.caricaJson("/dialoghi/dialoghi_hint.json");
         if (root == null) return Collections.emptyList();
@@ -59,7 +59,7 @@ public class IstanzaEnigma {
         return Arrays.asList(valori);
     }
 
-    // Metodo privato per caricare il testo dal file walloftext
+    // Serve per caricare il testo dal wall of text
     private static String caricaTesto(String chiave) {
         JsonObject root = JsonLoader.caricaJson("/dialoghi/walloftext.json");
         if (root == null) return "";
@@ -68,70 +68,35 @@ public class IstanzaEnigma {
         return JsonLoader.estraiStringa(schermo, chiave);
     }
 
+    /*
+        Creazione di ogni singolo enigma presente nel gioco l'istanza di un enigma specificco del gioco, 
+        assemblando testo, aiuti/opzioni e ricompensa
+    */
     public static EnigmaTestuale creaEnigma1(Oggetto reward) {
-        return new EnigmaTestuale(
-            "Enigma_1_Porto",
-            caricaTesto("Enigma_1_Lettera"),
-            caricaAiuti("Enigma_1_Porto"),
-            reward,
-            "porto"
-        );
+        return new EnigmaTestuale("Enigma_1_Porto", caricaTesto("Enigma_1_Lettera"), caricaAiuti("Enigma_1_Porto"), reward, "porto");
     }
 
     public static EnigmaTestuale creaEnigma2(Oggetto reward) {
-        return new EnigmaTestuale(
-            "Enigma_2_Germi",
-            caricaTesto("Enigma_2_Germi"),
-            caricaAiuti("Enigma_2_Germi"),
-            reward,
-            "59"
-        );
+        return new EnigmaTestuale("Enigma_2_Germi", caricaTesto("Enigma_2_Germi"), caricaAiuti("Enigma_2_Germi"), reward, "59");
     }
 
     public static EnigmaSceltaMultipla creaEnigma3(Oggetto reward) {
         List<String> opzioni = caricaOpzioni("Enigma_3_Fiori");
-        return new EnigmaSceltaMultipla(
-            "Enigma_3_Fiori",
-            caricaTesto("Cartello_Esploratori"),
-            caricaAiuti("Enigma_3_Fiori"),
-            reward,
-            opzioni,
-            2
-        );
+        return new EnigmaSceltaMultipla("Enigma_3_Fiori", caricaTesto("Cartello_Esploratori"), caricaAiuti("Enigma_3_Fiori"), reward, opzioni, 2);
     }
 
     public static EnigmaTestuale creaEnigma4(Oggetto reward) {
-        return new EnigmaTestuale(
-            "Enigma_4_Orologio",
-            caricaTesto("Enigma_4_Orologio"),
-            caricaAiuti("Enigma_4_Orologio_Fucina"),
-            reward,
-            "10"
-        );
+        return new EnigmaTestuale("Enigma_4_Orologio", caricaTesto("Enigma_4_Orologio"), caricaAiuti("Enigma_4_Orologio_Fucina"), reward, "10");
     }
 
     public static EnigmaSceltaMultipla creaEnigma5(Oggetto reward) {
         List<String> opzioni = caricaOpzioni("Enigma_5_Vincolo");
-        return new EnigmaSceltaMultipla(
-            "Enigma_5_Vincolo",
-            caricaTesto("Enigma_5_Vincolo") + "\n" + caricaTesto("Enigma_5_Vincolo_domanda"),
-            caricaAiuti("Enigma_5_Vincolo"),
-            reward,
-            opzioni,
-            0
-        );
+        return new EnigmaSceltaMultipla("Enigma_5_Vincolo", caricaTesto("Enigma_5_Vincolo") + "\n" + caricaTesto("Enigma_5_Vincolo_domanda"), caricaAiuti("Enigma_5_Vincolo"), reward, opzioni, 0);
     }
 
     public static EnigmaOrdinamento creaEnigmaFinale(Oggetto reward) {
         List<String> vestiti = caricaListaVestiti("Enigma_Finale_Principessa", "vestiti");
         List<String> ordineCorretto = caricaListaVestiti("Enigma_Finale_Principessa", "ordine_corretto");
-        return new EnigmaOrdinamento(
-            "Enigma_Finale_Principessa",
-            caricaTesto("Enigma_Finale_Principessa"),
-            caricaAiuti("Enigma_Finale_Mercanti_Collaborano"),
-            reward,
-            vestiti,
-            ordineCorretto
-        );
+        return new EnigmaOrdinamento("Enigma_Finale_Principessa","", caricaAiuti("Enigma_Finale_Mercanti_Collaborano"), reward, vestiti, ordineCorretto);
     }
 }

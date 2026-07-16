@@ -20,7 +20,7 @@ public class EnigmaTestuale extends Enigma {
     public boolean verifica(String risposta) {
         if (risposta == null) return false;
 
-        /* Pulizia input con Regex, praticamente rimuove spazi extra e 
+        /* Pulizia input con regex, praticamente rimuove spazi extra e 
            converte in minuscolo
         */
         String pulita = risposta.trim().toLowerCase().replaceAll("\\s+", " ");

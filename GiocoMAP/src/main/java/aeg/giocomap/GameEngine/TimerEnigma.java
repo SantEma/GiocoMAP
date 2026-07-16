@@ -12,7 +12,7 @@ public class TimerEnigma {
     private int secondiFinali;
     private boolean attivo;
 
-    // usato solo per l'azione periodica di debug, eseguita sull'EDT
+    // Da usare solo per l'azione periodica di debug
     private final Timer tickTimer;
 
     public TimerEnigma(Runnable onTick) {
@@ -27,7 +27,7 @@ public class TimerEnigma {
         return attivo;
     }
 
-    // Secondi trascorsi: calcolati in tempo reale mentre e' attivo,
+    // Secondi trascors, calcolati in tempo reale mentre e' attivo,
     // oppure il valore finale congelato dopo ferma()
     public int getSecondi() {
         if (isAttivo()) {

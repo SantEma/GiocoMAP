@@ -12,7 +12,7 @@ public class GameStatistics {
 
     private int punteggioTotale = 0;
     private TimerEnigma timerEnigma;
-    private String enigmaCorrenteId;   // id dell'enigma attualmente cronometrato
+    private String enigmaCorrenteId;   // ID dell'enigma attualmente cronometrato
 
     private final MainFrame frame;
     private final Giocatore giocatore;
@@ -28,11 +28,15 @@ public class GameStatistics {
         this.sceneManager = sceneManager;
     }
 
+    // Azzera il punteggio accumulato post scena crediti
+    public void resetPunteggio() {
+        punteggioTotale = 0;
+    }
+
     public void iniziaEnigma(Enigma enigma) {
         String id = (enigma != null) ? enigma.getId() : null;
 
-        // se sto gia' cronometrando LO STESSO enigma non ancora risolto,
-        // NON resetto il timer (evita che ri-cliccando l'NPC riparta il tempo)
+        // Se sto già cronometrando LO STESSO enigma non ancora risolto, NON resetto il timer (evita che ri-cliccando l'NPC riparta il tempo)
         if (timerEnigma != null && timerEnigma.isAttivo()
                 && id != null && id.equals(enigmaCorrenteId)) {
             System.out.println("DEBUG: Timer gia' attivo per " + id + ", non resetto");
@@ -50,7 +54,7 @@ public class GameStatistics {
     }
 
     public void enigmaRisolto(Enigma enigma) {
-        // registro l'enigma come risolto (per il salvataggio / no-redo)
+        // Registro l'enigma come risolto 
         if (enigma != null) giocatore.aggiungiEnigmaRisolto(enigma.getId());
 
         if (timerEnigma != null) timerEnigma.ferma();
@@ -67,6 +71,7 @@ public class GameStatistics {
         System.out.println("DEBUG: " + secondi + "s, " + punti + " punti, totale: " + punteggioTotale);
     }
 
+    // Calcolo dei punti in base ai secondi passati dalla prima interazione con NPC
     private int calcolaPunti(int secondi) {
         int fascia;
         if (secondi <= 100)      fascia = 1;
@@ -111,8 +116,8 @@ public class GameStatistics {
         music_player.stopMusic();
         if (fineGioco) music_player.playMusic(MusicPlayer.END_TITLE_MUSIC);
 
-        // dal menu (fineGioco=false) mostro solo la Hall of Fame;
-        // a fine partita (fineGioco=true) i titoli di coda completi
+        // Dal menu (fineGioco=false) mostro solo la Hall of Fame;
+        // A fine partita (fineGioco=true) i titoli di coda completi
         TitoliDiCoda titoli = new TitoliDiCoda(records, punteggio, nome_passato, !fineGioco);
 
         Runnable tornaAlMenu = () -> {

@@ -80,7 +80,7 @@ public class GameEngine {
 
         sceneManager.registraScena("MAPPA", new MappaPanel(sceneManager));
 
-        this.giocatore = new Giocatore("Eryndor");
+        this.giocatore = new Giocatore();
 
         Oggetto tessutoIniziale_temp = txt.getOggettoDaCatalogo(1);
         if (tessutoIniziale_temp != null)
@@ -168,6 +168,7 @@ public class GameEngine {
     }
 
     private void avviaGioco(boolean carica) {
+        statistics.resetPunteggio();
         String[] salvataggio = db.loadGame();
 
         if (carica) {
@@ -193,7 +194,7 @@ public class GameEngine {
                 getGiocatore().setEnigmiRisolti(Arrays.asList(enigmiStr.split(",")));
             }
 
-            // Ricostruzione Dinamica dell'Inventario
+            // Ricostruzione dinamica dell'inventario
             getGiocatore().getInventario().getListaOggetti().clear(); // Svuoto l'inventario dai default
             if (salvataggio.length > 4 && salvataggio[4] != null && !salvataggio[4].isEmpty()) {
                 String inventarioStr = salvataggio[4];
@@ -210,8 +211,7 @@ public class GameEngine {
                 }
             }
 
-            // Ripristino la carica della Spada Sincro, persistita a parte perché
-            // l'inventario salva solo gli ID e non lo stato interno degli oggetti
+            // Ripristino carica della Spada Sincro, siccome non viene salvata con l'ID degli oggetti
             if (salvataggio.length > 6 && salvataggio[6] != null) {
                 try {
                     int caricaSpada = Integer.parseInt(salvataggio[6].trim());
@@ -238,7 +238,7 @@ public class GameEngine {
             return;
         }
 
-        // NUOVA PARTITA: Reset completo dello stato
+        // Reset completo dello stato a nuova partita
         progression.setStatoCity(0);
         progression.setPrimoAccessoPalazzo(true);
         progression.setParlatoConGuardia(false);
@@ -246,9 +246,8 @@ public class GameEngine {
         getGiocatore().setPossiedeMappa(false);
         getGiocatore().setEnigmiRisolti(new ArrayList<>());
         getGiocatore().getInventario().getListaOggetti().clear();
-        // Azzero la carica della Spada Sincro nel catalogo (istanza condivisa): evita
-        // che una partita precedente nella stessa sessione lasci una carica residua
         Oggetto spadaCatalogo = getTxt().getOggettoDaCatalogo(10);
+        
         if (spadaCatalogo instanceof Spada spada) {
             spada.setCaricaSincro(0);
         }
@@ -547,8 +546,7 @@ public class GameEngine {
         int caricaSpada = 0;
         for (Oggetto o : getGiocatore().getInventario().getListaOggetti()) {
             invIds.add(String.valueOf(o.getIdOggetto()));
-            // Gli oggetti sono serializzati solo per ID: salvo a parte lo stato
-            // interno della Spada Sincro (la sua carica), altrimenti andrebbe perso
+            // Gli oggetti sono serializzati solo per ID, quindi la carica la salviamo separatamente
             if (o instanceof Spada spada) {
                 caricaSpada = spada.getCaricaSincro();
             }

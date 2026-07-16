@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @author andrea
  */
-public class GameScreen extends JPanel implements CoordinateDebuggable {
+public class GameScreen extends JPanel {
     private BufferedImage immagine;
 
     public GameScreen(BufferedImage sfondo, Map<double[],Runnable> zoneCliccabili) {
@@ -21,7 +21,6 @@ public class GameScreen extends JPanel implements CoordinateDebuggable {
             CursorUtil.registraZone(this, zoneCliccabili);
     }
 
-    @Override
     public JPanel getPanel() {
         return this;
     }

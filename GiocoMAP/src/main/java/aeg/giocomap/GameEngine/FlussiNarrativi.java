@@ -1,7 +1,6 @@
 package aeg.giocomap.GameEngine;
 
 import aeg.giocomap.Model.Oggetti.Oggetto;
-import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.Util.Parser;
 import aeg.giocomap.Model.Enigmi.EnigmaSceltaMultipla;
@@ -22,16 +21,19 @@ public class FlussiNarrativi {
     private final StatoProgressione stato;
     private final CostruttoreScene costruttore;
 
+    // Costruttore, prende i riferimenti da CostruttoreScene e amici
     public FlussiNarrativi(GameEngine engine, StatoProgressione stato, CostruttoreScene costruttore) {
         this.engine = engine;
         this.stato = stato;
         this.costruttore = costruttore;
     }
 
+    // Setter dello statoCity
     private void setStatoCity(int valore) {
         stato.setStatoCity(valore);
     }
 
+    // Eripeta blocca Eryndor sulle scale e si presenta, prima di accusarlo
     void avviaIntercettazioneEripeta() {
         GameScreen scale = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.SCALE);
         ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
@@ -79,6 +81,7 @@ public class FlussiNarrativi {
         engine.mostraDialogoCallback(scale, CostantiMappa.SCALE, "Eripeta", txt1, spriteEripeta, step2);
     }
 
+    // L'accusa di Eripeta nella Cripta: visione, difesa, sfida e indizio finale
     private void avviaAccusaEripeta() {
         GameScreen cripta = (GameScreen) engine.getSceneManager().getScena(CostantiMappa.CRIPTA_ERIPETA);
         ImageIcon spriteEripeta = new ImageIcon(getClass().getResource("/sprites/Personaggi/Eripeta.png"));
@@ -102,7 +105,7 @@ public class FlussiNarrativi {
         Runnable step9 = () -> {
             engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", txt5_3, spriteEripeta, () -> {
                 setStatoCity(11);
-                // David torna interpellabile al Porto (mandato da Eripeta): ne riattivo la hitbox
+                // David torna interpellabile al porto con la sua hitbox
                 Runnable riattiva = costruttore.getRiattivaDavidDopoMappa();
                 if (riattiva != null) riattiva.run();
                 engine.getSceneManager().mostraScena(CostantiMappa.SCALE);
@@ -136,20 +139,20 @@ public class FlussiNarrativi {
         engine.mostraDialogoCallback(cripta, CostantiMappa.CRIPTA_ERIPETA, "Eripeta", txt1_1, spriteEripeta, step3);
     }
 
-    void gestisciDavidDopoMappa(GameScreen portoScreen, Personaggio david, ImageIcon spriteDavid, JsonObject davidDb) {
+    // David al Porto dopo la mappa: cosa dice dipende da a che punto siamo nella storia
+    void gestisciDavidDopoMappa(GameScreen portoScreen, ImageIcon spriteDavid, JsonObject davidDb) {
         if (stato.getStato() == StatoStoria.ACCUSA_ERIPETA_SUPERATA) {
             String ritorno1 = davidDb.get("ritorno_1").getAsString();
             engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", ritorno1, spriteDavid, () -> {
                 String input = JOptionPane.showInputDialog(engine.getFrame(), "Cosa rispondi a David?");
                 if (input == null || input.trim().isEmpty()) return;
 
-                // Usiamo contieneParolaChiave anziché contieneRadiceParola con wildcard
-                // perché "Eripeta" è un nome proprio e non necessita di declinazioni (es. singolare/plurale)
+
                 if (Parser.contieneParolaChiave(input, "Eripeta")) {
                     setStatoCity(12);
                     String ritorno2 = davidDb.get("ritorno_2").getAsString();
                     engine.mostraDialogoCallback(portoScreen, CostantiMappa.PORTO, "David", ritorno2, spriteDavid, () -> {
-                        lanciaEnigma5(portoScreen, david, spriteDavid, davidDb);
+                        lanciaEnigma5(portoScreen, spriteDavid, davidDb);
                     });
                 } else {
                     String incomprensione = engine.getDbStoria().getAsJsonObject("Dialoghi_NPC").getAsJsonObject("Contadino_Green").get("incomprensione").getAsString();
@@ -157,7 +160,7 @@ public class FlussiNarrativi {
                 }
             });
         } else if (stato.getStato() == StatoStoria.DAVID_INTERPELLATO) {
-            lanciaEnigma5(portoScreen, david, spriteDavid, davidDb);
+            lanciaEnigma5(portoScreen, spriteDavid, davidDb);
         } else if (stato.getStato() == StatoStoria.ENIGMA_VINCOLO_RISOLTO) {
             mostraStoriaEripeta(portoScreen, spriteDavid, davidDb);
         } else {
@@ -166,13 +169,13 @@ public class FlussiNarrativi {
         }
     }
 
-    private void lanciaEnigma5(GameScreen portoScreen, Personaggio david, ImageIcon spriteDavid, JsonObject davidDb) {
+    // Si parte con l'Enigma del Vincolo: testo e loop di risposta
+    private void lanciaEnigma5(GameScreen portoScreen, ImageIcon spriteDavid, JsonObject davidDb) {
         Oggetto reward = engine.getTxt().getOggettoDaCatalogo(9);
         EnigmaSceltaMultipla enigma5 = IstanzaEnigma.creaEnigma5(reward);
         engine.getStatistics().iniziaEnigma(enigma5);
 
-        // David sta annunciando l'Enigma del Vincolo: da ora gli abitanti 1 e 3 in
-        // Piazza possono dare i relativi aiuti (se esci dalla risposta per cercarli)
+        // Appena David annuncia l'enigma di Eripeta gli NPC danno i reward
         Runnable attiva = costruttore.getAttivaAiutiEnigma5();
         if (attiva != null) attiva.run();
 
@@ -218,8 +221,7 @@ public class FlussiNarrativi {
         });
     }
 
-    // Esito della risoluzione dell'Enigma 5: David espone prima la soluzione del Vincolo
-    // (divisa in due pannelli perché lunga) e poi racconta la storia di Eripeta.
+    // Esito della risoluzione dell'enigma 5, ossia David espone prima la soluzione del vincolo e poi racconta la storia di Eripeta
     private void mostraEsitoEnigma5(GameScreen portoScreen, ImageIcon spriteDavid, JsonObject davidDb) {
         String soluzione1 = davidDb.get("soluzione_enigma_1").getAsString();
         String soluzione2 = davidDb.get("soluzione_enigma_2").getAsString();
@@ -230,8 +232,7 @@ public class FlussiNarrativi {
                     mostraStoriaEripeta(portoScreen, spriteDavid, davidDb))));
     }
 
-    // Il racconto di David sulla storia di Eripeta è lungo: lo mostro in due pannelli
-    // di dialogo consecutivi per non farlo apparire tagliato a schermo.
+    // Vengono creati due pannelli per poter tagliare il dialogo
     private void mostraStoriaEripeta(GameScreen portoScreen, ImageIcon spriteDavid, JsonObject davidDb) {
         String parte1 = davidDb.get("storia_eripeta_1").getAsString();
         String parte2 = davidDb.get("storia_eripeta_2").getAsString();

@@ -9,7 +9,7 @@ package aeg.giocomap.GameEngine;
     Queste costanti sono (ovviamente) utili per 2 motivi:
     1. Non bisogna ricordarsi come abbiamo chiamato le variabili tra tutte 
     le varie classi, semplificandoci il lavoro di un sacco
-    2. Se si volesse espandere il codice rende MOLTO tutto più facile.
+    2. Se si volesse espandere il codice rende tutto MOLTO più facile.
     
     Si poteva fare di meglio? Assolutamente. Avevamo voglia? No
 */

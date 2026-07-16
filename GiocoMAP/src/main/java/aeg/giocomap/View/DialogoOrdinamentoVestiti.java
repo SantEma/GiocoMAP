@@ -37,7 +37,7 @@ public class DialogoOrdinamentoVestiti extends JDialog {
         setLayout(new BorderLayout(10, 10));
         getContentPane().setBackground(Color.DARK_GRAY);
 
-        // Come i JOptionPane usati altrove nel gioco, ESC chiude il popup senza obbligare a completarlo
+        //ESC chiude il popup senza obbligare a completarlo
         JComponent radice = getRootPane();
         radice.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "chiudiPopup");
         radice.getActionMap().put("chiudiPopup", new AbstractAction() {
@@ -95,6 +95,7 @@ public class DialogoOrdinamentoVestiti extends JDialog {
         slot.setBackground(coloreVestito(vestito));
     }
 
+    // Toglie il vestito 
     public void disabilitaVestito(String vestito) {
         JButton bottone = bottoniVestiti.get(vestito);
         if (bottone != null) bottone.setEnabled(false);

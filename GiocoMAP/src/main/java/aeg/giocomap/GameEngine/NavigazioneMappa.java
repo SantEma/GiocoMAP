@@ -3,7 +3,6 @@ package aeg.giocomap.GameEngine;
 import aeg.giocomap.Model.Stanza.Stanza;
 import aeg.giocomap.Model.Personaggi.Personaggio;
 import aeg.giocomap.Model.Personaggi.Fantoccio;
-import aeg.giocomap.Model.Stanza.Stanza;
 import aeg.giocomap.View.GameScreen;
 import aeg.giocomap.Util.JsonLoader;
 
@@ -25,12 +24,13 @@ public class NavigazioneMappa {
     private final RegistroNPC registroNPC;
     private final CostruttoreScene costruttore;
 
-    // Struttura dati per astrarre la logica dei percorsi (routing table)
+    // Struttura dati per astrarre la logica dei percorsi
     private final Map<String, Map<String, Runnable>> collegamentiMappa = new HashMap<>();
 
-    // Mappa per le Stanze (routing standard)
+    // Mappa per le stanze 
     private final Map<String, Stanza> mappaStanze = new HashMap<>();
 
+    // Salva i riferimenti principali usati per la navigazione
     public NavigazioneMappa(GameEngine engine, StatoProgressione stato,
                             RegistroNPC registroNPC, CostruttoreScene costruttore) {
         this.engine = engine;
@@ -39,10 +39,12 @@ public class NavigazioneMappa {
         this.costruttore = costruttore;
     }
 
+    // Recupera la stanza corrispondente, creandola se non esiste ancora
     private Stanza getOrCreaStanza(String nome) {
         return mappaStanze.computeIfAbsent(nome, n -> new Stanza(n));
     }
 
+    // Direzioni delle frecce, 
     public void impostaFrecceLogica() {
         inizializzaRoot();
 
@@ -54,6 +56,7 @@ public class NavigazioneMappa {
         );
     }
 
+    // Registra tutti i collegamenti tra le scene della mappa
     private void inizializzaRoot() {
         registraCollegamentoSemplice(CostantiMappa.PIAZZA_CENTRALE, CostantiMappa.NORD, CostantiMappa.PORTO);
         registraCollegamentoSemplice(CostantiMappa.PORTO, CostantiMappa.SUD, CostantiMappa.PIAZZA_CENTRALE);
@@ -199,16 +202,19 @@ public class NavigazioneMappa {
         registraCollegamentoSemplice(CostantiMappa.CRIPTA_ERIPETA, CostantiMappa.EST, CostantiMappa.SCALE);
     }
 
+    // Collegamento con logica condizionale (dialoghi, controlli sullo stato, ecc.)
     private void registraCollegamento(String daScena, String direzione, Runnable azione) {
         collegamentiMappa.computeIfAbsent(daScena, k -> new HashMap<>()).put(direzione, azione);
     }
 
+    // Collegamento diretto tra due stanze, senza condizioni particolari
     private void registraCollegamentoSemplice(String daScena, String direzione, String aScena) {
         Stanza da = getOrCreaStanza(daScena);
         Stanza a = getOrCreaStanza(aScena);
         da.impostaUscita(direzione, a);
     }
 
+    // Gestisce lo spostamento quando il giocatore preme una freccia direzionale
     private void eseguiCollegamento(String direzione) {
         String scena = engine.getSceneManager().getScenaCorrente();
         if (scena == null) return;
@@ -218,10 +224,10 @@ public class NavigazioneMappa {
 
         Map<String, Runnable> usciteSpeciali = collegamentiMappa.get(scena);
         if (usciteSpeciali != null && usciteSpeciali.containsKey(direzione)) {
-            // Usa la logica custom/condizionale
+            // Usa la logica custom/condizionale per la direzione
             usciteSpeciali.get(direzione).run();
         } else {
-            // Usa la classe Stanza per il routing standard
+            // Usa la classe stanza per il routing tra queste ultime
             Stanza adiacente = stanzaCorrente.getStanzaAdiacente(direzione);
             if (adiacente != null) {
                 engine.getSceneManager().mostraScena(adiacente.getNome());

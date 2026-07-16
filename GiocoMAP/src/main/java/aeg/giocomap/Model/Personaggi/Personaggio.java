@@ -23,7 +23,7 @@ public class Personaggio extends Entity {
         this.indiceDialogoAttuale=0;
     }
     
-    // Restituisce la battuta del PG e se ha finito da null
+    // Restituisce la battuta del personaggi, se ha finito da null
     public String parla() {
         if (alberoDialoghi==null || alberoDialoghi.isEmpty() || indiceDialogoAttuale>=alberoDialoghi.size()) {
             return null; 

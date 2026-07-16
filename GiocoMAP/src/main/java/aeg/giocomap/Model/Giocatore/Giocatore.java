@@ -11,18 +11,16 @@ import java.util.Collection;
  * @author emanuele
  */
 public class Giocatore {
-    private final String nome_lore;
     private String nome_player;
     private Inventario<Oggetto> inventario;
     private boolean possiedeInventario;
     private boolean possiedeMappa;
 
-    // id degli enigmi gia' risolti (per non rifarli al ricaricamento)
+    // ID degli enigmi gia' risolti (per non rifarli al ricaricamento)
     private final Set<String> enigmiRisolti = new HashSet<>();
 
-    public Giocatore(String nome){
-        this.nome_lore=nome;
-        this.nome_player="";// Inizialmente vuoto poi il player lo inserirà come sta in "Statistiche"
+    public Giocatore(){
+        this.nome_player="";// Inizialmente vuoto poi il player lo inserirà come sta nelle stats
         this.possiedeInventario=false; // Non ancora ottenuto quando lo si crea
         this.possiedeMappa=false; // Non ha ancora la mappa all'inizio
     }
@@ -34,10 +32,7 @@ public class Giocatore {
         }
     }
 
-    // Fa avanzare di uno step la sincronia della Spada Sincro, se posseduta.
-    // La ricarica è un evento narrativo esplicito (ottenimento della spada,
-    // consegna dell'ampolla a Eripeta, enigma finale), non un effetto automatico
-    // di ogni enigma risolto.
+    // Fa avanzare di uno step la sincronia della Spada Sincro, se posseduta
     public void ricaricaSpadaSincro(){
         Oggetto spada = getInventario().cercaOggetto("Spada Sincro");
         if (spada instanceof Spada spadas) {
@@ -53,17 +48,17 @@ public class Giocatore {
         return enigmiRisolti;
     }
 
-    // ripristina l'insieme degli enigmi risolti (usato in caricamento)
+    // Ripristina l'insieme degli enigmi risolti (usato al caricamento di una partita)
     public void setEnigmiRisolti(Collection<String> ids){
         enigmiRisolti.clear();
         if (ids != null) enigmiRisolti.addAll(ids);
     }
     
     public Inventario<Oggetto> getInventario(){
-        // creamo l'inventario solo alla prima chiamata
+        //Ccreamo l'inventario solo alla prima chiamata
         if(this.inventario==null) this.inventario=new Inventario<>();
         
-        return this.inventario; // se non esiste da questo inventario perché non ha ancora quello esistente
+        return this.inventario;
     }
     
     public boolean isPossiedeInventario(){
@@ -86,7 +81,7 @@ public class Giocatore {
         return possiedeMappa;
     }
     
-    // facendo così andiamo ad agevolare il salvataggio
+    // Facendo così andiamo ad agevolare il salvataggio della mappa
     public void setPossiedeMappa(boolean possiedeMappa){
         this.possiedeMappa=possiedeMappa;
     }

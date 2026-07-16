@@ -34,7 +34,7 @@ public class Parser {
     }
 
     /*
-     * Controlla se l'input contiene una parola che corrisponde al pattern con wildcard
+     * Controllo input con pattern wildcard
      */
     public static boolean contieneRadiceParola(String input, String pattern) {
         if (input == null || pattern == null) return false;
