@@ -4,8 +4,14 @@ Il progetto è stato presentato dal gruppo **AEG**  per l'**esame di Metodi Avan
 - **Andrea Milo**
 - **Emanuele Santoruvo**
 - **Giulio Murgo**
+# Indice
+1. [[#Descrizione dell’avventura]]  
+2. [[#Progettazione]]
+	 2.1 [[#Diagramma delle classi]]
+	 2.2 [[#Specifica algebrica]]
+	 2.3 [[#Dettagli implementativi]]
+3. [[#Informazioni sul lavoro di gruppo e sul progetto]]
 # Descrizione dell’avventura
-
 L’avventura consiste nella storia del protagonista **Eryndor**, mercante di tessuti alla ricerca di un titolo nobiliare.
 
 Nel regno si dovranno svolgere le nozze della **Principessa Marien**, ed il Re del regno è alla ricerca del **tessuto** perfetto per il matrimonio.
@@ -16,7 +22,6 @@ Avventuratevi e scoprite se il nostro protagonista riuscirà a raggiungere il su
 
 Per consultare la **trama completa nel suo sviluppo** e visualizzare gli **enigmi con la loro soluzione** e spiegazione matematica, visualizzare il file [**Trama.md**](Idee%20trama/Trama.md)
 # Progettazione
-
 Le classi sono state individuate a partire da un'analisi del **dominio del problema** e dei **casi d'uso** del gioco.
 
 Ad ogni classe è stato assegnato il principio della **singola responsabilità (SRP)**: ogni classe è stata pensata per avere una sola ragione di cambiamento. Da qui la scelta di separare, ad esempio, la logica di un enigma (`Enigma`) dalla sua rappresentazione grafica (`DialogueScreen`, `DialogoOrdinamentoVestiti`) e dalla sua persistenza (`ModelDB`).
@@ -37,162 +42,117 @@ L'applicazione è strutturata secondo il pattern architetturale **MVC (Model–V
 
 Il **Model** è ulteriormente scomposto per area di responsabilità:
 
-- `Model.Enigmi` — `Enigma`, `EnigmaTestuale`, `EnigmaSceltaMultipla`, `EnigmaOrdinamento`, `IstanzaEnigma`
-- `Model.Giocatore` — `Giocatore`, `Inventario`
-- `Model.Oggetti` — `Oggetto`, `Spada`, `GiveObject`
-- `Model.Personaggi` — `Entity`, `Personaggio`, `Fantoccio`
-- `Model.Stanza` — `Stanza`
-- `Model.Storage` — `ModelDB`, `ModelTXTOggetti`
+- `Model.Enigmi`: `Enigma`, `EnigmaTestuale`, `EnigmaSceltaMultipla`, `EnigmaOrdinamento`, `IstanzaEnigma`
+- `Model.Giocatore` : `Giocatore`, `Inventario`
+- `Model.Oggetti` : `Oggetto`, `Spada`, `GiveObject`
+- `Model.Personaggi` : `Entity`, `Personaggio`, `Fantoccio`
+- `Model.Stanza` : `Stanza`
+- `Model.Storage` : `ModelDB`, `ModelTXTOggetti`
 
 L'idea base è stata quella di massimizzare la **coesione interna**  e minimizzare l'**accoppiamento tra package**. Le dipendenze fluiscono coerentemente con MVC: la View non conosce il Model se non attraverso il Controller; il `GameEngine` (Controller) coordina Model e View; il Model non dipende né dalla View né dal Controller.
 
 #### Controller — `aeg.giocomap.GameEngine`
 
-- **`GameEngine`** — è il **controller** centrale creato dal `main`. Riceve gli input, coordina Model e View e mantiene lo stato di alto livello della partita (scena da salvare, dialogo attivo). Precarica i database dei dialoghi/storia/hint (JSON), istanzia `ModelDB`/`ModelTXTOggetti`, `SceneManager` e la rete, e gestisce il ciclo di gioco (`avviaGioco`, `salvaEdEsci`, mostra dialoghi con NPC e wall-of-text).
-- **`SceneManager`** — gestisce il **cambio di scena** e la cache dei pannelli. Sa quale scena è correntemente mostrata (per il salvataggio), gestisce gli overlay (mappa, puntatore, inventario, chat) e ripristina la scena sottostante alla loro chiusura, delegando a `MainFrame` la visualizzazione concreta.
-- **`GameStatistics`** — tiene il **punteggio** e le statistiche di sessione: avvia/chiude gli enigmi (`iniziaEnigma`, `enigmaRisolto`), calcola i punti in base al tempo impiegato (`calcolaPunti`) tramite `TimerEnigma`.
-- **`TimerEnigma`** — cronometra la risoluzione di un enigma, fornendo a `GameStatistics` il tempo impiegato.
+- **`GameEngine`** : è il **controller** centrale creato dal `main`. Riceve gli input, coordina Model e View e mantiene lo stato di alto livello della partita (scena da salvare, dialogo attivo). Precarica i database dei dialoghi/storia/hint (JSON), istanzia `ModelDB`/`ModelTXTOggetti`, `SceneManager` e la rete, e gestisce il ciclo di gioco (`avviaGioco`, `salvaEdEsci`, mostra dialoghi con NPC e wall-of-text).
+- **`SceneManager`** : gestisce il **cambio di scena** e la cache dei pannelli. Sa quale scena è correntemente mostrata (per il salvataggio), gestisce gli overlay (mappa, puntatore, inventario, chat) e ripristina la scena sottostante alla loro chiusura, delegando a `MainFrame` la visualizzazione concreta.
+- **`GameStatistics`** : tiene il **punteggio** e le statistiche di sessione: avvia/chiude gli enigmi (`iniziaEnigma`, `enigmaRisolto`), calcola i punti in base al tempo impiegato (`calcolaPunti`) tramite `TimerEnigma`.
+- **`TimerEnigma`** : cronometra la risoluzione di un enigma, fornendo a `GameStatistics` il tempo impiegato.
 - Oltre alle classi mostrate, il package comprende alcune classi di supporto al controller: **`StatoProgressione`** conserva lo stato di avanzamento della partita e si appoggia all'enum **`StatoStoria`**, che elenca in ordine le tappe narrative; **`CostruttoreScene`** costruisce le scene di gioco (sfondi, personaggi, enigmi) ed è usata da `ProgressioneStoria`, mentre **`FlussiNarrativi`** gestisce le sequenze narrative complesse ed è composta da `CostruttoreScene`. **`MusicPlayer`**, infine, riproduce le tracce audio ed è richiamata dal `GameEngine`, senza dipendere da altre classi del progetto.
 
 #### Model — dominio
 Esistono vari package Model che gestiscono logiche di back in base al compito da svolgere, favorendo così l'**incapsuletion hiding**, di seguito vengono riportati con le loro classi:
 
 - **Enigmi (`Model.Enigmi`)**:
-	- **`Enigma`** *(astratta)* -  Definisce lo stato comune (`id`, `testo`, `aiuti`, `reward`, `risolto`) e la risposta `verifica(risposta)`, lasciato astratto perché ogni tipo di enigma valida la risposta in modo diverso (**polimorfismo**).
-	- **`EnigmaTestuale`** — enigma a risposta libera: confronta la risposta con una `soluzione`.
-	- **`EnigmaSceltaMultipla`** — enigma a opzioni: valida l'indice/valore scelto tra le `opzioni`.
-	- **`EnigmaOrdinamento`** — enigma in cui va ricostruito l'ordine corretto (es. sequenza di vestiti), con `verificaPosizione` per la validazione parziale.
+	- **`Enigma`** *(astratta)*:  Definisce lo stato comune (`id`, `testo`, `aiuti`, `reward`, `risolto`) e la risposta `verifica(risposta)`, lasciato astratto perché ogni tipo di enigma valida la risposta in modo diverso (**polimorfismo**).
+	- **`EnigmaTestuale`**: enigma a risposta libera: confronta la risposta con una `soluzione`.
+	- **`EnigmaSceltaMultipla`**: enigma a opzioni: valida l'indice/valore scelto tra le `opzioni`.
+	- **`EnigmaOrdinamento`**: enigma in cui va ricostruito l'ordine corretto (es. sequenza di vestiti), con `verificaPosizione` per la validazione parziale.
 	- Il package include anche **`IstanzaEnigma`**, che funge da costruttore concreto degli enigmi: carica testi e aiuti dai file JSON (tramite `JsonLoader`) e istanzia il tipo di `Enigma` appropriato, restituendo l'oggetto `Oggetto` da assegnare come ricompensa.
 
 * **Giocatore (`Model.Giocatore`)**
 
-	- **`Giocatore`** — rappresenta lo **stato del giocatore**: nome, possesso di mappa/inventario, insieme degli enigmi risolti. Espone le operazioni sul progresso (`aggiungiEnigmaRisolto`, `isEnigmaRisolto`) e possiede un `Inventario`.
-	- **`Inventario<T>`** — collezione **generica** di oggetti posseduti dal giocatore (aggiunta/rimozione/ricerca).
+	- **`Giocatore`**: rappresenta lo **stato del giocatore**: nome, possesso di mappa/inventario, insieme degli enigmi risolti. Espone le operazioni sul progresso (`aggiungiEnigmaRisolto`, `isEnigmaRisolto`) e possiede un `Inventario`.
+	- **`Inventario<T>`**: collezione **generica** di oggetti posseduti dal giocatore (aggiunta/rimozione/ricerca).
 
 - **Oggetti (`Model.Oggetti`)**
 
-	- **`Oggetto`** — entità  raccoglibile/utilizzabile, identificata da `idOggetto`, `nome`, `descrizione`.
-	- **`Spada`** — oggetto speciale che implementa `GiveObject`: reagisce alla risoluzione di un enigma (`reagisciRisoluzioneEnigma`) e gestisce una carica (`caricaSincro`) con soglia massima.
-	- **`GiveObject`** *(interfaccia)* — contratto per gli oggetti che devono **reagire** al completamento di un enigma; disaccoppia chi risolve l'enigma dall'oggetto che ne subisce l'effetto.
+	- **`Oggetto`**: entità  raccoglibile/utilizzabile, identificata da `idOggetto`, `nome`, `descrizione`.
+	- **`Spada`**: oggetto speciale che implementa `GiveObject`: reagisce alla risoluzione di un enigma (`reagisciRisoluzioneEnigma`) e gestisce una carica (`caricaSincro`) con soglia massima.
+	- **`GiveObject`** *(interfaccia)*: contratto per gli oggetti che devono **reagire** al completamento di un enigma; disaccoppia chi risolve l'enigma dall'oggetto che ne subisce l'effetto.
 
 - **Personaggi (`Model.Personaggi`)**
 
-	- **`Entità`** *(astratta)* — base di tutti i personaggi, incapsula il `nome`.
-	- **`Personaggio`** — NPC con albero di dialoghi: gestisce l'avanzamento delle battute (`parla`, `setDialoghi`, `resetDialogo`).
-	- **`Fantoccio`** — personaggio "muto"/decorativo, specializzazione minimale di `Personaggio`
+	- **`Entità`** *(astratta)*: base di tutti i personaggi, incapsula il `nome`.
+	- **`Personaggio`**: NPC con albero di dialoghi: gestisce l'avanzamento delle battute (`parla`, `setDialoghi`, `resetDialogo`).
+	- **`Fantoccio`**: personaggio "muto"/decorativo, specializzazione minimale di `Personaggio`
 
 - **Storage (`Model.Storage`)**
 
-	- **`ModelDB`** —  connessione, salvataggio/caricamento partita (`salvaPartita`, `loadGame`), gestione record e punteggi.
-	- **`ModelTXTOggetti`** — carica il **catalogo degli oggetti** da file di testo in una `Map<Integer, Oggetto>`, fungendo da sorgente dati per gli oggetti di gioco.
+	- **`ModelDB`**:  connessione, salvataggio/caricamento partita (`salvaPartita`, `loadGame`), gestione record e punteggi.
+	- **`ModelTXTOggetti`**: carica il **catalogo degli oggetti** da file di testo in una `Map<Integer, Oggetto>`, fungendo da sorgente dati per gli oggetti di gioco.
+
+- **Model (`Model.Stanza`)**
+	Gestisce il salvataggio della stanza adiacente, il nome della stanza da salvare per il DB e il `Map<String, Stanza>` per gestire la stanza, da stringa da prendere a stanza restituita.
 
 ####  View — `aeg.giocomap.View`
 
-- **`MainFrame`** — la **finestra principale** (`JFrame`). Ospita i pannelli delle scene tramite un `JLayeredPane`, gestisce elementi sempre in sovraimpressione (bottone chat, frecce di navigazione, effetti) e il ridimensionamento. È l'unico punto di ingresso grafico verso cui il Controller invia i pannelli da mostrare.
-- **`GameScreen`** — pannello che **disegna una scena** di gioco: renderizza l'immagine di sfondo e registra le zone cliccabili (hotspot) associate ad azioni (`Runnable`).
-- **`DialogueScreen`** — schermata di **dialogo/enigma**: mostra testo, opzioni e aiuti e raccoglie la risposta del giocatore.
-- **`InventarioPanel` / `MappaPanel`** — overlay per **inventario** e **mappa**, mostrati sopra la scena corrente e gestiti dal `SceneManager`.
+- **`MainFrame`**: la **finestra principale** (`JFrame`). Ospita i pannelli delle scene tramite un `JLayeredPane`, gestisce elementi sempre in sovraimpressione (bottone chat, frecce di navigazione, effetti) e il ridimensionamento. È l'unico punto di ingresso grafico verso cui il Controller invia i pannelli da mostrare.
+- **`GameScreen`**: pannello che **disegna una scena** di gioco: renderizza l'immagine di sfondo e registra le zone cliccabili (hotspot) associate ad azioni (`Runnable`).
+- **`DialogueScreen`**: schermata di **dialogo/enigma**: mostra testo, opzioni e aiuti e raccoglie la risposta del giocatore.
+- **`InventarioPanel` / `MappaPanel`**: overlay per **inventario** e **mappa**, mostrati sopra la scena corrente e gestiti dal `SceneManager`.
+  
 ![alt text|505](InventarioSenzaDescrizione.png)
 ![alt text|626](Mappa%201.png)
 
-- **`ChatPanel`** — pannello grafico della **chat multiplayer**: area messaggi, campo di input e invio. Fa da ponte tra la View e il `GameClient` del package Network.
+- **`ChatPanel`**: pannello grafico della **chat multiplayer**: area messaggi, campo di input e invio. Fa da ponte tra la View e il `GameClient` del package Network.
 
 ![alt text|697](ProvaDiChatting%201.png)
 
 #### Network — `aeg.giocomap.Network`
 Modulo autonomo che implementa una **chat multiplayer** con architettura **client-server su socket TCP**.
 
-- **`GameNetwork`** — Coordina l'avvio come **host** (`GameServer` + `GameClient` locale) o l'ingresso come client (`connettiComeClient`), rileva l'IP locale da **condividere** e collega il `ChatPanel` alla connessione.
-- **`GameServer`** *(Runnable)* — il **server**: apre il `ServerSocket` sulla porta, accetta le connessioni creando un `ClientHandler` per ciascun client, gestisce l'elenco dei nomi connessi (**unicità**) e il **broadcast** dei messaggi a tutti.
-- **`GameClient`** — il **client**: si connette al server, invia messaggi (`invia`) e avvia il `ThreadRicezione` per l'ascolto asincrono.
-- **`ClientHandler`** *(Runnable)* — gestisce **un singolo client** lato server, su **thread** dedicato: legge i messaggi in arrivo, verifica i nomi duplicati e inoltra al server per il broadcast (*JOIN/CHAT/LEAVE*).
-- **`ThreadRicezione`** *(Runnable)* — thread di **ricezione asincrona** dei messaggi lato client; formatta i messaggi ricevuti e notifica la View tramite callback (`SwingUtilities.invokeLater`), garantendo l'aggiornamento sul thread grafico.
-- **`Message`** — oggetto  che modella un messaggio (tipo, mittente, contenuto).
-- **`TipoMessaggio`** *(enum)* — tipi di messaggio del protocollo: `JOIN`, `LEAVE`, `CHAT`, `NOME_DUPLICATO`.
-- **`MessageParser`** — **serializzazione/deserializzazione** dei messaggi in stringhe da trasmettere sul socket (formato `tipo|mittente|contenuto`), incapsulando il protocollo di comunicazione.
+- **`GameNetwork`**: Coordina l'avvio come **host** (`GameServer` + `GameClient` locale) o l'ingresso come client (`connettiComeClient`), rileva l'IP locale da **condividere** e collega il `ChatPanel` alla connessione.
+- **`GameServer`** *(Runnable)*: il **server**: apre il `ServerSocket` sulla porta, accetta le connessioni creando un `ClientHandler` per ciascun client, gestisce l'elenco dei nomi connessi (**unicità**) e il **broadcast** dei messaggi a tutti.
+- **`GameClient`**: il **client**: si connette al server, invia messaggi (`invia`) e avvia il `ThreadRicezione` per l'ascolto asincrono.
+- **`ClientHandler`** *(Runnable)*: gestisce **un singolo client** lato server, su **thread** dedicato: legge i messaggi in arrivo, verifica i nomi duplicati e inoltra al server per il broadcast (*JOIN/CHAT/LEAVE*).
+- **`ThreadRicezione`** *(Runnable)*: thread di **ricezione asincrona** dei messaggi lato client; formatta i messaggi ricevuti e notifica la View tramite callback (`SwingUtilities.invokeLater`), garantendo l'aggiornamento sul thread grafico.
+- **`Message`**: oggetto  che modella un messaggio (tipo, mittente, contenuto).
+- **`TipoMessaggio`** *(enum)*: tipi di messaggio del protocollo: `JOIN`, `LEAVE`, `CHAT`, `NOME_DUPLICATO`.
+- **`MessageParser`**: **serializzazione/deserializzazione** dei messaggi in stringhe da trasmettere sul socket (formato `tipo|mittente|contenuto`), incapsulando il protocollo di comunicazione.
 
 #### Util — `aeg.giocomap.Util`
 Raccolta di classi di supporto trasversali, senza logica di dominio:
 
-- **`JsonLoader`** — lettura dei database JSON di dialoghi/storia/hint
-- **`Parser`** — parsing di dati testuali
-- **`CursorUtil`** — gestione del cursore e delle **zone cliccabili** nelle scene
+- **`JsonLoader`**: lettura dei database JSON di dialoghi/storia/hint
+- **`Parser`**: parsing di dati testuali
+- **`CursorUtil`**: gestione del cursore e delle **zone cliccabili** nelle scene
 
 ####  Strumenti esterni utilizzati
 
-- **Mermaid** — per la stesura dei diagrammi UML (diagramma delle classi, e volendo diagrammi di sequenza/stato per i flussi di gioco e di rete).
-- **Gson** — libreria per la (de)serializzazione JSON, usata da `JsonLoader` per leggere i file di dialoghi/storia/hint.
-- **H2** — database relazionale embedded usato da `ModelDB` per il salvataggio/caricamento delle partite.
-- **Java Swing** — libreria grafica per l'interfaccia utente (`MainFrame`, `GameScreen`, `DialogueScreen`, pannelli overlay), con zone cliccabili responsive basate su percentuali (`CursorUtil`) per adattarsi al ridimensionamento della finestra.
-- **Socket TCP** — per il modulo di rete multiplayer (`GameServer`/`GameClient`),
+- **Mermaid**: per la stesura dei diagrammi UML (diagramma delle classi, e volendo diagrammi di sequenza/stato per i flussi di gioco e di rete).
+- **Gson**: libreria per la (de)serializzazione JSON, usata da `JsonLoader` per leggere i file di dialoghi/storia/hint.
+- **H2**: database relazionale embedded usato da `ModelDB` per il salvataggio/caricamento delle partite.
+- **Java Swing**: libreria grafica per l'interfaccia utente (`MainFrame`, `GameScreen`, `DialogueScreen`, pannelli overlay), con zone cliccabili responsive basate su percentuali (`CursorUtil`) per adattarsi al ridimensionamento della finestra.
+- **Socket TCP**: per il modulo di rete multiplayer (`GameServer`/`GameClient`),
 
 ## Diagramma delle classi
 
 [Cliccare qui per visualizzare l’UML.](UML%20e%20design/UML%20delle%20classi.png)
 
-Il diagramma delle classi rappresenta la struttura del sistema: le classi, i loro attributi e metodi e le relazioni che le legano. Si è fatto uso dei principali meccanismi della progettazione a oggetti — **astrazione**, **classi astratte**, **ereditarietà**, **interfacce** e **composizione** (insieme alle altre forme di associazione) — descritti di seguito con i relativi esempi.
+Il diagramma delle classi rappresenta la struttura del sistema: le classi, i loro attributi e metodi e le relazioni che le legano. Si è fatto uso dei principali meccanismi della progettazione a oggetti **astrazione**, **classi astratte**, **ereditarietà**, **interfacce** e **composizione** (insieme alle altre forme di associazione), descritti di seguito.
 
-### Astrazione
+Attraverso l'**astrazione** e l'**incapsulamento**, ogni entità espone unicamente la propria interfaccia pubblica necessaria, mantenendo privato e nascosto il proprio stato interno (come avviene, ad esempio, per le proprietà della classe `Oggetto`). Per modellare i concetti più generali si è fatto ricorso alle **classi astratte** e all'**ereditarietà**. L'astratta `Entity` accomuna le basi di tutti i personaggi e viene specializzata da `Personaggio` e `Fantoccio`; similmente, la classe `Enigma` centralizza gli attributi condivisi ma delega alle sue tre sottoclassi l'implementazione specifica del metodo di verifica, applicando di fatto il **polimorfismo**.
 
-L'astrazione è il criterio con cui, per ogni entità del dominio, si sono modellati solo gli attributi e i comportamenti **rilevanti**, nascondendo i dettagli implementativi. Ogni classe espone la propria interfaccia pubblica (metodi `get`/operazioni) e mantiene privato il proprio stato (attributi marcati `-`), rispettando il principio di **incapsulamento**: ad esempio `Oggetto` nasconde `idOggetto`, `nomeOggetto`, `descrizioneOggetto` ed è accessibile solo tramite i metodi `getIdOggetto()`, `getNomeOggetto()`, `getDescrizioneOggetto()`.
+L'architettura è ulteriormente disaccoppiata dall'uso delle **interfacce**, come `GiveObject`, che definiscono contratti di comportamento (realizzati concretamente da classi come `Spada`) svincolando i dettagli implementativi.
 
-###  Classi astratte
-
-Nel diagramma sono presenti due classi astratte, marcate con lo stereotipo «abstract»:
-
-- **`Entità`** — astrae il concetto generico di *entità dotata di nome*. Definisce l'attributo comune `nome` e l'operazione `getNome()`, ma non è istanziabile direttamente: rappresenta solo ciò che accomuna tutti i personaggi del gioco.
-- **`Enigma`** — astrae il concetto di *enigma*. Raccoglie lo stato condiviso da ogni enigma (`id`, `testo`, `aiuti`, `reward`, `risolto`) e i metodi comuni (`getId()`, `getTesto()`, `getReward()`, `getAiuti()`). Dichiara inoltre il metodo **astratto** `verifica(risposta): boolean`, la cui implementazione è demandata alle sottoclassi.
-
-### Ereditarietà
-
-L'ereditarietà (relazione «ereditarietà», freccia con punta vuota verso la superclasse) modella la relazione **"è un"** e permette alle sottoclassi di riusare e specializzare il comportamento della superclasse. Nel diagramma sono presenti due gerarchie principali:
-
-#### Gerarchia dei personaggi
-
-- `Personaggio` **eredita da** `Entità`: è un'entità dotata di nome, arricchita con l'albero dei dialoghi (`alberoDialoghi`, `indiceDialogoAttuale`) e i metodi `parla()`, `setDialoghi()`, `resetDialogo()`.
-- `Fantoccio` **eredita da** `Personaggio`: ne è una specializzazione minimale (personaggio decorativo/muto), che riusa tutta la struttura del padre.
-
-#### Gerarchia degli enigmi
-
-- `EnigmaTestuale`, `EnigmaSceltaMultipla` ed `EnigmaOrdinamento` **ereditano** tutti dalla classe astratta `Enigma`. Ognuna aggiunge gli attributi specifici (rispettivamente `soluzione`; `opzioni`/`indiceSoluzione`; `vestiti`/`ordineCorretto`) e **ridefinisce** (override) il metodo `verifica(risposta)`.
-
-Quest'ultima gerarchia è anche un esempio di **polimorfismo.**
-
-### Interfacce
-
-L'interfaccia definisce un **contratto** di comportamento indipendente dall'implementazione:
-
-- **`GiveObject`** — dichiara l'operazione `reagisciRisoluzioneEnigma(): void`. Ogni oggetto che deve *reagire* alla risoluzione di un enigma implementa questa interfaccia.
-- **`Spada`** **realizza** `GiveObject`: fornisce l'implementazione concreta di `reagisciRisoluzioneEnigma()`, aggiornando la propria carica (`caricaSincro`).
-
-La differenza rispetto alla classe astratta è che l'interfaccia non fornisce stato né implementazione: serve a definire *cosa* un oggetto deve saper fare, non *com'è fatto*. Questo disaccoppia il chiamante dall'implementazione — chi risolve l'enigma dialoga con il tipo `GiveObject` senza conoscere la classe `Spada`.
-
-### Composizione e altre associazioni
-
-Il diagramma usa diverse forme di associazione, con semantica di legame via via più forte.
-
-#### Composizione
-
-- `GameEngine` è composto da  `ModelDB`, `ModelTXTOggetti` e `GameStatistics`: sono componenti creati e gestiti internamente dal motore di gioco, che ne detiene il ciclo di vita.
-- `Giocatore` è composto da `Inventario<T>`: l'inventario nasce e muore insieme al giocatore che lo possiede.
-
-#### Aggregazione
-
-- `Inventario<T>` **aggrega** `Oggetto` (molteplicità `0..*`): l'inventario raccoglie oggetti che hanno vita propria e possono essere trasferiti o esistere fuori dall'inventario.
-- `ModelTXTOggetti` **aggrega** gli `Oggetto` del `catalogo` caricato da file.
-
-#### Dipendenza
-
-- `GameEngine` **dipende da** `Entità` (la usa nella gestione dei personaggi).
-- `GameStatistics` **dipende da** `Enigma`: riceve un `Enigma` nei metodi `iniziaEnigma()` ed `enigmaRisolto()` per calcolare il punteggio, senza possederlo.
-
-#### Associazione d'uso
-
-Collaborazioni fra classi indicate con «usa», come tra `GameEngine`/`GameStatistics` e `Giocatore`, e la relazione tra `Enigma` e `Oggetto` come *reward*: un enigma, una volta risolto, restituisce un `Oggetto` come ricompensa.
-
-
+Infine, le **relazioni tra le classi** sono state modellate con diversi gradi di intensità per riflettere le reali interazioni del gioco. Troviamo:
+- legami forti di **composizione**, utilizzati quando un elemento dipende vitalmente da un altro e ne condivide il ciclo di vita (come il `Giocatore` che genera e possiede il proprio `Inventario`).
+- Si passa poi all'**aggregazione**, utile per raggruppare elementi che mantengono una loro esistenza autonoma (come gli oggetti che vengono semplicemente raccolti o eliminati momentaneamente). 
+- Connessioni più deboli e momentanee, definite di **dipendenza** o **associazione**.
+  Queste ultime servono per **scambi temporanei di dati che non richiedono un legame fisso**. Un chiaro esempio è la risoluzione delle sfide: la classe astratta `Enigma` produce il risultato limitandosi a esporre metodi come `verifica(String risposta)`, `getId()` e `getReward()`, ma non conosce né tiene riferimenti a classi come `GameStatistics` o all'`Inventario`. A sua volta, `GameStatistics` consuma il risultato per calcolare il punteggio tramite il metodo `enigmaRisolto(Enigma)`, non mantiene un campo persistente per l'enigma, ma lo riceve solo come parametro al volo, ne estrae i dati utili (come la ricompensa o il timer) e lo scarta. In modo del tutto simile, l'`Inventario<T Oggetto extends>` incamera la ricompensa tramite il metodo `aggiungiOggetto(T oggetto)`, invocato passandogli l'oggetto transitoriamente.
+  
+  Il ruolo di far dialogare queste componenti è affidato a classi orchestratrici come `CostruttoreScene` e `FlussiNarrativi`: sono loro a fungere da mediatori creando l'enigma, chiamando il metodo `verifica()`, funzione astratta che verifica la correttezza della soluzione, adattato in base alla tipologia d'enigma (inserimento, testuale, scelta multipla) e, in caso di esito positivo, invocando le funzioni opportune del Controller (come `engine.getStatistics().enigmaRisolto(enigma)` e `inventario.aggiungiOggetto(...)`).
 ## Specifica algebrica
-
 La specifica algebrica implementata è quella della struttura dati **Insieme**. Abbiamo utilizzato questa struttura dati per gestire **l'inventario del giocatore**.
 
 Il tipo parametro _tipoelem_ è istanziato con **Oggetto (`Inventario<T extends Oggetto>`)**. L'uguaglianza $x=y$ su _tipoelem_ è definita per nome (`getNomeOggetto()` confrontato con `equalsIgnoreCase`), coerentemente con `cercaOggetto`: due oggetti con lo stesso nome sono lo stesso elemento.
@@ -409,7 +369,8 @@ public class JsonLoader {
 ```
 
 In questo metodo della classe `JsonLoader` andiamo a caricare il file JSON specificato dal `percorso`, così da poterlo utilizzare (come vedremo dopo). Il JSON viene aperto tramite `InputStream` e viene letto tramite `BufferedReader` con specifica **UTF-8** per poter prendere gli accenti nelle `TextArea` dei dialoghi, come mostrato nella foto seguente:
-![[Pasted image 20260716195101.png|518]]
+
+![[utf-8_mostrato.png|506]]
 
 Il metodo restituisce `null`, così da non dover far bloccare il gioco in caso di dialogo mancante, ma proseguirebbe senza quella parte di dialogo. Ovviamente nella **console** durante i test di gioco veniva mostrato questo messaggio per verificarne l'esattezza.
 
@@ -560,43 +521,27 @@ bla bla bla…
 bla bla bla…
 
 # Informazioni sul lavoro di gruppo e sul progetto
-La suddivisione dei compiti all'interno del gruppo è avvenuta in modo abbastanza informale: ognuno ha scelto di occuparsi delle parti che gli interessavano o in cui si sentiva più a suo agio, senza una vera e propria assegnazione dall'alto. Per la gestione del codice abbiamo lavorato su GitHub, utilizzando branch separati per le diverse funzionalità e aprendo pull request per unire il lavoro sul branch principale, così da poter rivedere le modifiche prima di integrarle ed evitare conflitti quando lavoravamo in parallelo sulle stesse parti del progetto.
-Dal punto di vista architetturale abbiamo scelto di seguire il pattern MVC, separando la logica di gioco (Model), l'interfaccia grafica (View) e il coordinamento tra le due (Controller/GameEngine): questo ci ha permesso di lavorare su parti diverse del progetto senza intralciarci a vicenda, dato che ognuno poteva intervenire sul proprio livello con un impatto limitato sul resto.
-La difficoltà principale è stata gestire alcuni conflitti di merge su GitHub, soprattutto nei momenti in cui più persone lavoravano in parallelo su parti del codice che finivano per toccarsi (ad esempio quando modifiche diverse interessavano le stesse classi o gli stessi file di configurazione). Li abbiamo risolti confrontandoci direttamente sulle modifiche prima di integrarle, il che ci ha fatto capire l'importanza di comunicare in anticipo quando si stava per toccare una parte condivisa del codice, piuttosto che scoprirlo solo al momento della pull request.
-Il punto di forza principale del gruppo è stata la comunicazione: ci siamo confrontati spesso in call su Discord, il che ha reso più semplice tenere tutti allineati sullo stato di avanzamento e risolvere velocemente eventuali dubbi o blocchi. Anche la divisione dei compiti, pur essendo nata in modo naturale e senza una pianificazione rigida, si è rivelata efficace , il che ha reso il lavoro più fluido rispetto a un'assegnazione imposta dall'esterno.
-Per quanto riguarda la parte grafica, le immagini di base sono state reperite su Pinterest e poi ritoccate per adattarle allo stile e alle esigenze del gioco . Per l'audio abbiamo invece attinto a librerie di suoni royalty-free reperite su YouTube.
-Tra le funzionalità accantonate per motivi di tempo, la più significativa era l'idea di un secondo finale alternativo, che sarebbe dovuto comparire in modo casuale con una probabilità molto bassa (circa 1 su 1000): un'idea che avrebbe aggiunto rigiocabilità al progetto, ma che abbiamo scelto di non implementare per concentrare il tempo a disposizione sulle funzionalità core del gioco.
+La suddivisione dei compiti all'interno del gruppo è avvenuta in modo concreto, tramite consultazione: ognuno ha scelto di occuparsi delle parti che gli interessavano o in cui si sentiva più a suo agio, senza una vera e propria assegnazione dall'alto. Anche la divisione dei compiti, pur essendo nata in modo naturale e senza una pianificazione rigida, si è rivelata efficace, il che ha reso il lavoro più rapido.
+#### Architettura e gestione del codice
+
+- **Pattern architetturale:** Dal punto di vista architetturale abbiamo scelto di seguire il pattern **MVC**, separando la logica di gioco (**Model**), l'interfaccia grafica (**View**) e il coordinamento tra le due (**Controller - GameEngine**).
+    
+- **Gestione tramite repository:** Per la gestione del codice abbiamo lavorato su **GitHub**, utilizzando branch separati per le diverse funzionalità e aprendo **pull request** per unire il lavoro sul **branch principale**. Questo approccio ci ha permesso di rivedere le modifiche prima di integrarle ed evitare conflitti quando lavoravamo in parallelo sulle stesse parti del progetto.
+#### Punti di forza e difficoltà
+
+- **Comunicazione efficace:** Il punto di forza principale del gruppo è stata la comunicazione: ci siamo confrontati spesso in chiamata su **Discord**, il che ha reso più semplice tenere tutti allineati sullo stato di avanzamento e risolvere velocemente eventuali dubbi o blocchi.
+    
+- **Risoluzione dei conflitti:** La difficoltà principale è stata gestire alcuni conflitti di merge su GitHub, soprattutto nei momenti in cui più persone lavoravano in parallelo su parti del codice che finivano per toccarsi (ad esempio quando modifiche diverse interessavano le stesse classi o gli stessi file di configurazione). Li abbiamo risolti confrontandoci direttamente sulle modifiche prima di integrarle, il che ci ha fatto capire l'importanza di comunicare in anticipo quando si stava per toccare una parte condivisa del codice, piuttosto che scoprirlo solo al momento della pull request. Un altra difficoltà incontrata è stato ritrovarci molto spesso con delle **GodClass**, così da attuare varie separazioni su file paralleli del lavoro che eseguiva un solo file, così da comprendere a pieno quanto sia importante l'**incapsulamento** e la **suddivisione dei compiti** che deve gestire ogni file senza mischiare i compiti di una classe con un altra e astrarre i compiti il più possibile.
+#### Asset esterni e funzionalità accantonate
+
+- **Grafica:** Per quanto riguarda la parte grafica, le immagini di base sono state reperite su **Pinterest** e poi ritoccate tramite **AI generativa** per adattarle allo stile e alle esigenze del gioco, purtroppo nessuno del team sa disegnare e volevamo tanto fare la parte grafica.
+    
+- **Audio:** Per l'audio abbiamo invece attinto a librerie di suoni **free-copyright** reperite su **YouTube**.
+    
+- **Idee non implementate:** Tra le funzionalità accantonate per motivi di tempo, la più significativa era l'idea di un **finale alternativo**, che sarebbe dovuto comparire in modo casuale con una probabilità **randomica**, startata ad avvio del gioco molto bassa (circa 1 su 1000). È un'idea che avrebbe aggiunto rigiocabilità al progetto, ma che abbiamo scelto di non implementare per concentrare il tempo a disposizione sulle funzionalità madre del gioco.
 
 ---
 # NOTE VALUTATIVE e IMPLEMENTATIVE CHE SARANNO TOLTE DA QUESTO FILE, SERVONO SOLO ORA IN VIA DI SVILUPPO
-**La struttura del documento è solo un suggerimento. È possibile modificarla purché il documento contenga le informazioni richieste. È possibile inserire altre sezioni, ad esempio: soluzione del gioco, dettagli sull’organizzazione del lavoro di gruppo, ecc…**
-
-### Note sulla valutazione
-
-Il caso di studio verrà valutato in una scala da 0 a 50. Il voto finale verrà rapportato in trentesimi.
-
-Il voto è determinato da 10 criteri, ognuno dei quali può avere un voto tra 0 e 5. I criteri sono:
-
-1. qualità dell’avventura
-2. qualità della programmazione ad oggetti
-3. utilizzo dei file
-4. utilizzo di database/JDBC
-5. utilizzo dei thread e della programmazione concorrente
-6. utilizzo delle socket e/o delle REST
-7. utilizzo delle SWING
-8. utilizzo delle lambda expression, stream e pipeline
-9. qualità della documentazione (documentazione progetto + documentazione codice)
-10. punteggio bonus che tiene conto della complessità del progetto rapportata anche al numero dei componenti del gruppo
-
-**Tutto il materiale deve essere consegnato 5 giorni prima della prova orale. Deve essere consegnato tramite mail allegando uno zip o un link per il download. Il testo della mail deve riportare in modo chiaro tutti i membri del gruppo.**
-
-### Svolgimento della prova orale
-
-Ogni gruppo presenterà il caso di studio e una demo live dell’avventura realizzata per un tempo massimo di 20 minuti. È possibile preparare delle slide, ma non è obbligatorio. Al termine della presentazione, ogni membro del gruppo sarà interrogato su tutti gli argomenti del corso.
-
-Il voto finale terrà conto sia della valutazione del caso di studio sia della qualità della prova orale.
-
-**Le note sulla valutazione e lo svolgimento della prova vanno eliminate dal documento che verrà consegnato.**
 
 ## Idea originale
 L'idea di base è basata sull'ispirazione data dai giochi Monkey Island e Phoenix Wright per un'avventura grafico-testuale.
