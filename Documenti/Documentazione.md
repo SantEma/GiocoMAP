@@ -97,7 +97,10 @@ L'idea base è stata quella di massimizzare la **coesione interna**  e minimizza
 - **`GameScreen`** — pannello che **disegna una scena** di gioco: renderizza l'immagine di sfondo e registra le zone cliccabili (hotspot) associate ad azioni (`Runnable`).
 - **`DialogueScreen`** — schermata di **dialogo/enigma**: mostra testo, opzioni e aiuti e raccoglie la risposta del giocatore.
 - **`InventarioPanel` / `MappaPanel`** — overlay per **inventario** e **mappa**, mostrati sopra la scena corrente e gestiti dal `SceneManager`.
+![alt text](Inventario.png)
+![alt text](Mappa.png)
 - **`ChatPanel`** — pannello grafico della **chat multiplayer**: area messaggi, campo di input e invio. Fa da ponte tra la View e il `GameClient` del package Network.
+![alt text](ProvaDiChatting.png)
 
 #### Network — `aeg.giocomap.Network`
 
@@ -327,7 +330,12 @@ bla bla bla…
 bla bla bla…
 
 # Informazioni sul lavoro di gruppo e sul progetto
-
+La suddivisione dei compiti all'interno del gruppo è avvenuta in modo abbastanza informale: ognuno ha scelto di occuparsi delle parti che gli interessavano o in cui si sentiva più a suo agio, senza una vera e propria assegnazione dall'alto. Per la gestione del codice abbiamo lavorato su GitHub, utilizzando branch separati per le diverse funzionalità e aprendo pull request per unire il lavoro sul branch principale, così da poter rivedere le modifiche prima di integrarle ed evitare conflitti quando lavoravamo in parallelo sulle stesse parti del progetto.
+Dal punto di vista architetturale abbiamo scelto di seguire il pattern MVC, separando la logica di gioco (Model), l'interfaccia grafica (View) e il coordinamento tra le due (Controller/GameEngine): questo ci ha permesso di lavorare su parti diverse del progetto senza intralciarci a vicenda, dato che ognuno poteva intervenire sul proprio livello con un impatto limitato sul resto.
+La difficoltà principale è stata gestire alcuni conflitti di merge su GitHub, soprattutto nei momenti in cui più persone lavoravano in parallelo su parti del codice che finivano per toccarsi (ad esempio quando modifiche diverse interessavano le stesse classi o gli stessi file di configurazione). Li abbiamo risolti confrontandoci direttamente sulle modifiche prima di integrarle, il che ci ha fatto capire l'importanza di comunicare in anticipo quando si stava per toccare una parte condivisa del codice, piuttosto che scoprirlo solo al momento della pull request.
+Il punto di forza principale del gruppo è stata la comunicazione: ci siamo confrontati spesso in call su Discord, il che ha reso più semplice tenere tutti allineati sullo stato di avanzamento e risolvere velocemente eventuali dubbi o blocchi. Anche la divisione dei compiti, pur essendo nata in modo naturale e senza una pianificazione rigida, si è rivelata efficace , il che ha reso il lavoro più fluido rispetto a un'assegnazione imposta dall'esterno.
+Per quanto riguarda la parte grafica, le immagini di base sono state reperite su Pinterest e poi ritoccate per adattarle allo stile e alle esigenze del gioco . Per l'audio abbiamo invece attinto a librerie di suoni royalty-free reperite su YouTube.
+Tra le funzionalità accantonate per motivi di tempo, la più significativa era l'idea di un secondo finale alternativo, che sarebbe dovuto comparire in modo casuale con una probabilità molto bassa (circa 1 su 1000): un'idea che avrebbe aggiunto rigiocabilità al progetto, ma che abbiamo scelto di non implementare per concentrare il tempo a disposizione sulle funzionalità core del gioco.
 
 ---
 # NOTE VALUTATIVE e IMPLEMENTATIVE CHE SARANNO TOLTE DA QUESTO FILE, SERVONO SOLO ORA IN VIA DI SVILUPPO
