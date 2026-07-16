@@ -641,19 +641,196 @@ può rientrare nella partita nel punto in cui era rimasto, poiché nelle colonne
 
 ### Lamba Expression (compresi stream e pipeline)
 
-bla bla bla…
+Le **Lambda Expression** vengono usate nel progetto principalmente per **sostituire le classi anonime** nell'implementazione delle *interfacce funzionali* (interfacce con un solo metodo astratto), sia quelle native di Java (`Runnable`, `Consumer<T>`) sia negli `ActionListener`, rendendo il codice più compatto quando si devono passare **comportamenti** da un metodo all'altro.
 
+L'unico utilizzo della **Stream** a **pipeline** si trova, come sempre, proprio nella classe generica `Inventario<T>` già vista nella sezione sulle *Generics*, nel metodo `cercaOggetto()`:
+
+```JAVA
+//...
+private final List<T> listaOggetti;
+//...
+
+public T cercaOggetto(String nome) {
+    return listaOggetti.stream()
+            .filter(obj -> obj.getNomeOggetto().equalsIgnoreCase(nome))
+            .findFirst()
+            .orElse(null);
+}
+```
+
+Qui si nota una vera e propria **pipeline**: la `List<T>` viene trasformata in uno `Stream<T>` tramite `.stream()`, il quale viene **filtrato** con una _lambda_ (`obj -> obj.getNomeOggetto().equalsIgnoreCase(nome)`) che scarta tutti gli oggetti il cui nome non corrisponde, per poi richiamare `.findFirst`, metodo usato grazie all'import della libreria `util.stream.Stream`, che restituisce un `Optional<T>` col primo elemento rimasto (se esiste), gestito subito con `.orElse(null)` per non dover gestire esplicitamente l'`Optional` in tutto il resto del codice. Questo metodo viene poi richiamato ovunque nel gioco, serve a controllare se un oggetto è già in inventario (es. `aggiungiOggetto`) o per recuperarlo prima di rimuoverlo, come accade nella scena con Fox.
+#### Runnable e dialoghi a catena
+
+La maggior parte delle **lambda** del progetto, però, non riguarda gli `Stream`, ma l'uso di `Runnable` come **callback**, per concatenare più dialoghi ed eventi di gioco uno dopo l'altro, usata come se fosse una **pipeline di eventi**: ogni schermata di dialogo, una volta chiusa dal giocatore, esegue il `Runnable` che le è stato passato, il quale a sua volta può aprirne un'altra con un nuovo `Runnable` agganciato, e così via con tutte le altri che si susseguono. 
+Il cuore di questo meccanismo è in `GameEngine.mostraDialogoCallback`:
+
+```JAVA
+public void mostraDialogoCallback(GameScreen scenaSfondo, String idScenaSfondo, String nome, String battuta, ImageIcon sprite, Runnable callback) {
+    if (isDialogoActive) return;
+    setDialogueActive(true);
+    DialogueScreen ds = new DialogueScreen(scenaSfondo, () -> {
+        setDialogueActive(false);
+        getSceneManager().mostraScena(idScenaSfondo);
+        if (callback != null) callback.run();
+    });
+    ds.aggiornaSchermata(nome, battuta, sprite);
+    getSceneManager().registraScena("DIALOGO_CORRENTE", ds);
+    getSceneManager().mostraScena("DIALOGO_CORRENTE");
+}
+```
+
+Qui la **lambda** passata al costruttore di `DialogueScreen` viene eseguita solo alla **chiusura** del dialogo (quando il giocatore clicca "*avanti*" sull'ultima battuta) e al suo interno richiama `callback.run()`, cioè il `Runnable` ricevuto come parametro, in questo modo il metodo non deve sapere **cosa** succederà dopo il dialogo, riceve semplicemente il "*cosa fare dopo*" già pronto sotto forma di espressione lambda, così che chi chiama il metodo possa decidere se non fare nulla, aprirne un altro o avviare un enigma.
+
+Un esempio concreto di questa catena si trova nella gestione dell'interazione col **Contadino Green** in `CostruttoreScene.costruisciPiazza`, dove più `Runnable` vengono incastrati uno dentro l'altro:
+
+```JAVA
+zonePiazza.put(CostantiHitbox.PIAZZA_CONTADINO, () -> {
+    if (stato.getStato() == StatoStoria.MISSIONE_COOPER_ACCETTATA) {
+        contadino.setDialoghi(Arrays.asList(contadinoDb.get("saluto").getAsString()));
+        Runnable loopContadino = new Runnable() {
+            @Override
+            public void run() {
+                String input = JOptionPane.showInputDialog(engine.getFrame(), "Cosa chiedi al Contadino Green?");
+                if (input == null) return;
+                if (Parser.contieneRadiceParola(input, "carot*")) {
+                    contadino.setDialoghi(Arrays.asList(contadinoDb.get("richiesta").getAsString()));
+                    engine.mostraDialogoNPCCallback(CostruttoreScene.this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, () -> {
+                        // ...altro Runnable annidato per il loop di accettazione...
+                    });
+                } else {
+                    contadino.setDialoghi(Arrays.asList(contadinoDb.get("incomprensione").getAsString()));
+                    engine.mostraDialogoNPCCallback(CostruttoreScene.this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, this);
+                }
+            }
+        };
+        engine.mostraDialogoNPCCallback(this.piazzaCentrale, CostantiMappa.PIAZZA_CENTRALE, contadino, spriteGreen, loopContadino);
+    }
+    // ...
+});
+```
+
+Qui il valore inserito nella `Map<double[], Runnable> zonePiazza` (la stessa mappa vista nella sezione sulle *Generics* per la gestione delle **zone cliccabili**) è direttamente una *lambda*, richiamata quando il giocatore clicca sull'omino del contadino.
+#### Il limite delle Lambda
+
+Non tutte le **interfacce funzionali** del progetto vengono implementate con le lambda expression. `loopContadino`, per esempio, **non può** essere scritto come `() -> { ... }`, perché al suo interno, nel ramo `else`, richiama sé stesso passando `this` ( `..., contadino, spriteGreen, this)`) per far **ripetere il dialogo** finché il giocatore non risponde correttamente. 
+In una espressione lambda, `this` farebbe riferimento alla classe che la contiene (`CostruttoreScene`), non all'espressione stessa, quindi per un `Runnable` **ricorsivo** serve necessariamente una classe anonima (`new Runnable() { ... }`).
+
+Allo stesso modo, in `GameEngine.impostaKeyBindingMappa()` usiamo una **classe anonima** e non una lambda per gestire la **scorciatoia da tastiera che apre/chiude la mappa**:
+
+```JAVA
+am.put("toggle_mappa", new AbstractAction() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        toggleMappa();
+    }
+});
+```
+
+In questo caso il motivo è diverso: `AbstractAction` è una **classe astratta**, non un'interfaccia funzionale (ha più metodi, alcuni già implementati), quindi Java non permette proprio di sostituirla con una lambda, che può implementare solo *interfacce* con **un unico metodo astratto**.
+#### Consumer
+
+Oltre a `Runnable`, il progetto usa in due punti l'interfaccia funzionale nativa `Consumer<T>` (`java.util.function.Consumer`), utile quando il "*comportamento*" da eseguire ha bisogno di **ricevere un dato** in ingresso invece di essere eseguito e basta. Lo si vede nel dialogo per l'enigma finale della principessa, `DialogoOrdinamentoVestiti`, dove ogni *bottone-vestito*, al click, non decide da solo cosa fare ma **avvisare**  la scelta a `CostruttoreScene`, ovvero colui che apre il pop up:
+
+```JAVA
+public DialogoOrdinamentoVestiti(JFrame owner, List<String> vestiti, Consumer<String> alClick) {
+    // ...
+    bottone.addActionListener(e -> alClick.accept(vestito));
+    // ...
+}
+```
+
+`CostruttoreScene`, passa la lambda che riceve il **nome del vestito scelto** e decide se è nella **posizione corretta**, aggiornando lo stato dell'enigma (di fatto alla prima posizione non corretta l'enigma si ferma):
+
+```JAVA
+DialogoOrdinamentoVestiti popup = new DialogoOrdinamentoVestiti(engine.getFrame(), enigmaFinale.getVestiti(), vestitoScelto -> {
+    int posizione = posizioneCorrente[0];
+    if (enigmaFinale.verificaPosizione(posizione, vestitoScelto)) {
+        popupCorrente[0].posizionaVestito(posizione, vestitoScelto);
+        popupCorrente[0].disabilitaVestito(vestitoScelto);
+        posizioneCorrente[0]++;
+        // ...
+    }
+    else { 
+	    // Vestito fuori posto -> parte subito la scena dell'errore, l'enigma andrà 
+	    // ripetuto popupCorrente[0].dispose(); stepPiumatoNarrazione.run();
+    }
+});
+```
+
+Questo disaccoppia completamente `DialogoOrdinamentoVestiti` (che sa solo disegnare i bottoni e notificare i click) dalla logica dell'enigma (che sa se la scelta è giusta o sbagliata), che resta interamente in `CostruttoreScene`. 
+
+Da notare anche `posizioneCorrente` e `popupCorrente`, poiché in Java una *lambda* può usare solo variabili locali che dopo essere state assegnate una prima volta, non vengono più **riassegnate**. Questo normalmente impedirebbe di incrementare un contatore dentro una lambda, perché sarebbe un riassegnamento non consentito. 
+Per aggirare il problema, `posizioneCorrente` e `popupCorrente` non sono variabili semplici ma **array di un solo elemento**, dichiarati poco prima della lambda:
+
+```JAVA
+final int[] posizioneCorrente = {0};
+final DialogoOrdinamentoVestiti[] popupCorrente = new DialogoOrdinamentoVestiti[1];
+```
+
+La variabile che punta all'array (`posizioneCorrente`, `popupCorrente`) non cambia mai e quindi la lambda può catturarla, ed è il **contenuto** dell'array (`posizioneCorrente[0]`, `popupCorrente[0]`) che può essere modificato liberamente, sia dentro la lambda sia fuori (come alla riga `posizioneCorrente[0] = 0;` in `avviaPopupVestiti`). 
+In questo modo più *lambda* annidate possono condividere e aggiornare nel tempo lo stesso valore, per questo nel gioco poi avviene questo:
+
+![[AvviaPopupVestiti.png]]
 ### SWING
 
-bla bla bla…
+L'idea iniziale prevedeva tre meccanismi **Swing** distinti per rendere l'avventura grafico-testuale interattiva: un puntatore dinamico sulle zone sensibili, delle frecce direzionali per lo spostamento e un parser a **Regex** per l'input da tastiera. Tutti e tre sono stati effettivamente realizzati nel progetto.
+
+#### Puntatore dinamico (hotspot)
+La classe `CursorUtil` (package `Util`) espone il metodo `registraZone(JPanel panel, Map<double[], Runnable> zone)`, richiamato da ogni `GameScreen` per registrare le proprie **zone cliccabili**. Un `MouseMotionAdapter` intercetta `mouseMoved` e, se il cursore entra in una delle zone, cambia l'icona in `Cursor.HAND_CURSOR` (altrimenti resta `Cursor.DEFAULT_CURSOR`); un `MouseAdapter` separato gestisce `mouseClicked`, ricalcola la stessa zona ed esegue il `Runnable` associato:
+
+```JAVA
+panel.addMouseMotionListener(new MouseMotionAdapter() {
+    @Override
+    public void mouseMoved(MouseEvent e) {
+        boolean sopraZona = false;
+        for (double[] perc : zone.keySet()) {
+            if (rettangoloZona(panel, perc).contains(e.getPoint())) {
+                sopraZona = true;
+                break;
+            }
+        }
+        panel.setCursor(Cursor.getPredefinedCursor(
+            sopraZona ? Cursor.HAND_CURSOR : Cursor.DEFAULT_CURSOR));
+    }
+});
+```
+
+Le zone non sono coordinate assolute in pixel ma **percentuali** (`{xPerc, yPerc, wPerc, hPerc}`), ricalcolate rispetto all'area dell'immagine di sfondo: questo permette alle zone cliccabili di restare correttamente posizionate anche quando la finestra viene **ridimensionata**.
+
+#### Frecce direzionali
+`MainFrame` istanzia quattro `JButton` dedicati (`btnNord`, `btnSud`, `btnEst`, `btnOvest`), posizionati come overlay fisso sul `JLayeredPane` tramite `impostaFrecceLogica()`, e li espone tramite `setFrecceListener(ActionListener nord, sud, est, ovest)`. La logica di navigazione vera e propria, però, non risiede nella View ma nel Controller: è `NavigazioneMappa.impostaFrecceLogica()` a collegare ai quattro bottoni le rispettive callback, ciascuna delle quali invoca `eseguiCollegamento(CostantiMappa.NORD/SUD/EST/OVEST)` per determinare la stanza successiva.
+
+#### Analisi testuale (Regex)
+La classe `Parser` (package `Util`) usa `java.util.regex.Pattern`/`Matcher` nel metodo `contieneRadiceParola(String input, String pattern)`: costruisce dinamicamente un'espressione regolare inserendo `\s*` opzionale tra ogni lettera del pattern (per tollerare spazi extra digitati dal giocatore) e, se il pattern termina con `*`, aggiunge un suffisso libero `\w*` per accettare variazioni della parola (es. plurali):
+
+```JAVA
+String regex = haWildcard
+    ? "(?i).*\\b" + regexRadice.toString() + "\\w*\\b.*"
+    : "(?i).*\\b" + regexRadice.toString() + "\\b.*";
+```
+
+Il flag inline `(?i)` rende il confronto **case-insensitive**. Questo parser viene richiamato ogni volta che il gioco chiede una risposta libera da tastiera tramite `JOptionPane.showInputDialog`, ad esempio in `CostruttoreScene.contieneRadiceParola(input, "carot*")` nel dialogo col Contadino Green, così da riconoscere "carota", "carote" o varianti con spazi/maiuscole senza dover elencare ogni possibile risposta.
 
 ### Thread e programmazione concorrente
 
-bla bla bla…
+L'idea originale era di affiancare al calcolo del punteggio un **thread concorrente** che misurasse il tempo di risoluzione di un enigma. Nell'implementazione finale, però, `TimerEnigma` non avvia un thread dedicato: calcola il tempo trascorso in modo **sincrono**, salvando l'istante di partenza e confrontandolo con l'istante corrente:
+
+```JAVA
+public int getSecondi() {
+    if (isAttivo()) {
+        return (int) ((System.currentTimeMillis() - inizioMs) / 1000);
+    }
+    return secondiFinali;
+}
+```
+
+L'unico `javax.swing.Timer` presente in `TimerEnigma` serve solo per un ticchettio periodico di debug (stampa in console), eseguito sull'**Event Dispatch Thread**, e non introduce concorrenza reale; `GameStatistics.calcolaPunti()` assegna poi il punteggio in base a delle fasce di secondi trascorsi, in modo anch'esso interamente sincrono.
+
+La vera **programmazione concorrente** del progetto si trova invece nel modulo di rete (package `Network`), dove più thread lavorano realmente in parallelo per gestire la chat multiplayer. `GameServer` si avvia come `Runnable` su un thread dedicato (`new Thread(this).start()`) che resta in ascolto di nuove connessioni; per **ogni client** che si collega viene creato un `ClientHandler` eseguito a sua volta su un proprio thread (`new Thread(handler).start()`), così che i messaggi di più giocatori vengano letti in parallelo senza bloccarsi a vicenda. Lato client, `GameClient` avvia un `ThreadRicezione` dedicato all'ascolto asincrono dei messaggi in arrivo, mentre l'interfaccia grafica resta libera di rispondere agli input dell'utente. Poiché più thread accedono contemporaneamente alle stesse strutture condivise (l'elenco dei client connessi e dei nomi), `GameServer` protegge questi accessi rendendo `synchronized` i metodi che li leggono o modificano (`nomeDisponibile`, `aggiungiNome`, `rimuoviNome`, `broadcast`, `rimuoviClient`), evitando così race condition tra il thread di accettazione e i thread dei singoli `ClientHandler`.
 
 ### Socket e/o REST
 
-bla bla bla…
+Tra Socket e REST, l'idea iniziale lasciava aperte entrambe le strade per la **chat multiplayer**; nel progetto è stata scelta l'implementazione a **Socket TCP** (package `Network`, già descritto nella sezione sull'architettura). La scelta è dovuta alla natura stessa della funzionalità: una chat richiede uno scambio di messaggi **continuo e bidirezionale** tra client connessi contemporaneamente, mentre REST è pensato per interazioni **stateless** di tipo richiesta/risposta, meno adatte a notificare in tempo reale un client quando un altro giocatore scrive. Con i socket, invece, ogni client mantiene una connessione TCP persistente col server (`GameServer`/`ClientHandler`), che può quindi fare da subito il **broadcast** di ogni messaggio a tutti i partecipanti non appena arriva, senza dover attendere che i client lo richiedano tramite polling.
 
 # Informazioni sul lavoro di gruppo e sul progetto
 La suddivisione dei compiti all'interno del gruppo è avvenuta in modo concreto, tramite consultazione: ognuno ha scelto di occuparsi delle parti che gli interessavano o in cui si sentiva più a suo agio, senza una vera e propria assegnazione dall'alto. Anche la divisione dei compiti, pur essendo nata in modo naturale e senza una pianificazione rigida, si è rivelata efficace, il che ha reso il lavoro più rapido.
@@ -665,6 +842,7 @@ La suddivisione dei compiti all'interno del gruppo è avvenuta in modo concreto,
 #### Punti di forza e difficoltà
 
 - **Comunicazione efficace:** Il punto di forza principale del gruppo è stata la comunicazione: ci siamo confrontati spesso in chiamata su **Discord**, il che ha reso più semplice tenere tutti allineati sullo stato di avanzamento e risolvere velocemente eventuali dubbi o blocchi.
+  Uno dei punti forti del progetto è stato sicuramente utilizzare i JSON, così i dialoghi sono stati facilmente **modificabili** (nelle fasi di fix), senza che nessuna `TextArea` e `label` di testo vengano alterate.
     
 - **Risoluzione dei conflitti:** La difficoltà principale è stata gestire alcuni conflitti di merge su GitHub, soprattutto nei momenti in cui più persone lavoravano in parallelo su parti del codice che finivano per toccarsi (ad esempio quando modifiche diverse interessavano le stesse classi o gli stessi file di configurazione). Li abbiamo risolti confrontandoci direttamente sulle modifiche prima di integrarle, il che ci ha fatto capire l'importanza di comunicare in anticipo quando si stava per toccare una parte condivisa del codice, piuttosto che scoprirlo solo al momento della pull request. Un altra difficoltà incontrata è stato ritrovarci molto spesso con delle **GodClass**, così da attuare varie separazioni su file paralleli del lavoro che eseguiva un solo file, così da comprendere a pieno quanto sia importante l'**incapsulamento** e la **suddivisione dei compiti** che deve gestire ogni file senza mischiare i compiti di una classe con un altra e astrarre i compiti il più possibile.
 #### Asset esterni e funzionalità accantonate
@@ -673,45 +851,4 @@ La suddivisione dei compiti all'interno del gruppo è avvenuta in modo concreto,
     
 - **Audio:** Per l'audio abbiamo invece attinto a librerie di suoni **free-copyright** reperite su **YouTube**.
     
-- **Idee non implementate:** Tra le funzionalità accantonate per motivi di tempo, la più significativa era l'idea di un **finale alternativo**, che sarebbe dovuto comparire in modo casuale con una probabilità **randomica**, startata ad avvio del gioco molto bassa (circa 1 su 1000). È un'idea che avrebbe aggiunto rigiocabilità al progetto, ma che abbiamo scelto di non implementare per concentrare il tempo a disposizione sulle funzionalità madre del gioco.
-
----
-# NOTE VALUTATIVE e IMPLEMENTATIVE CHE SARANNO TOLTE DA QUESTO FILE, SERVONO SOLO ORA IN VIA DI SVILUPPO
-
-## Idea originale
-L'idea di base è basata sull'ispirazione data dai giochi Monkey Island e Phoenix Wright per un'avventura grafico-testuale.
-### La trama rispetto al codice
-Abbiamo adattato la trama per poter coincidere con le richieste fatte dal professore in termini di 
-* **OOP, Classi e Proprietà:** La spada sincro che si "ricarica del 30% ad ogni enigma" è l'esempio di un oggetto con una proprietà che cambia durante l'avventura.
-* **Enigmi e Thread/Concorrenza:** Per poter calcolare un punteggio, si può utilizzare un thread concorrente all'esecuzione dell'enigma per il calcolo del tempo e del punteggio in base a quest'ultimo.
-* **Gestione chat con Sockets e/o REST:** Per poter parlare con altri giocatori che stanno giocando il gioco (in qualunque punto siano) in modo da poterne interagire o parlare con loro
-* **Mappa e Luoghi:** Il castello, l'ingresso e le montagne verranno trasformate in una mappa strutturata a grafo o a matrice. 
-* **Dialoghi:** L'opzione di scelta multipla (1. Velluto, 2. Seta, ecc.) è utilizzata per semplificare l'interazione nel gioco (rendendolo user-friendly).
-### Architettura del Progetto
-Divideremo in tre categorie il codice:
-#### Package 1: Model (Il Back-end e la Logica)
-* **`Stanza` (Room):** Ha un nome, una descrizione e i collegamenti ad altre stanze.
-* **`Oggetto` (Item):** Interfaccia o classe astratta. Avrà nome, descrizione e uno score (punteggio, solo per la spada).
-* **`Personaggio` (NPC):** Gestisce l'albero dei dialoghi, richiamando opportunamente il suo dialogo prestabilito. Un fantoccio verrà istanziato per poter dare al giocatore i vari oggetti
-* **`Giocatore`:** Contiene la posizione attuale (Stanza corrente) e l'`Inventario`.
-* **`Inventario` (Generics/Lambda):** Usiamo i Generics per la collezione di oggetti. Usa le **Lambda Expression e gli Stream**  per cercare un oggetto (es. `inventario.stream().filter(obj -> obj.getNome().equals("Chiave")).findFirst()`).
-#### Package 2: View (Il Front-end Grafico / SWING)
-* **`MainFrame` (JFrame):** La finestra principale, che verrà divisa in due. 
-1. Un pannello superiore (`ImagePanel`) che mostra lo sfondo della location corrente (come i cancelli del Castello) e (forse) lo sprite del PG presente. 
-2. Un pannello inferiore (`DialogPanel`) contenente una `JTextArea` non modificabile per il testo e un pannello laterale con i pulsanti (`JButton`) per le azioni: "Esamina", "Parla", "Inventario", "Spostati".
-#### Package 3: Controller (L'intermediario)
-* **`GameEngine`:** Inizializza la mappa e gestisce le interazioni. Quando l'utente preme il pulsante "Prendi Tessuto Reale", il Controller riceve l'input dalla View, chiama il metodo sul Model (es. `giocatore.aggiungi(tessuto)`), e poi dice alla View di aggiornare la casella di testo: "Hai recuperato il Tessuto Reale!". (Facendo un esempio)
-## Tecnicismi
-### Gestione Database (JDBC): Salvataggi e Ranking
-Dato che il gioco non finisce mai in modo prematuro, il database avrà una doppia funzione strutturale fondamentale per l'esperienza del giocatore:
-* **Sistema di Salvataggio:** Crea una tabella `Salvataggi`. Quando il giocatore decide di salvare, il database memorizza lo stato esatto di Eryndor: la stanza in cui si trova, gli ID degli oggetti nell'inventario, il punteggio accumulato fino a quel momento.
-* **Punteggi (Hall of Fame):** Crea una tabella `Classifica`. Poiché il punteggio si basa sulla velocità di risoluzione degli enigmi tramite i Thread (meno tempo = più punti), alla fine del gioco, quando Eryndor sposa la Principessa Marien, il punteggio finale totale viene salvato nel DB associato al nome del giocatore, che sarà visualizzabile dopo i titoli di coda.
-### Gestione File (I/O): Il Copione degli NPC
-Nessun dialogo deve essere scritto direttamente nel codice sorgente Java. Questo pulisce il codice e rispetta appieno il requisito dell'uso dei file.
-
-* **File di Testo/JSON:** Creeremo un file dedicato con tutte le battute di Mr.Cooper, Fox, Saggio Clock, Eripeta, David e degli altri personaggi.
-* **Lettura all'Avvio:** Durante il caricamento del gioco, una classe dedicata (ipotizziamo `DialogueLoader`) leggerà il file tramite `BufferedReader` o librerie JSON, salvando i dialoghi in una struttura dati appropriata (come una `HashMap` in cui la chiave è il nome dell'NPC e il valore è la lista delle sue battute).
-### Interfaccia Grafica e Controlli (SWING & Regex)
-* **Puntatore Dinamico (Hotspots):** Sulla `JLabel` o `JPanel` che contiene l'immagine di sfondo, imposteremo un `MouseMotionListener`. Quando le coordinate del mouse entrano in un'"area sensibile" (es. sopra la figura del pescatore o su un oggetto nascosto nell'ambiente ), cambia l'icona del cursore. Un `MouseListener` intercetterà poi il click effettivo.
-* **Frecce Direzionali:** Posizioneremo a schermo quattro pulsanti grafici (NORD, SUD, EST, OVEST), quando il giocatore clicca su uno di essi il pulsante innesca l'azione di spostamento. Simuleremo l'esperienza di una avventura testuale in modalità "ibrida" .
-* **Analisi Testuale (Regex):** Per i momenti in cui è necessario l'input da tastiera (es. digitare la risposta esatta all'enigma N.7 della Principessa), utilizzeremo le Espressioni Regolari (Regex) per creare un parser. Questa permetterà di ignorare spazi extra, maiuscole/minuscole o parole inutili, catturando solo la parola chiave necessaria per risolvere l'enigma.
+- **Idee non implementate:** Tra le funzionalità accantonate per motivi di tempo, la più significativa era l'idea di un **finale alternativo**, che sarebbe dovuto comparire in modo casuale con una probabilità **randomica**, implementabile ad avvio del gioco molto bassa (circa 1 su 1000). È un'idea che avrebbe aggiunto rigiocabilità al progetto, ma che abbiamo scelto di non implementare per concentrare il tempo a disposizione sulle funzionalità madre del gioco.
