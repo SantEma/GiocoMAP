@@ -1,5 +1,5 @@
 # **The Royal Silk Adventure**
-Il progetto è stato presentato dal gruppo **AEG**  per l'**esame di Metodi Avanzati di Programmazione** *M-Z* *A.A. 2025/2026*
+Il progetto è stato presentato dal gruppo **AEG** per l'**esame di Metodi Avanzati di Programmazione** *M-Z* *A.A. 2025/2026*
 ### Componenti
 - **Andrea Milo**
 - **Emanuele Santoruvo**
@@ -20,7 +20,7 @@ Da qui inizia il lungo e tortuoso cammino verso il **castello**, che avrà diver
 
 Avventuratevi e scoprite se il nostro protagonista riuscirà a raggiungere il suo obiettivo, e qual è il suo **vero obiettivo….**
 
-Per consultare la **trama completa nel suo sviluppo** e visualizzare gli **enigmi con la loro soluzione** e spiegazione matematica, visualizzare il file [**Trama.md**](Idee%20trama/Trama.md)
+Per consultare la **trama completa nel suo sviluppo** e visualizzare gli **enigmi con la loro soluzione** e spiegazione matematica, visualizzare il file [**Trama.md**](Trama.md)
 # Progettazione
 Le classi sono state individuate a partire da un'analisi del **dominio del problema** e dei **casi d'uso** del gioco.
 
@@ -60,7 +60,7 @@ L'idea base è stata quella di massimizzare la **coesione interna**  e minimizza
 - Oltre alle classi mostrate, il package comprende alcune classi di supporto al controller: **`StatoProgressione`** conserva lo stato di avanzamento della partita e si appoggia all'enum **`StatoStoria`**, che elenca in ordine le tappe narrative; **`CostruttoreScene`** costruisce le scene di gioco (sfondi, personaggi, enigmi) ed è usata da `ProgressioneStoria`, mentre **`FlussiNarrativi`** gestisce le sequenze narrative complesse ed è composta da `CostruttoreScene`. **`MusicPlayer`**, infine, riproduce le tracce audio ed è richiamata dal `GameEngine`, senza dipendere da altre classi del progetto.
 
 #### Model — dominio
-Esistono vari package Model che gestiscono logiche di back in base al compito da svolgere, favorendo così l'**incapsuletion hiding**, di seguito vengono riportati con le loro classi:
+Esistono vari package Model che gestiscono logiche di back-end in base al compito da svolgere, favorendo così l'**incapsulamento** (*information hiding*); di seguito vengono riportati con le loro classi:
 
 - **Enigmi (`Model.Enigmi`)**:
 	- **`Enigma`** *(astratta)*:  Definisce lo stato comune (`id`, `testo`, `aiuti`, `reward`, `risolto`) e la risposta `verifica(risposta)`, lasciato astratto perché ogni tipo di enigma valida la risposta in modo diverso (**polimorfismo**).
@@ -69,7 +69,7 @@ Esistono vari package Model che gestiscono logiche di back in base al compito da
 	- **`EnigmaOrdinamento`**: enigma in cui va ricostruito l'ordine corretto (es. sequenza di vestiti), con `verificaPosizione` per la validazione parziale.
 	- Il package include anche **`IstanzaEnigma`**, che funge da costruttore concreto degli enigmi: carica testi e aiuti dai file JSON (tramite `JsonLoader`) e istanzia il tipo di `Enigma` appropriato, restituendo l'oggetto `Oggetto` da assegnare come ricompensa.
 
-* **Giocatore (`Model.Giocatore`)**
+- **Giocatore (`Model.Giocatore`)**
 
 	- **`Giocatore`**: rappresenta lo **stato del giocatore**: nome, possesso di mappa/inventario, insieme degli enigmi risolti. Espone le operazioni sul progresso (`aggiungiEnigmaRisolto`, `isEnigmaRisolto`) e possiede un `Inventario`.
 	- **`Inventario<T>`**: collezione **generica** di oggetti posseduti dal giocatore (aggiunta/rimozione/ricerca).
@@ -82,7 +82,7 @@ Esistono vari package Model che gestiscono logiche di back in base al compito da
 
 - **Personaggi (`Model.Personaggi`)**
 
-	- **`Entità`** *(astratta)*: base di tutti i personaggi, incapsula il `nome`.
+	- **`Entity`** *(astratta)*: base di tutti i personaggi, incapsula il `nome`.
 	- **`Personaggio`**: NPC con albero di dialoghi: gestisce l'avanzamento delle battute (`parla`, `setDialoghi`, `resetDialogo`).
 	- **`Fantoccio`**: personaggio "muto"/decorativo, specializzazione minimale di `Personaggio`
 
@@ -101,12 +101,12 @@ Esistono vari package Model che gestiscono logiche di back in base al compito da
 - **`DialogueScreen`**: schermata di **dialogo/enigma**: mostra testo, opzioni e aiuti e raccoglie la risposta del giocatore.
 - **`InventarioPanel` / `MappaPanel`**: overlay per **inventario** e **mappa**, mostrati sopra la scena corrente e gestiti dal `SceneManager`.
   
-![alt text|505](InventarioSenzaDescrizione.png)
-![alt text|626](Mappa%201.png)
+![[InventarioSenzaDescrizione.png|505]]
+![[Mappa 1.png|626]]
 
 - **`ChatPanel`**: pannello grafico della **chat multiplayer**: area messaggi, campo di input e invio. Fa da ponte tra la View e il `GameClient` del package Network.
 
-![alt text|697](ProvaDiChatting%201.png)
+![[ProvaDiChatting 1.png|697]]
 
 #### Network — `aeg.giocomap.Network`
 Modulo autonomo che implementa una **chat multiplayer** con architettura **client-server su socket TCP**.
@@ -137,7 +137,7 @@ Raccolta di classi di supporto trasversali, senza logica di dominio:
 
 ## Diagramma delle classi
 
-[Cliccare qui per visualizzare l’UML.](UML%20e%20design/UML%20delle%20classi.png)
+[Cliccare qui per visualizzare l’UML.](UML%20e%20immagini/UML%20delle%20classi.png)
 
 Il diagramma delle classi rappresenta la struttura del sistema: le classi, i loro attributi e metodi e le relazioni che le legano. Si è fatto uso dei principali meccanismi della progettazione a oggetti **astrazione**, **classi astratte**, **ereditarietà**, **interfacce** e **composizione** (insieme alle altre forme di associazione), descritti di seguito.
 
@@ -149,7 +149,7 @@ Infine, le **relazioni tra le classi** sono state modellate con diversi gradi di
 - legami forti di **composizione**, utilizzati quando un elemento dipende vitalmente da un altro e ne condivide il ciclo di vita (come il `Giocatore` che genera e possiede il proprio `Inventario`).
 - Si passa poi all'**aggregazione**, utile per raggruppare elementi che mantengono una loro esistenza autonoma (come gli oggetti che vengono semplicemente raccolti o eliminati momentaneamente). 
 - Connessioni più deboli e momentanee, definite di **dipendenza** o **associazione**.
-  Queste ultime servono per **scambi temporanei di dati che non richiedono un legame fisso**. Un chiaro esempio è la risoluzione delle sfide: la classe astratta `Enigma` produce il risultato limitandosi a esporre metodi come `verifica(String risposta)`, `getId()` e `getReward()`, ma non conosce né tiene riferimenti a classi come `GameStatistics` o all'`Inventario`. A sua volta, `GameStatistics` consuma il risultato per calcolare il punteggio tramite il metodo `enigmaRisolto(Enigma)`, non mantiene un campo persistente per l'enigma, ma lo riceve solo come parametro al volo, ne estrae i dati utili (come la ricompensa o il timer) e lo scarta. In modo del tutto simile, l'`Inventario<T Oggetto extends>` incamera la ricompensa tramite il metodo `aggiungiOggetto(T oggetto)`, invocato passandogli l'oggetto transitoriamente.
+  Queste ultime servono per **scambi temporanei di dati che non richiedono un legame fisso**. Un chiaro esempio è la risoluzione delle sfide: la classe astratta `Enigma` produce il risultato limitandosi a esporre metodi come `verifica(String risposta)`, `getId()` e `getReward()`, ma non conosce né tiene riferimenti a classi come `GameStatistics` o all'`Inventario`. A sua volta, `GameStatistics` consuma il risultato per calcolare il punteggio tramite il metodo `enigmaRisolto(Enigma)`, non mantiene un campo persistente per l'enigma, ma lo riceve solo come parametro al volo, ne estrae i dati utili (come la ricompensa o il timer) e lo scarta. In modo del tutto simile, l'`Inventario<T extends Oggetto>` incamera la ricompensa tramite il metodo `aggiungiOggetto(T oggetto)`, invocato passandogli l'oggetto transitoriamente.
   
   Il ruolo di far dialogare queste componenti è affidato a classi orchestratrici come `CostruttoreScene` e `FlussiNarrativi`: sono loro a fungere da mediatori creando l'enigma, chiamando il metodo `verifica()`, funzione astratta che verifica la correttezza della soluzione, adattato in base alla tipologia d'enigma (inserimento, testuale, scelta multipla) e, in caso di esito positivo, invocando le funzioni opportune del Controller (come `engine.getStatistics().enigmaRisolto(enigma)` e `inventario.aggiungiOggetto(...)`).
 ## Specifica algebrica
@@ -162,17 +162,17 @@ Il tipo parametro _tipoelem_ è istanziato con **Oggetto (`Inventario<T extends 
 
 - **Operazioni:**
 
-	• `creainsieme () -> insieme`
+	- `creainsieme () -> insieme`
 
-	• `insiemevuoto (insieme) -> boolean`
+	- `insiemevuoto (insieme) -> boolean`
 
-	• `appartiene (insieme, tipoelem) -> boolean`
+	- `appartiene (insieme, tipoelem) -> boolean`
 
-	• `inserisci (insieme, tipoelem) -> insieme`
+	- `inserisci (insieme, tipoelem) -> insieme`
 
-	• `cancella (insieme, tipoelem) -> insieme`
+	- `cancella (insieme, tipoelem) -> insieme`
 
-	• `uguale (insieme, insieme) -> boolean`
+	- `uguale (insieme, insieme) -> boolean`
 #### Specifica semantica
 
 **Dichiarazione variabili da usare:**
@@ -257,7 +257,7 @@ Si verifica che ogni singolo elemento estratto dal primo insieme appartenga al s
 Le **Generics** nel progetto vengono utilizzate per estendere le **liste e le mappe** nel gioco così da non far prendere qualsiasi tipo di dato dalle `HashMap` ma per definire esattamente che tipo di dato deve contenere la **collezione di dati** e senza fare il **casting** dal tipo oggetto al tipo corretto.
 Un esempio lo si trova nella **gestione della mappa e delle uscite** nel file `Stanza.java`:
 
-``` JAVA
+```JAVA
 private final Map<String, Stanza> uscite;
 // ...
 public void impostaUscita(String direzione, Stanza stanza) {
@@ -303,7 +303,7 @@ public class Inventario<T extends Oggetto> {
 }
 ```
 
-Alla luca di questa implementazione se torniamo ad analizzare `Giocatore` e specificamente in questa sezione di codice:
+Alla luce di questa implementazione se torniamo ad analizzare `Giocatore` e specificamente in questa sezione di codice:
 
 ```JAVA
 import aeg.giocomap.Model.Oggetti.Oggetto;
@@ -447,7 +447,7 @@ Ogni riga del file rappresenta un oggetto nel formato `id;nome;descrizione` (es.
 #### PNG
 Le **immagini** sono basati sulla libreria standard `javax.imageio.ImageIO`. Il caricamento è **dinamico**, dove il nome del file non è scritto nel codice ma viene costruito a runtime a partire da un **dato di gioco**. Lo si vede bene in `InventarioPanel`, dove lo *sprite* di ogni oggetto viene recuperato usando il nome dell'oggetto stesso come nome del file:
 
-```java
+```JAVA
 String nomeFileImmagine = obj.getNomeOggetto() + ".png";
 InputStream is = getClass().getResourceAsStream("/sprites/Oggetti/" + nomeFileImmagine);
 
@@ -514,23 +514,20 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 ```
- 
- Essi sono le librerie per utilizzare il linguaggio di **interrogazione SQL**.
- Ma per far funzionare il DB di H2 che lavora in maniera locale, abbiamo dovuto comunque inserire nelle **dipendenze** di maven (`pom.xml`) la struttura di h2:
- 
- ```xml
- <dependencies>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.200</version>
-        </dependency>
-        
-        ...
-        
- ```
- 
- La connessione al DB avviene tramite il comando `DriverManager.getConnection("jdbc:h2:./saves/DB")` all'interno dell'apposito metodo privato:
+Essi sono le librerie per utilizzare il linguaggio di **interrogazione SQL**.
+Ma per far funzionare il DB di H2 che lavora in maniera locale, abbiamo dovuto comunque inserire nelle **dipendenze** di Maven (`pom.xml`) la struttura di H2:
+
+```XML
+<dependencies>
+    <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>1.4.200</version>
+    </dependency>
+    ...
+```
+
+La connessione al DB avviene tramite il comando `DriverManager.getConnection("jdbc:h2:./saves/DB")` all'interno dell'apposito metodo privato:
 
 ```JAVA
 // Funzione che connette al Database e crea/aggiorna le tabelle
@@ -638,7 +635,7 @@ L'uso principale del DB è stato quello di creare i dati di un giocatore in caso
 
 può rientrare nella partita nel punto in cui era rimasto, poiché nelle colonne del DB vengono **salvate le seguenti colonne**, importanti per tenere traccia del punto in cui vi si è fermati nella storia: `stanza_attuale, stato_city, possiede_mappa, enigmi_risolti, inventario, primo_accesso_palazzo, carica_spada`, tutte controllate rigorosamente dalla funzione `loadGame()` presente sempre in `ModelDB` al momento dell'avvio del gioco (da `avvioGioco()` di `GameEngine`) tramite il tasto predisposto.
 
-### Lamba Expression (compresi stream e pipeline)
+### Lambda Expression (compresi stream e pipeline)
 
 Le **Lambda Expression** vengono usate nel progetto principalmente per **sostituire le classi anonime** nell'implementazione delle *interfacce funzionali* (interfacce con un solo metodo astratto), sia quelle native di Java (`Runnable`, `Consumer<T>`) sia negli `ActionListener`, rendendo il codice più compatto quando si devono passare **comportamenti** da un metodo all'altro.
 
@@ -660,7 +657,7 @@ public T cercaOggetto(String nome) {
 Qui si nota una vera e propria **pipeline**: la `List<T>` viene trasformata in uno `Stream<T>` tramite `.stream()`, il quale viene **filtrato** con una _lambda_ (`obj -> obj.getNomeOggetto().equalsIgnoreCase(nome)`) che scarta tutti gli oggetti il cui nome non corrisponde, per poi richiamare `.findFirst`, metodo usato grazie all'import della libreria `util.stream.Stream`, che restituisce un `Optional<T>` col primo elemento rimasto (se esiste), gestito subito con `.orElse(null)` per non dover gestire esplicitamente l'`Optional` in tutto il resto del codice. Questo metodo viene poi richiamato ovunque nel gioco, serve a controllare se un oggetto è già in inventario (es. `aggiungiOggetto`) o per recuperarlo prima di rimuoverlo, come accade nella scena con Fox.
 #### Runnable e dialoghi a catena
 
-La maggior parte delle **lambda** del progetto, però, non riguarda gli `Stream`, ma l'uso di `Runnable` come **callback**, per concatenare più dialoghi ed eventi di gioco uno dopo l'altro, usata come se fosse una **pipeline di eventi**: ogni schermata di dialogo, una volta chiusa dal giocatore, esegue il `Runnable` che le è stato passato, il quale a sua volta può aprirne un'altra con un nuovo `Runnable` agganciato, e così via con tutte le altri che si susseguono. 
+La maggior parte delle **lambda** del progetto, però, non riguarda gli `Stream`, ma l'uso di `Runnable` come **callback**, per concatenare più dialoghi ed eventi di gioco uno dopo l'altro, usata come se fosse una **pipeline di eventi**: ogni schermata di dialogo, una volta chiusa dal giocatore, esegue il `Runnable` che le è stato passato, il quale a sua volta può aprirne un'altra con un nuovo `Runnable` agganciato, e così via con tutte le altre che si susseguono. 
 Il cuore di questo meccanismo è in `GameEngine.mostraDialogoCallback`:
 
 ```JAVA
@@ -772,7 +769,7 @@ In questo modo più *lambda* annidate possono condividere e aggiornare nel tempo
 ![[AvviaPopupVestiti.png]]
 ### SWING
 
-L'idea iniziale prevedeva tre meccanismi **Swing** distinti per rendere l'avventura grafico-testuale interattiva: un puntatore dinamico sulle zone sensibili, delle frecce direzionali per lo spostamento e un parser a **Regex** per l'input da tastiera. Tutti e tre sono stati effettivamente realizzate nel progetto.
+L'idea iniziale prevedeva tre meccanismi **Swing** distinti per rendere l'avventura grafico-testuale interattiva: un puntatore dinamico sulle zone sensibili, delle frecce direzionali per lo spostamento e un parser a **Regex** per l'input da tastiera. Tutti e tre sono stati effettivamente realizzati nel progetto.
 #### Puntatore dinamico (hotspot)
 La classe `CursorUtil` (package `Util`) espone il metodo `registraZone(JPanel panel, Map<double[], Runnable> zone)`, richiamato da ogni `GameScreen` per registrare le proprie **zone cliccabili**. Un `MouseMotionAdapter` intercetta `mouseMoved` e, se il cursore entra in una delle zone, cambia l'icona in `Cursor.HAND_CURSOR` (altrimenti resta `Cursor.DEFAULT_CURSOR`); un `MouseAdapter` separato gestisce `mouseClicked`, ricalcola la stessa zona ed esegue il `Runnable` associato:
 
@@ -794,7 +791,7 @@ panel.addMouseMotionListener(new MouseMotionAdapter() {
 ```
 
 Le zone non sono coordinate assolute in pixel ma **percentuali** (`{xPerc, yPerc, wPerc, hPerc}`), ricalcolate rispetto all'area dell'immagine di sfondo: questo permette alle zone cliccabili di restare correttamente posizionate anche quando la finestra viene **ridimensionata**.
-Le coordinate in fase di debug le prendavamo dall'**interfaccia** `CoordinateDebuggable` 
+Le coordinate in fase di debug le prendevamo dall'**interfaccia** `CoordinateDebuggable`.
 #### Marcatore di posizione sulla mappa
 Quando si apre la mappa (overlay `MappaPanel`, tasto **M**), sopra l'immagine della mappa viene disegnato anche un piccolo **marcatore** (`Posizione.png`) che indica in quale stanza si trova attualmente il giocatore, caricato come `BufferedImage` e ridisegnato ad ogni `paintComponent`:
 
@@ -820,7 +817,7 @@ Va precisato che non si tratta di un `Cursor` del mouse personalizzato (nel prog
 
 ![[PosizioneMappa.png]]
 #### Frecce direzionali
-`MainFrame` istanzia quattro `JButton` dedicati (`btnNord`, `btnSud`, `btnEst`, `btnOvest`), posizionati come overlay fisso sul `JLayeredPane` tramite `impostaFrecceLogica()`, e li espone tramite `setFrecceListener(ActionListener nord, sud, est, ovest)`. La logica di navigazione vera e propria, però, non risiede nella View ma nel Controller: è `NavigazioneMappa.impostaFrecceLogica()` a collegare ai quattro bottoni le rispettive callback, ciascuna delle quali invoca `eseguiCollegamento(CostantiMappa.NORD/SUD/EST/OVEST)` per determinare la stanza successiva.
+`MainFrame` istanzia quattro `JButton` dedicati (`btnNord`, `btnSud`, `btnEst`, `btnOvest`), posizionati come overlay fisso sul `JLayeredPane` tramite `impostaFrecceDirezionali()`, e li espone tramite `setFrecceListener(ActionListener nord, sud, est, ovest)`. La logica di navigazione vera e propria, però, non risiede nella View ma nel Controller: è `NavigazioneMappa.impostaFrecceLogica()` a collegare ai quattro bottoni le rispettive callback, ciascuna delle quali invoca `eseguiCollegamento(CostantiMappa.NORD/SUD/EST/OVEST)` per determinare la stanza successiva.
 #### Analisi testuale (Regex)
 La classe `Parser` (package `Util`) usa `java.util.regex.Pattern`/`Matcher` nel metodo `contieneRadiceParola(String input, String pattern)`: costruisce dinamicamente un'espressione regolare inserendo `\s*` opzionale tra ogni lettera del pattern (per tollerare spazi extra digitati dal giocatore) e, se il pattern termina con `*`, aggiunge un suffisso libero `\w*` per accettare variazioni della parola (gestito principalmente per i plurali):
 
@@ -854,7 +851,20 @@ public void mostraPannello(JComponent newPanel){
 }
 ```
 
-Gli elementi che devono restare **sempre visibili** a prescindere dalla scena (bottone chat, frecce direzionali) non vivono nel `contentPane` appena svuotato, ma nel `JLayeredPane` del frame (`getLayeredPane()`), tutti sul livello `JLayeredPane.POPUP_LAYER`: in questo modo sopravvivono a ogni `removeAll()` e restano sempre sopra alla scena corrente. Il frame usa anche un `glassPane` dedicato per un effetto di transizione ("lampo" a schermo intero con dissolvenza), completamente separato dal `JLayeredPane` e approfondito nella prossima sottosezione.
+Gli elementi che devono restare **sempre visibili** a prescindere dalla scena (bottone chat, frecce direzionali) non vivono nel `contentPane` appena svuotato, ma nel `JLayeredPane` del frame (`getLayeredPane()`), tutti sul livello `JLayeredPane.POPUP_LAYER`: in questo modo sopravvivono a ogni `removeAll()` e restano sempre sopra alla scena corrente. Il frame usa anche un `glassPane` dedicato per un effetto di transizione ("lampo" a schermo intero con dissolvenza), completamente separato dal `JLayeredPane` e approfondito nella sottosezione sulle animazioni.
+
+La gestione di **quale** pannello mostrare è affidata a `SceneManager`, che mantiene una cache (`Map<String, JComponent> sceneCache`) popolata una sola volta all'avvio tramite `registraScena(...)`: aprire la mappa o l'inventario (`apriMappa()`, `apriInventario()`) non crea una nuova istanza del pannello, ma pesca quella già esistente dalla cache e la passa a `mostraPannello(...)`, salvando la scena precedente per poterla ripristinare alla chiusura. Fa eccezione la `ChatPanel`, creata alla prima apertura (sia in `GameNetwork.toggleChat()` come host, sia in `connettiComeClient(...)` come client) e poi riutilizzata allo stesso modo per le aperture successive, dopo che viene mostrato l'**IP address da inserire**.
+Gestiamo tramite il **LayeredPane** la disposizione di una griglia a livelli, così da inserire le immagini e testi in questo ordine:
+$Sfondo<Immagine\ personaggio<Testo\ di \ dialogo$
+In merito a ciò lo analizziamo nella seguente descrizione:
+#### Composizione a livelli
+La schermata di dialogo estende direttamente `JLayeredPane` e sovrappone tre componenti su livelli semanticamente coerenti con Swing: lo sfondo della scena sottostante, lo sprite del personaggio sopra di esso, e il box di testo del dialogo in primo piano:
+
+```JAVA
+this.add(scena_stanza, JLayeredPane.DEFAULT_LAYER);  // sfondo (GameScreen)
+this.add(panelSpritePG, JLayeredPane.PALETTE_LAYER);  // sprite del personaggio
+this.add(boxDialogo, JLayeredPane.MODAL_LAYER);       // box di testo
+```
 #### Animazioni con `javax.swing.Timer`
 Diverse animazioni del progetto danno l'impressione di girare "in background", ma sono in realtà interamente `javax.swing.Timer`: lo scorrimento dei titoli di coda in `TitoliDiCoda`, la dissolvenza del testo e dell'orologio in `SchermataFinale` e l'effetto "**lampo arcobaleno**" del `glassPane` in `MainFrame`, quest'ultimo realizzato incatenando più `Timer` in sequenza:
 
@@ -871,22 +881,9 @@ fadeIn.addActionListener(e -> {
 fadeIn.start();
 ```
 
-Questa tecnica è stata pensata volutamente per restare **dentro Swing**. Per una semplice animazione grafica (una dissolvenza, uno scorrimento di testo non serve un thread indipendente: basta far scandire il tempo da un `Timer` che, a ogni tick, aggiorna un valore (opacità, posizione verticale) e richiede un nuovo `repaint()`, rimanendo un meccanismo puramente **Swing**.
-
-La gestione di **quale** pannello mostrare è affidata a `SceneManager`, che mantiene una cache (`Map<String, JComponent> sceneCache`) popolata una sola volta all'avvio tramite `registraScena(...)`: aprire la mappa o l'inventario (`apriMappa()`, `apriInventario()`) non crea una nuova istanza del pannello, ma pesca quella già esistente dalla cache e la passa a `mostraPannello(...)`, salvando la scena precedente per poterla ripristinare alla chiusura. Fa eccezione la `ChatPanel`, creata alla prima apertura (sia in `GameNetwork.toggleChat()` come host, sia in `connettiComeClient(...)` come client) e poi riutilizzata allo stesso modo per le aperture successive, dopo che viene mostrato l'**IP address da inserire**.
-Gestiamo tramite il **LayeredPane** la disposizione di una griglia a livelli, così da inserire le immagini e testi in questo ordine:
-$Sfondo<Immagine\ personaggio<Testo\ di \ dialogo$
-In merito a ciò lo analizziamo nella seguente descrizione:
-#### Composizione a livelli
-La schermata di dialogo estende direttamente `JLayeredPane` e sovrappone tre componenti su livelli semanticamente coerenti con Swing: lo sfondo della scena sottostante, lo sprite del personaggio sopra di esso, e il box di testo del dialogo in primo piano:
-
-```JAVA
-this.add(scena_stanza, JLayeredPane.DEFAULT_LAYER);  // sfondo (GameScreen)
-this.add(panelSpritePG, JLayeredPane.PALETTE_LAYER);  // sprite del personaggio
-this.add(boxDialogo, JLayeredPane.MODAL_LAYER);       // box di testo
-```
+Questa tecnica è stata pensata volutamente per restare **dentro Swing**. Per una semplice animazione grafica (una dissolvenza, uno scorrimento di testo) non serve un thread indipendente: basta far scandire il tempo da un `Timer` che, a ogni tick, aggiorna un valore (opacità, posizione verticale) e richiede un nuovo `repaint()`, rimanendo un meccanismo puramente **Swing**.
 #### Ridimensionamento responsive
-La finestra parte non massimizzata ma resta **ridimensionabile** fino a una dimensione minima (`setMinimumSize(1024, 768)`). Un `ComponentAdapter` registrato sul `rootPane` intercetta ogni ridimensionamento e riposiziona gli elementi fissi:
+Il costruttore di `MainFrame` **richiede** l'avvio a finestra massimizzata tramite `setExtendedState(JFrame.MAXIMIZED_BOTH)`, ma questa è solo una richiesta al *window manager* del sistema operativo, che non tutti onorano allo stesso modo: nei nostri test l'avvio realmente massimizzato avviene su **Ubuntu**, mentre su altri sistemi la finestra parte a dimensione normale e va massimizzata manualmente. In ogni caso la finestra resta **ridimensionabile** fino a una dimensione minima garantita (`setMinimumSize(1024, 768)`), ed è proprio per questa variabilità che tutto il layout è stato reso responsive: un `ComponentAdapter` registrato sul `rootPane` intercetta ogni ridimensionamento e riposiziona gli elementi fissi:
 
 ```JAVA
 getRootPane().addComponentListener(new ComponentAdapter() {
@@ -934,7 +931,7 @@ public int getSecondi() {
 }
 ```
 
-L'unico `javax.swing.Timer` presente in `TimerEnigma` serve solo per un ticchettio periodico di debug (stampa in console), eseguito sull'**Event Dispatch Thread**, e non introduce concorrenza reale; `GameStatistics.calcolaPunti()` assegna poi il punteggio in base a delle fasce di secondi trascorsi, in modo anch'esso interamente sincrono (Il punteggio è presente nel ReadMe.md, presente su github).
+L'unico `javax.swing.Timer` presente in `TimerEnigma` serve solo per un ticchettio periodico di debug (stampa in console), eseguito sull'**Event Dispatch Thread**, e non introduce concorrenza reale; `GameStatistics.calcolaPunti()` assegna poi il punteggio in base a delle fasce di secondi trascorsi, in modo anch'esso interamente sincrono (le fasce di punteggio sono riportate nel `README.md` del repository GitHub).
 
 La vera **programmazione concorrente** del progetto si trova invece nel modulo di rete (package `Network`), dove più **thread** lavorano realmente in parallelo per gestire la chat **multiplayer**. `GameServer` si avvia come `Runnable` su un thread dedicato (`new Thread(this).start()`) che resta in ascolto di nuove connessioni; per **ogni client** che si collega viene creato un `ClientHandler` eseguito a sua volta su un proprio thread (`new Thread(handler).start()`), così che i messaggi di più giocatori vengano letti in parallelo senza bloccarsi a vicenda. Lato client, `GameClient` avvia un `ThreadRicezione` dedicato all'ascolto asincrono dei messaggi in arrivo, mentre l'interfaccia grafica resta libera di rispondere agli input dell'utente. Poiché più thread accedono contemporaneamente alle stesse strutture condivise (l'elenco dei client connessi e dei nomi), `GameServer` protegge questi accessi rendendo `synchronized` i metodi che li leggono o modificano (`nomeDisponibile`, `aggiungiNome`, `rimuoviNome`, `broadcast`, `rimuoviClient`), evitando così race condition tra il thread di accettazione e i thread dei singoli `ClientHandler`.
 
@@ -953,7 +950,7 @@ while ((raw = input.readLine()) != null) {
 
 La disconnessione di un client viene gestita in **due modi**: esplicitamente, quando arriva un messaggio applicativo `LEAVE` (il giocatore chiude la chat volontariamente); oppure implicitamente, quando `readLine()` ritorna `null` o lancia una `IOException` (connessione caduta, client crashato) — in quel caso è il blocco `finally` a richiamare comunque `disconnetti()`, che rimuove il client dalle strutture condivise di `GameServer` (`rimuoviNome`, `rimuoviClient`) e chiude il **socket**. `ClientHandler` non dichiara mai `synchronized` su di sé: si appoggia interamente ai metodi `synchronized` già esposti da `GameServer` per toccare in sicurezza le liste condivise.
 
-Nel progetto l'unico modo per farlo terminare un thread è in modo indiretto, chiudendo il `Socket` condiviso (`GameClient.disconnetti()`), il che fa fallire la `readLine()` bloccante con una `IOException` catturata nel `run()`. Allo stesso modo, se il server si interrompe in modo anomalo (crash, non tramite `GameServer.ferma()`), `GameClient` riceve una notifica, vedendo che l'host è uscito dalla stanza.
+Nel progetto l'unico modo per far terminare un thread è indiretto: chiudendo il `Socket` condiviso (`GameClient.disconnetti()`), la `readLine()` bloccante fallisce con una `IOException` catturata nel `run()`. Se invece è il server a fermarsi volontariamente (`GameServer.ferma()`), i client ricevono la notifica applicativa `LEAVE` con mittente `"SERVER"`, vedendo che l'host è uscito dalla stanza; in caso di interruzione anomala (crash), il thread di ricezione termina comunque per la chiusura dello stream, ma senza alcuna notifica esplicita.
 
 Un caso concreto per capire quanti thread lavorano in parallelo: quando un giocatore avvia la chat come **host**, `GameNetwork.toggleChat()` avvia sia un `GameServer` sia un `GameClient` locale connesso a `127.0.0.1`, così che l'host possa scambiare messaggi con lo stesso protocollo usato dai client remoti:
 
@@ -1032,7 +1029,7 @@ La suddivisione dei compiti all'interno del gruppo è avvenuta in modo concreto,
 - **Comunicazione efficace:** Il punto di forza principale del gruppo è stata la comunicazione: ci siamo confrontati spesso in chiamata su **Discord**, il che ha reso più semplice tenere tutti allineati sullo stato di avanzamento e risolvere velocemente eventuali dubbi o blocchi.
   Uno dei punti forti del progetto è stato sicuramente utilizzare i JSON, così i dialoghi sono stati facilmente **modificabili** (nelle fasi di fix), senza che nessuna `TextArea` e `label` di testo vengano alterate.
     
-- **Risoluzione dei conflitti:** La difficoltà principale è stata gestire alcuni conflitti di merge su GitHub, soprattutto nei momenti in cui più persone lavoravano in parallelo su parti del codice che finivano per toccarsi (ad esempio quando modifiche diverse interessavano le stesse classi o gli stessi file di configurazione). Li abbiamo risolti confrontandoci direttamente sulle modifiche prima di integrarle, il che ci ha fatto capire l'importanza di comunicare in anticipo quando si stava per toccare una parte condivisa del codice, piuttosto che scoprirlo solo al momento della pull request. Un altra difficoltà incontrata è stato ritrovarci molto spesso con delle **GodClass**, così da attuare varie separazioni su file paralleli del lavoro che eseguiva un solo file, così da comprendere a pieno quanto sia importante l'**incapsulamento** e la **suddivisione dei compiti** che deve gestire ogni file senza mischiare i compiti di una classe con un altra e astrarre i compiti il più possibile.
+- **Risoluzione dei conflitti:** La difficoltà principale è stata gestire alcuni conflitti di merge su GitHub, soprattutto nei momenti in cui più persone lavoravano in parallelo su parti del codice che finivano per toccarsi (ad esempio quando modifiche diverse interessavano le stesse classi o gli stessi file di configurazione). Li abbiamo risolti confrontandoci direttamente sulle modifiche prima di integrarle, il che ci ha fatto capire l'importanza di comunicare in anticipo quando si stava per toccare una parte condivisa del codice, piuttosto che scoprirlo solo al momento della pull request. Un'altra difficoltà incontrata è stata ritrovarci molto spesso con delle **GodClass**, così da attuare varie separazioni su file paralleli del lavoro che eseguiva un solo file, così da comprendere a pieno quanto sia importante l'**incapsulamento** e la **suddivisione dei compiti** che deve gestire ogni file senza mischiare i compiti di una classe con un altra e astrarre i compiti il più possibile.
 #### Asset esterni e funzionalità accantonate
 
 - **Grafica:** Per quanto riguarda la parte grafica, le immagini di base sono state reperite su **Pinterest** e poi ritoccate tramite **AI generativa** per adattarle allo stile e alle esigenze del gioco, purtroppo nessuno del team sa disegnare e volevamo tanto fare la parte grafica.
