@@ -75,3 +75,5 @@ Per avviare correttamente il gioco, assicurarsi di avere installati sul proprio 
     *   *Avvertenza per il Firewall:* Per il corretto funzionamento in una rete locale (LAN) tra macchine fisicamente diverse, assicurarsi che il firewall del computer Host consenta le connessioni in entrata sulla porta **12345**. Altrimenti si può provare tramite *VPN* o tramite software che simulino la rete locale.
 
 Un'altra piccola nota tecnica meno importante, anche se nei contributors sono segnate 4 persone, due sono la stessa persona. MiloMilu e AndreaMilo sono la stessa persona, solamente che per motivi di spostamenti ho dovuto accedere per una commit da un dispositivo diverso.
+
+Inoltre consigliamo vivamente di scaricare tutto il progetto per vedere i link inseriti nei file `.md` poiché usano i collegamenti formattati in stile obsidian, dato che abbiamo usato questo software di editor markdown per la stesura dei file di testo
