@@ -73,3 +73,5 @@ Per avviare correttamente il gioco, assicurarsi di avere installati sul proprio 
     *   Il primo giocatore che apre la chat diventa automaticamente il server (**Host**) e gli verrà riservato il nome "Eryndor". Il gioco calcolerà e mostrerà a schermo il suo indirizzo IP locale.
     *   Gli altri giocatori (Client) dovranno selezionare "Partecipa alla Chat", inserire l'indirizzo IP dell'Host e scegliere un nome utente non duplicato e diverso da "Eryndor".
     *   *Avvertenza per il Firewall:* Per il corretto funzionamento in una rete locale (LAN) tra macchine fisicamente diverse, assicurarsi che il firewall del computer Host consenta le connessioni in entrata sulla porta **12345**. Altrimenti si può provare tramite *VPN* o tramite software che simulino la rete locale.
+
+Un'altra piccola nota tecnica meno importante, anche se nei contributors sono segnate 4 persone, due sono la stessa persona. MiloMilu e AndreaMilo sono la stessa persona, solamente che per motivi di spostamenti ho dovuto accedere per una commit da un dispositivo diverso.
