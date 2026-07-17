@@ -28,7 +28,7 @@ Sono lieto di invitarvi al palazzo reale con lo scopo di rendere uno di voi il m
 
 ---
 #### Fase della città col porto
-Il protagonista non conosce la via per andare verso il castello ma si accorge che dietro la lettera è presente un **indovinello**. Vedere enigma N.1
+Il protagonista non conosce la via per andare verso il castello ma si accorge che dietro la lettera è presente un **indovinello**. Vedere [[#Enigma N.1]]
 
 Il protagonista arrivato al porto della città vedrà tante persone portuali, ma la sua attenzione si soffermerà su questa strana creatura. E' un costrutto ideato dal Re in persona che sta analizzando tutti gli arrivati per capire chi sono i mercanti che hanno risolto la prima prova.
 	
@@ -61,7 +61,7 @@ Arrivato al porto e parlando con il negozio ittico, che prima era chiuso se si p
 *   **Eryndor**: *"Dirà che è qui per la cena di Green"*
 *   **Pescivendolo**: *"Ah ma certo certo... Solo che devi sapere, -mi vergogno a dirlo-, sono analfabeta e dovrei capire assolutamente come risolvere questo problema presente su questo foglio. Ma non so leggere, potresti risolverlo per me è molto importante e personale. Mia figlia mi accetterà nuovamente a casa se gli dimostro un minimo di istruzione."*
 
-Il protagonista deve risolvere l'indovinello N.2 per acquistare la cena di Green.
+Il protagonista deve risolvere [[#Enigma N.2]] per acquistare la cena di Green.
 Risolto l'enigma ottiene la cena, va a dare la cena a Green che gli da le carote e le porta a Cooper.
 A questo punto Cooper gli da la carrozza e il protagonista può dirigersi al Bosco Losco.
 
@@ -80,7 +80,7 @@ Nel bosco durante il tragitto il giocatore si imbatte in un **ladro** che gli ru
 
 Nel bosco il protagonista potrà interagire con molti oggetti (come alberi, cartelli, piante, ecc...).
 Così attiverà il terzo enigma.
-Alla risoluzione del terzo enigma e all'ottenimento del tessuto, sussegue il seguente testo a schermo.
+Alla risoluzione del [[#Enigma N.3]] e all'ottenimento del tessuto, sussegue il seguente testo a schermo.
 
 *Nelle tasche di Fox trovi anche una chiave, sembra importante così' decidi di tenerla*.
 
@@ -103,19 +103,19 @@ Analizzando la fucina, il protagonista vede una spada rovinata e mal messa incas
 	
 **A schermo**: *"Nemmeno con tutta la forza del mondo riusciresti a prendere questa cianfrusaglia. C'è un disegno dietro all'incudine però..."*
  
-Analizzando l'incudine, Inizia il quarto enigma.
+Analizzando l'incudine, Inizia l'[[#Enigma N.4]].
 
 Risolto l'enigma la spada si sblocca e il giocatore ottiene la spada sincro, ancora ignaro il suo potere a lui.
 
 >[!TODO]
->Da implementare che d'ora in poi ad ogni enigma la sua descrizione nell'inventario salga del 30%, fino alla fine prima dello scontro che arriverà al max.
+>Da implementare che d'ora in poi ad ogni enigma la sua descrizione nell'inventario salga del 33%, fino alla fine prima dello scontro che arriverà al max.
 
 ---
 #### Castello ingresso
 Il protagonista scalando il sentiero della montagna arriva al cancello principale del castello ma una guardia reale gli blocca il passaggio spiegandoli che per accedere al portone gli serve una chiave. Il protagonista potrà parlare con gli NPC presenti nella mappa (o nell'online) per capire dove trovare questa chiave.
 
 >[!TODO] Thread and Socket
->Da implementare che gli amici con l'online ti aiutano negli enigmi
+>Da implementare che gli amici con l'online ti aiutano negli enigmi o per discutere dell'andamento del gioco
 
 Alla conclusione di ciò e dei dialoghi da implementare con gli NPC il giocatore userà sulla guardia reale la chiave che ha preso da Fox e entrerà nel castello.
 
@@ -144,7 +144,7 @@ Il protagonista torna indietro e dovrà andare al Porto come si evince dalle par
 **Erynodr**: *"Inserire parser con il nome di Eripeta"*
 **David**: *"Ohhh capisco... Quindi ti ha mandato per questo, speravo che prima o poi si ricongiungesse a lui. Per darti questo oggetto di estrema importanza devo testare la tua preparazione. Eryndor hai fatto molta strada vediamo se riesci a superare un problema così complesso però"*.
 
-Enigma N.5
+[[#Enigma N.5]]
 Il protagonista ottiene **l'ampolla d'oro**, dovrà tornare da **Eripeta** e dargliela.
 
 **David**: *"Purtroppo le lacrime di questo indovinello sono quelle di Eripeta. Devi sapere che è diventata veggente proprio per trovare chi ha trasformato suo figlio in oro liquido. Prima era una guerriera ma il Re non voleva consegnarli questo oggetto, credeva che l'avrebbe fatta soffrire troppo. Per questo l'ha dato via. Ma una persona onesta e giusta dal cuore **nobile** credo che debba riunire sempre una madre col proprio figlio, per quanto male possa fare, è la cosa giusta da dover eseguire."*
@@ -163,7 +163,7 @@ Marien parla quest'ultima espone il suo enigma:
 
 Eryndor, assieme a tutti gli altri mercanti non si tirano indietro e si prostano con un inchino a sua signoria, procedendo ad ascoltare il suo dettato. Alcuni mercanti pensano già di collaborare tra loro per risolverlo, così il giocatore potrà ascoltare i loro dialoghi se cerca una soluzione.
 
-Guardare l'Enigma 7.
+Guardare [[#Enigma Finale, L'enigma della principessa]].
 Alla risoluzione dell'enigma:
 **Marien**: *"Non ho mai assistito a così tanta astuzia... Sono commossa, posso sapere lei chi è buon uomo?"*
 
@@ -202,7 +202,7 @@ Il giocatore selezionando la spada sincro la sguaina contro il nemico. A schermo
 
 **Eryndor**: *"(Ecco perché Clock era fissato col tempo, potevo arrivarci da solo) E' la mia occasione allora bene, fatti avanti. Potere a me!"*
 
-**A schermo**: *"Una luce arcobaleno irradia la stanza e un fendente d'orata trafigge Jack, facendo cadere la sua sciabola per terra ricoprendo la stanza di un silenzio profondo che dura per qualche minuto. Dopo di che, alcuni mercanti cominciano ad applaudire sempre più forte"*
+**A schermo**: *"Una luce arcobaleno (**veramente presente a schermo**) irradia la stanza e un fendente d'orata trafigge Jack, facendo cadere la sua sciabola per terra ricoprendo la stanza di un silenzio profondo che dura per qualche minuto. Dopo di che, alcuni mercanti cominciano ad applaudire sempre più forte"*
 
 **Marien**: *"Mio salvatore, Jack ci avrebbe decapitato entrambi. Hai salvato la vita del nostro amore. Per le leggi di Shambala editate da mio padre in persona chi uccide il promesso sposso della principessa è destinato ad essere il nuovo sposo. E sono molto contenta che sia tu"*
 
@@ -247,10 +247,10 @@ Si avviano i titoli di coda stile Dungeon Quest.
 - **Chiave**: apre il portone del castello
 - **Spada Sincro**: la spada utilizzata per sconfiggere il cavaliere nel finale
 - **Mappa**: Mappa che permette di tenere traccia del percorso per arrivare al castello
-  >[!TODO] Da implementare
-  >La mappa sarà apribile in ogni momento (fuori dalle scelte e dialoghi) e darà informazioni con un tracciato rosso delle città da percorrere per arrivare al castello del regno
   
-- **Strana Birra**: Automaticamente la birra renderà ubriaco il protagonista facendolo risvegliare come marito di Sir Jack e così si otterrà il finale segreto.
+  >[!TODO] Da implementare
+  >La mappa sarà apribile in ogni momento (fuori dalle scelte e dialoghi) e darà informazioni con un tracciato rosso delle città da percorrere per arrivare al castello del regno, non è un oggetto concreto nell'inventario
+
 - **Tessuto**: Da consegnare al Re.
 - **Carote e cena**: Oggetti per la quest della carrozza
 - **Fiori**: Per avvelenare Fox

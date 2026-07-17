@@ -32,3 +32,9 @@ replay_pid*
 
 # Cartella salvataggi
 /GiocoMAP/saves/
+
+# Word file temporanei
+*.tmp
+~$*.doc*
+*.tmp
+~.doc*
