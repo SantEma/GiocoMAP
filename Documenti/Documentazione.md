@@ -918,9 +918,61 @@ public int getSecondi() {
 }
 ```
 
-L'unico `javax.swing.Timer` presente in `TimerEnigma` serve solo per un ticchettio periodico di debug (stampa in console), eseguito sull'**Event Dispatch Thread**, e non introduce concorrenza reale; `GameStatistics.calcolaPunti()` assegna poi il punteggio in base a delle fasce di secondi trascorsi, in modo anch'esso interamente sincrono.
+L'unico `javax.swing.Timer` presente in `TimerEnigma` serve solo per un ticchettio periodico di debug (stampa in console), eseguito sull'**Event Dispatch Thread**, e non introduce concorrenza reale; `GameStatistics.calcolaPunti()` assegna poi il punteggio in base a delle fasce di secondi trascorsi, in modo anch'esso interamente sincrono (Il punteggio è presente nel ReadMe.md, presente su github).
 
-La vera **programmazione concorrente** del progetto si trova invece nel modulo di rete (package `Network`), dove più thread lavorano realmente in parallelo per gestire la chat multiplayer. `GameServer` si avvia come `Runnable` su un thread dedicato (`new Thread(this).start()`) che resta in ascolto di nuove connessioni; per **ogni client** che si collega viene creato un `ClientHandler` eseguito a sua volta su un proprio thread (`new Thread(handler).start()`), così che i messaggi di più giocatori vengano letti in parallelo senza bloccarsi a vicenda. Lato client, `GameClient` avvia un `ThreadRicezione` dedicato all'ascolto asincrono dei messaggi in arrivo, mentre l'interfaccia grafica resta libera di rispondere agli input dell'utente. Poiché più thread accedono contemporaneamente alle stesse strutture condivise (l'elenco dei client connessi e dei nomi), `GameServer` protegge questi accessi rendendo `synchronized` i metodi che li leggono o modificano (`nomeDisponibile`, `aggiungiNome`, `rimuoviNome`, `broadcast`, `rimuoviClient`), evitando così race condition tra il thread di accettazione e i thread dei singoli `ClientHandler`.
+La vera **programmazione concorrente** del progetto si trova invece nel modulo di rete (package `Network`), dove più **thread** lavorano realmente in parallelo per gestire la chat **multiplayer**. `GameServer` si avvia come `Runnable` su un thread dedicato (`new Thread(this).start()`) che resta in ascolto di nuove connessioni; per **ogni client** che si collega viene creato un `ClientHandler` eseguito a sua volta su un proprio thread (`new Thread(handler).start()`), così che i messaggi di più giocatori vengano letti in parallelo senza bloccarsi a vicenda. Lato client, `GameClient` avvia un `ThreadRicezione` dedicato all'ascolto asincrono dei messaggi in arrivo, mentre l'interfaccia grafica resta libera di rispondere agli input dell'utente. Poiché più thread accedono contemporaneamente alle stesse strutture condivise (l'elenco dei client connessi e dei nomi), `GameServer` protegge questi accessi rendendo `synchronized` i metodi che li leggono o modificano (`nomeDisponibile`, `aggiungiNome`, `rimuoviNome`, `broadcast`, `rimuoviClient`), evitando così race condition tra il thread di accettazione e i thread dei singoli `ClientHandler`.
+
+Ogni `ClientHandler` (un thread per client connesso) resta bloccato in lettura sul proprio socket finché non arriva una riga o lo stream si chiude:
+
+```JAVA
+String raw;
+while ((raw = input.readLine()) != null) {
+    Message msg = MessageParser.deserializza(raw);
+    switch (msg.getTipo()) {
+        case LEAVE: server.broadcast(msg); disconnetti(); return;
+        // ...
+    }
+}
+```
+
+La disconnessione di un client viene gestita in **due modi**: esplicitamente, quando arriva un messaggio applicativo `LEAVE` (il giocatore chiude la chat volontariamente); oppure implicitamente, quando `readLine()` ritorna `null` o lancia una `IOException` (connessione caduta, client crashato) — in quel caso è il blocco `finally` a richiamare comunque `disconnetti()`, che rimuove il client dalle strutture condivise di `GameServer` (`rimuoviNome`, `rimuoviClient`) e chiude il socket. `ClientHandler` non dichiara mai `synchronized` su di sé: si appoggia interamente ai metodi `synchronized` già esposti da `GameServer` per toccare in sicurezza le liste condivise.
+
+#### Un limite della gestione dei thread di rete
+Nel progetto non esiste alcun flag `volatile` né una chiamata a `Thread.interrupt()` per fermare `ThreadRicezione` dall'esterno in modo pulito: l'unico modo per farlo terminare è indiretto, chiudendo il `Socket` condiviso (`GameClient.disconnetti()`), il che fa fallire la `readLine()` bloccante con una `IOException` catturata nel `run()`. Allo stesso modo, se il server si interrompe in modo anomalo (crash, non tramite `GameServer.ferma()`), `GameClient` non riceve alcuna notifica applicativa dell'evento: il campo `connesso` resta `true` finché non viene chiamato esplicitamente `disconnetti()`, e l'unico segnale gestito è il messaggio `LEAVE` inviato volontariamente dal server quando si ferma con `GameServer.ferma()`. È un limite noto e accettato del modulo di rete, coerente con l'obiettivo didattico del progetto (dimostrare l'uso di thread e socket) più che con la robustezza di un client di produzione.
+
+#### Concorrenza "apparente" con `javax.swing.Timer`
+Diverse animazioni del progetto danno l'impressione di girare "in background", ma in realtà usano tutte `javax.swing.Timer`, mai un `Thread` reale: lo scorrimento dei titoli di coda in `TitoliDiCoda`, la dissolvenza del testo e dell'orologio in `SchermataFinale` e l'effetto "lampo arcobaleno" del `glassPane` in `MainFrame`, quest'ultimo realizzato incatenando più `Timer` in sequenza (fade-in → pausa → fade-out):
+
+```JAVA
+Timer fadeIn = new Timer(20, null);
+fadeIn.addActionListener(e -> {
+    opacitaLampo += 0.15f;
+    lampoArcobaleno.repaint();
+    if (opacitaLampo >= 1f) {
+        ((Timer) e.getSource()).stop();
+        // ... avvia un Timer di pausa, poi un Timer di fadeOut
+    }
+});
+fadeIn.start();
+```
+
+La differenza con la concorrenza reale del modulo `Network` è sostanziale: un `javax.swing.Timer` pianifica i propri `ActionEvent` direttamente sull'**Event Dispatch Thread**, quindi i suoi listener possono chiamare `repaint()` senza `invokeLater` e senza rischio di race condition, proprio perché non girano mai in parallelo con il resto della UI. `GameServer`, `ClientHandler` e `ThreadRicezione`, invece, sono thread del sistema operativo che restano bloccati su I/O di rete e girano **realmente in parallelo** rispetto all'EDT: è per questo che solo lì servono `synchronized` e `SwingUtilities.invokeLater` per comunicare in sicurezza con l'interfaccia.
+
+#### Quanti thread di rete sono attivi contemporaneamente
+Un caso concreto per capire quanti thread lavorano in parallelo: quando un giocatore avvia la chat come **host**, `GameNetwork.toggleChat()` avvia sia un `GameServer` sia un `GameClient` locale connesso a `127.0.0.1`, così che l'host possa scambiare messaggi con lo stesso protocollo usato dai client remoti:
+
+```JAVA
+gameServer = new GameServer();
+gameServer.avvia();                 // new Thread(this).start() dentro GameServer
+
+gameClient = new GameClient("Eryndor");
+gameClient.connetti("127.0.0.1");   // new Thread(threadRicezione).start() dentro GameClient
+```
+
+Subito dopo questa chiamata sono attivi, oltre all'EDT, almeno **tre thread di rete**: il `run()` di `GameServer` (in ascolto di nuove connessioni), il `run()` del `ThreadRicezione` del client locale dell'host, e il `ClientHandler` che il server crea per accettare la connessione dello stesso host locale. Ogni ulteriore giocatore che si collega da remoto aggiunge un altro `ClientHandler` lato server.
+
+#### Audio: riproduzione "fire-and-forget"
+Anche `MusicPlayer` delega implicitamente la riproduzione a un thread separato: `Clip.start()` (libreria `javax.sound.sampled`) fa sì che l'audio venga gestito internamente dal *mixer thread* della JVM, del tutto incapsulato nella libreria. Il progetto non osserva né gestisce esplicitamente questo thread (nessun `LineListener`, nessuna callback alla fine della traccia): la musica viene avviata in loop continuo (`Clip.LOOP_CONTINUOUSLY`) e fermata solo in modo sincrono e volontario da `stopMusic()`, senza che il codice applicativo debba mai sincronizzarsi con essa.
 
 #### Thread-safety tra rete e interfaccia grafica
 Proprio perché il modulo di rete gira su thread propri, si pone il problema di farlo comunicare con l'interfaccia grafica senza violare le regole di **Swing**, che non è *thread-safe*: i componenti grafici vanno aggiornati solo sull'**Event Dispatch Thread** (EDT). Il thread `ThreadRicezione`, che legge i messaggi in arrivo bloccandosi sul socket, non aggiorna quindi mai direttamente la `ChatPanel`, ma inoltra la callback all'EDT tramite `SwingUtilities.invokeLater`:
@@ -935,7 +987,63 @@ Questo evita che un messaggio ricevuto in un momento imprevedibile (asincrono ri
 
 ### Socket e/o REST
 
-Tra Socket e REST, l'idea iniziale lasciava aperte entrambe le strade per la **chat multiplayer**; nel progetto è stata scelta l'implementazione a **Socket TCP** (package `Network`, già descritto nella sezione sull'architettura). La scelta è dovuta alla natura stessa della funzionalità: una chat richiede uno scambio di messaggi **continuo e bidirezionale** tra client connessi contemporaneamente, mentre REST è pensato per interazioni **stateless** di tipo richiesta/risposta, meno adatte a notificare in tempo reale un client quando un altro giocatore scrive. Con i socket, invece, ogni client mantiene una connessione TCP persistente col server (`GameServer`/`ClientHandler`), che può quindi fare da subito il **broadcast** di ogni messaggio a tutti i partecipanti non appena arriva, senza dover attendere che i client lo richiedano tramite polling.
+Tra Socket e REST, l'idea iniziale lasciava aperte entrambe le strade per la **chat multiplayer**; nel progetto è stata scelta esclusivamente l'implementazione a **Socket TCP** (package `Network`, già descritto nella sezione sull'architettura): non è presente alcuna componente **REST/HTTP** (nessuna dipendenza nel `pom.xml` oltre a `H2` e `Gson`, nessun client/server HTTP nel codice). La scelta è dovuta alla natura stessa della funzionalità: una chat richiede uno scambio di messaggi **continuo e bidirezionale** tra client connessi contemporaneamente, mentre REST è pensato per interazioni **stateless** di tipo richiesta/risposta, meno adatte a notificare in tempo reale un client quando un altro giocatore scrive. Con i socket, invece, ogni client mantiene una connessione TCP persistente col server (`GameServer`/`ClientHandler`), che può quindi fare da subito il **broadcast** di ogni messaggio a tutti i partecipanti non appena arriva, senza dover attendere che i client lo richiedano tramite polling. Server e client comunicano su una singola porta fissa, `GameServer.PORTA = 12345`.
+
+#### Il protocollo applicativo: `Message` e `MessageParser`
+Sopra al semplice flusso di testo dei socket (`PrintWriter`/`BufferedReader`, una riga per messaggio) il progetto definisce un piccolo **protocollo applicativo** proprio. Ogni `Message` è un oggetto immutabile con tre soli campi (`tipo`, `mittente`, `contenuto`), che `MessageParser` traduce da/verso una singola riga di testo nel formato `TIPO|MITTENTE|CONTENUTO`:
+
+```JAVA
+private static final String SEP = "|";
+
+public static String serializza(Message m) {
+    return m.getTipo() + SEP + m.getMittente() + SEP + m.getContenuto();
+}
+
+public static Message deserializza(String raw) {
+    try {
+        String[] parti = raw.split("\\|", 3);
+        return new Message(TipoMessaggio.valueOf(parti[0]), parti[1], parti[2]);
+    } catch (Exception e) {
+        System.err.println("Errore parsing messaggio: " + raw);
+        return null;
+    }
+}
+```
+
+Il limite `3` passato a `split` non è casuale: senza di esso, un messaggio di chat che contenesse a sua volta il carattere `|` verrebbe spezzato in troppe parti e il `contenuto` risulterebbe troncato. Con il limite, Java divide la stringa solo sui primi due `|` trovati, e tutto il resto (compresi eventuali altri `|` digitati dal giocatore) finisce intatto nel campo `contenuto`. Se il parsing fallisce (tipo sconosciuto, riga malformata), il metodo non lancia eccezioni verso il chiamante ma logga l'errore e ritorna `null`: sia `ClientHandler` sia `ThreadRicezione` controllano `if (msg == null) continue;`, così un singolo messaggio corrotto viene scartato senza interrompere la connessione.
+
+#### `TipoMessaggio`: i quattro tipi di messaggio
+Il protocollo prevede solo quattro tipi, sufficienti per gestire il ciclo di vita di una chat semplice:
+
+```JAVA
+public enum TipoMessaggio {
+    JOIN, LEAVE, CHAT, NOME_DUPLICATO
+}
+```
+
+`JOIN` viene inviato dal client non appena la connessione è stabilita, e il server lo usa per verificare che il nome non sia già in uso e registrarlo; `CHAT` trasporta i messaggi testuali veri e propri, semplicemente ribroadcastati a tutti dal server; `LEAVE` segnala una disconnessione volontaria (inviato sia dal client che si scollega, sia dal server quando si ferma, con mittente `"SERVER"`); `NOME_DUPLICATO` è la risposta del server quando il nome scelto dal client è già occupato da un altro giocatore connesso.
+
+#### Diventare host o unirsi come client
+`GameNetwork` distingue due flussi, entrambi guidati da `JOptionPane`. Diventando **host**, `toggleChat()` avvia `GameServer` e si collega ad esso anche come proprio client locale (`"127.0.0.1"`), con nome fisso `"Eryndor"` (protagonista della storia), e mostra un dialog con l'IP da comunicare agli altri giocatori. Unendosi come **client** (`connettiComeClient(String ip)`), viene invece chiesto il nome tramite `JOptionPane.showInputDialog`, con un controllo che impedisca di scegliere proprio `"Eryndor"` (riservato all'host). Sono gestiti esplicitamente anche i casi d'errore più prevedibili: tentare di unirsi come client mentre si è già host (o viceversa) mostra un messaggio di avviso dedicato, mentre un nome già in uso viene rifiutato dal server con `NOME_DUPLICATO` e segnalato al giocatore, disconnettendolo automaticamente.
+
+#### Rilevamento dell'IP locale da condividere
+Per suggerire all'host l'indirizzo da comunicare agli altri giocatori, `GameNetwork.ottieniIP()` non usa il più ovvio `InetAddress.getLocalHost()` (che su molte configurazioni di rete restituisce l'indirizzo di loopback o un indirizzo poco affidabile), ma un piccolo trucco con un socket **UDP**:
+
+```JAVA
+try (DatagramSocket socket = new DatagramSocket()) {
+    socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+    String ip = socket.getLocalAddress().getHostAddress();
+    // ...
+}
+```
+
+Il `connect()` su un socket UDP non invia realmente alcun pacchetto: serve solo a far scegliere al sistema operativo quale interfaccia di rete userebbe per raggiungere `8.8.8.8` (un DNS pubblico Google, scelto solo perché quasi sempre raggiungibile), da cui si può leggere l'indirizzo IP locale associato a quella rotta. Se questo tentativo fallisce, esiste un fallback che itera manualmente su `NetworkInterface.getNetworkInterfaces()` cercando un indirizzo IPv4 non di loopback, e in ultima istanza il metodo restituisce comunque `"127.0.0.1"` piuttosto che lasciare l'operazione in errore.
+
+#### `ChatPanel`: l'interfaccia della chat
+Sul lato grafico, `ChatPanel` è composto da una `JTextArea` non modificabile per lo storico dei messaggi (dentro una `JScrollPane`), un `JTextField` per scrivere e un `JButton` di invio; sia il click sul bottone sia la pressione di **Invio** nel campo di testo richiamano lo stesso metodo `inviaMessaggio()`. Ogni volta che arriva un nuovo messaggio, l'area di testo viene riscritta per intero a partire dalla lista di messaggi ricevuti, con il mittente anteposto tra parentesi quadre (es. `[Eryndor]: ciao`), e il **caret** viene riposizionato alla fine del testo per forzare lo scroll automatico verso il basso. Non è previsto alcun *color coding* per distinguere i mittenti: la distinzione resta puramente testuale.
+
+#### Test in rete con Tailscale
+Poiché `GameServer` apre semplicemente una `ServerSocket` su una porta locale e i client si collegano specificando l'**IP** del server (`GameClient.connetti(String host)`), la chat funziona "out of the box" solo tra dispositivi sulla stessa rete locale (LAN). Per poter testare la chat multiplayer anche tra i membri del gruppo **non collegati alla stessa rete fisica**, è stato usato **Tailscale**: una VPN a rete privata (*mesh VPN*), basata sul protocollo **WireGuard**, che collega più dispositivi tra loro assegnando a ciascuno un indirizzo IP privato stabile, come se si trovassero tutti sulla stessa LAN, indipendentemente dalla loro posizione reale o dal fatto che si trovino dietro **NAT**/router diversi. In questo modo è stato sufficiente inserire l'IP Tailscale del membro che ospitava la partita (host) per validare `GameServer`/`GameClient` in condizioni di rete reali, senza dover configurare manualmente il **port forwarding** sul router.
 
 # Informazioni sul lavoro di gruppo e sul progetto
 La suddivisione dei compiti all'interno del gruppo è avvenuta in modo concreto, tramite consultazione: ognuno ha scelto di occuparsi delle parti che gli interessavano o in cui si sentiva più a suo agio, senza una vera e propria assegnazione dall'alto. Anche la divisione dei compiti, pur essendo nata in modo naturale e senza una pianificazione rigida, si è rivelata efficace, il che ha reso il lavoro più rapido.
